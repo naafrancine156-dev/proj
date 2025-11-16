@@ -1,0 +1,708 @@
+:root{
+    --primarybgcolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybgcolor: --hsl(47, 47%, 93%); /* beige */
+    --optionalbgcolor: --hsl(0, 0%, 100%); /* white lang */
+    --primarytxtcolor: --hsl(0, 0%, 100%); /* white lang */
+    --secondarytxtcolor: --hsl(0, 1%, 25%); /* gray lang */
+    --primarybttncolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybttncolor: --hsl(0, 0%, 6%); /* black lang */
+}
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+body{
+    background: hsl(0, 0%, 100%);
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    animation: fadeAnimation 1.5s ease-in 1 forwards;
+}
+
+/* eat bulaga animation */
+@keyframes fadeAnimation{
+    0%{
+        opacity: 0;
+    }100%{
+        opacity: 1;
+    }
+}
+
+.navHeaderCont{
+    background-color: hsl(164, 31%, 17%);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+    padding: 10px 15px;
+}
+
+.logoCont{
+    color: hsl(0, 0%, 100%);
+    display: flex;
+    align-items: center;
+}
+
+.logoCont img{
+    background-color: #ffff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.navLogoText{
+    color: hsl(0, 0%, 100%);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navHeaderBttnCont{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+.navHeaderBttnCont button{
+    background: none;
+    color: hsl(0, 0%, 100%);
+    border: none;
+    font-size: 1rem;
+    padding: 8px 12px;
+}
+
+.navHeaderBttnCont button:hover{
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+    border-bottom: 1px solid hsl(0, 1%, 44%);
+    box-shadow: 0 5px 5px hsl(0, 0%, 52%);
+    cursor: pointer;
+}
+
+.navHeaderLogoBttonCont{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navHeaderLogoBttonCont button{
+    width: 33px;
+    height: 33px;
+    background: transparent;
+    border-radius: 50%;
+    border: none;
+}
+
+.navSearch{
+    background-image: url("./assets/whitesearch.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+}
+
+.navCard{
+    background-image: url("./assets/whitecart.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+}
+
+.navAcc{
+    background-image: url("./assets/whiteaccount.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+}
+
+.navHeaderLogoBttonCont i:hover{
+    transform: scale(1.06);
+    transition: all 0.2s ease-in;
+    box-shadow: 0 0 20px hsl(165, 33%, 2%);
+    cursor: pointer;
+}
+
+.textQuoteHeader{
+    background-color: hwb(0 100% 0%);
+    text-align: center;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: scrolling 20s linear infinite;
+}
+
+/* wala lang trip ko lang tong animation na marquee */
+@keyframes scrolling {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+section{
+    background-color: hsl(47, 47%, 93%);
+    padding: 40px 80px;
+}
+
+.pageHeaderCont{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid hsl(164, 31%, 17%);
+}
+
+.pageHeaderCont h1{
+    font-size: 2.5rem;
+
+    /* 
+    overflow: hidden;
+    border-right: 0.15em solid hsl(164, 31%, 17%);
+    white-space: nowrap; 
+    width: 0; 
+    animation: 
+        typingAnim 3.5s steps(30, end) forwards, 
+        blinkingAnim 0.75s step-end 5 forwards;
+    */
+}
+
+.pageHeaderCont p {
+    font-size: 1rem;
+    color: hsl(0, 0%, 30%);
+}
+
+/* typing animation */
+@keyframes typingAnim {
+    from { 
+        width: 0 
+    }
+    to { 
+        width: 100% 
+    }
+}
+
+@keyframes blinkingAnim {
+    from, to {
+        border-color: transparent;
+    }
+    50% {
+        border-color: hsl(164, 31%, 17%);
+    }
+}
+
+.pageHeaderCont button{
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    padding: 6px 14px;
+    transition: transform 0.2s ease-in;
+}
+
+.ckearCart:hover{
+    transform: scale(1.05);
+    color: hsl(0, 0%, 100%);
+    box-shadow: 0 3px 5px hsl(0, 1%, 28%);
+    cursor: pointer;
+}
+
+section {
+    background-color: hsl(47, 47%, 93%);
+    padding: 40px 80px;
+    flex: 1;
+}
+
+.itemStatusCont {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+}
+
+.cartCont {
+    flex: 1;
+    min-width: 300px;
+    background: hsl(164, 31%, 17%);
+    border-radius: 15px;
+    padding: 20px  20px 5px 20px;
+    color: #fff;
+}
+
+.carts {
+    background-color: hsl(0, 0%, 100%);
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+}
+
+.cartImg1, .cartImg2 {
+    width: 130px;
+    height: 130px; /* add this */
+    border-radius: 10px;
+    background-image: url("./assets/loginFinalBg.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.cartDetails{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.itemNameAndRemoveBttnCont{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.removeBttn{
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    padding: 4px 10px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.removeBttn:hover{
+    transform: scale(1.05);
+    transition: all 0.2s ease-in;
+    color: hsl(0, 0%, 100%);
+    box-shadow: 0 3px 5px hsl(0, 1%, 28%);
+    cursor: pointer;
+}
+
+.itemDetails{
+    color: hsl(0, 0%, 0%);
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.sizeLabel{
+    color: hsl(0, 1%, 25%);
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.qnttyLabel{
+    color: hsl(0, 1%, 25%);
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.qntyAndPriceCont{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.qntyAndPriceCont select{
+    border-radius: 5px;
+    border: none;
+    color: hsl(0, 0%, 100%);
+    background-color: hsl(164, 31%, 17%);
+    font-size: 0.7rem;
+    padding: 5px;
+}
+
+select:hover{
+    transform: scale(1.05);
+    color: hsl(0, 0%, 100%);
+    box-shadow: 0 3px 5px hsl(0, 1%, 28%);
+    cursor: pointer;
+}
+
+.prodPrice{
+    font-weight: bold;
+}
+
+.accStatusCont {
+    flex: 1;
+    min-width: 250px;
+    background: hsl(164, 31%, 17%);
+    border-radius: 15px;
+    padding: 20px;
+    color: hsl(0, 0%, 100%);
+    height: fit-content;
+}
+
+.codeBttn{
+    margin-bottom: 20px;
+    padding: 20px 20px 0 20px;
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    border: none;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.logoNbttnCont{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.logoNbttnCont img{
+    width: 20px;
+    height: 20px;
+}
+
+.arrowBttn{
+    width: 20px;
+    height: 20px;
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    border: none;
+    border-radius: 5px;
+}
+
+.arrowBttn:hover{
+    transform: scale(1.05);
+    transition: all 0.2s ease-in;
+    box-shadow: 0 0 10px hsl(0, 1%, 28%);
+    cursor: pointer;
+}
+
+.statusCont{
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    border: none;
+    border-radius: 10px;
+    margin-top: 10px;
+    padding: 10px;
+}
+
+.status{
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid hsl(164, 31%, 17%);
+    opacity: 0.7;
+}
+
+.statusLabel{
+    margin-bottom: 5px;
+}
+
+.checkoutBttn{
+    background-color: hsl(165, 29%, 8%);
+    color: hsl(0, 0%, 100%);
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 5px;
+}
+
+.checkoutBttn:hover{
+    transform: scale(1.05);
+    transition: all 0.2s ease-in;
+    color: hsl(0, 0%, 100%);
+    box-shadow: 0 3px 5px hsl(0, 0%, 11%);
+    cursor: pointer;
+}
+
+.pageCardCont2{
+    background-color: hsl(164, 31%, 17%);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 50px;
+}
+
+.labelCont{
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: hsl(0, 0%, 100%);
+    padding-bottom: 20px;
+    margin: 10px 30px 30px 30px;
+    border-bottom: 1px solid hsl(0, 0%, 100%);
+}
+
+.cardsCont{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.imgCont img{
+    background-image: url("./assets/loginFinalBg.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+    height: 190px;
+}
+
+.itemDetailCont{
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.cardProdNameAndFavBttn{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.heartBttn{
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: hsl(164, 31%, 17%);
+}
+
+.heartIcon:hover{
+    cursor: pointer;
+    transform: scale(1.05);
+    transition: all 0.2s ease-in;
+    text-shadow: 0 0 10px hsl(0, 0%, 100%);
+}
+
+.cardProdNameAndFavBttn label{
+    color: hsl(0, 0%, 100%);
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding-top: 5px;
+    margin-bottom: 20px;
+}
+
+.cardDetailCont{
+    display: flex;
+    flex-direction: column;
+}
+
+.cardDetailCont p, label{
+    color: hsl(0, 0%, 100%);
+    margin-bottom: 20px;
+}
+
+.cardDetailCont label{
+    font-weight: bold;
+}
+
+.cardBttn{
+    padding: 8px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.cardBttn:hover{
+    transform: scale(1.03);
+    transition: all 0.2s ease-in;
+    box-shadow: 0 3px 5px hsl(0, 0%, 11%);
+    cursor: pointer;
+}
+
+footer{
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    font-weight: bold;
+    text-align: center;
+    padding: 15px 0;
+}
+
+/* lalaki tapos biglang liit siya T0T */
+@keyframes scaleAnimation{
+    0%{
+        transform: scale(1.0);
+    }50%{
+        transform: scale(1.1);
+    }100%{
+        transform: scale(1.0);
+    }
+}
+
+@media (max-width: 1024px) {
+  .navHeaderBttnCont {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .pageHeader {
+    font-size: 2rem;
+  }
+
+  .itemStatusCont {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cartCont, .accStatusCont {
+    width: 90%;
+    margin-bottom: 20px;
+  }
+
+  .cartCont {
+    flex: none;
+  }
+
+  .accStatusCont {
+    flex: none;
+  }
+
+  .cardsCont {
+    justify-content: center;
+    gap: 25px;
+  }
+
+  .cards {
+    width: 45%;
+    min-width: 260px;
+  }
+
+  .imgCardCont img, .card img {
+    height: 160px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .navHeaderCont {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .navHeaderBttnCont button {
+    font-size: 0.9rem;
+  }
+
+  .pageHeader {
+    font-size: 1.8rem;
+  }
+
+  .itemStatusCont {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cartCont, .accStatusCont {
+    width: 100%;
+    margin-bottom: 25px;
+  }
+
+  .checkoutBttn{
+    font-size: 1.3rem;
+    padding: 8px;
+  }
+
+  .cardsCont {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cards {
+    width: 90%;
+  }
+
+  .cardBttn {
+    font-size: 1rem;
+  }
+
+  .footerHeader {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .navHeaderCont {
+    padding: 10px;
+  }
+
+  .logoCont img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .navLogoText {
+    font-size: 1.2rem;
+  }
+
+  .pageHeader {
+    font-size: 1.5rem;
+  }
+
+  .pageSubHeader {
+    font-size: 0.9rem;
+  }
+
+  .exploreCollectionBttn {
+    font-size: 0.9rem;
+  }
+
+  .itemStatusCont {
+    gap: 15px;
+  }
+
+  .cartCont, .accStatusCont {
+    width: 100%;
+  }
+
+  .cards {
+    width: 100%;
+  }
+
+  .cardBttn {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .textQuoteHeader {
+    font-size: 0.75rem;
+  }
+
+  .checkoutBttn {
+    font-size: 1rem;
+  }
+
+  .otherInfoCont {
+    flex-direction: column;
+    text-align: center;
+  }
+}

@@ -1,0 +1,218 @@
+:root{
+    --primarybgcolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybgcolor: --hsl(47, 47%, 93%); /* beige */
+    --optionalbgcolor: --hsl(0, 0%, 100%); /* white lang */
+    --primarytxtcolor: --hsl(0, 0%, 100%); /* white lang */
+    --secondarytxtcolor: --hsl(0, 1%, 25%); /* gray lang */
+    --primarybttncolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybttncolor: --hsl(0, 0%, 6%); /* black lang */
+}
+
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+body{
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.forgotFormCont{
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 8px 8px 20px hsl(0, 0%, 2%);
+  background-image: url("./assets/loginFinalBg.jpg");
+
+}
+
+.header h1{
+  font-size: 2.5rem;
+  margin-bottom: 55px;
+  text-align: center;
+}
+
+.formCont{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.formLabelCont{
+  margin-bottom: 20px;
+}
+
+.formHeader {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.subHeader {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.inputFieldCont{
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.accRecEmailLabel{
+  color: hsl(0, 0%, 100%);
+  font-size: 1rem;
+  letter-spacing: 1px;
+  text-indent: 3%;
+}
+
+.inputFieldCont input{
+  color: hsl(0, 2%, 38%);
+  padding: 12px;
+  font-size: 1.2rem;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 3px 3px 5px hsl(0, 3%, 23%);
+}
+
+.inputFieldCont input:hover{
+  box-shadow: 3px 3px 5px hsl(0, 2%, 11%);
+}
+
+button{
+  background: hsl(0, 0%, 6%);
+  color: hsl(0, 8%, 90%);
+  font-size: 1.5rem;
+  padding: 5px;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 5px 8px hsl(0, 3%, 23%);
+  transition: all 0.2s ease-in-out; 
+}
+
+button:hover{
+  box-shadow: 3px 3px 5px hsl(0, 2%, 11%);
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.footerTextCont {
+  margin-top: 20px;
+}
+
+.footerTextCont p {
+  color: hsl(0, 8%, 90%);
+  font-weight: bold;
+  font-size: 0.9rem;
+   text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .forgotFormCont {
+    max-width: 80%;
+    padding: 40px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .formHeader {
+    font-size: 1.4rem;
+  }
+
+  button {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .forgotFormCont {
+    max-width: 90%;
+    padding: 30px;
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+
+  .formHeader {
+    font-size: 1.3rem;
+  }
+
+  .subHeader {
+    font-size: 0.95rem;
+  }
+
+  .inputFieldCont input {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  button {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 8px;
+  }
+
+  .footerTextCont p {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .forgotFormCont {
+    width: 95%;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .formHeader {
+    font-size: 1.1rem;
+  }
+
+  .subHeader {
+    font-size: 0.85rem;
+  }
+
+  .accRecEmailLabel {
+    font-size: 0.9rem;
+  }
+
+  .inputFieldCont input {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 8px;
+  }
+
+  .footerTextCont p {
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,457 @@
+:root{
+    --primarybgcolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybgcolor: --hsl(47, 47%, 93%); /* beige */
+    --optionalbgcolor: --hsl(0, 0%, 100%); /* white lang */
+    --primarytxtcolor: --hsl(0, 0%, 100%); /* white lang */
+    --secondarytxtcolor: --hsl(0, 1%, 25%); /* gray lang */
+    --primarybttncolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybttncolor: --hsl(0, 0%, 6%); /* black lang */
+}
+
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.SignupPageWrapper{
+  background: hsl(0, 1%, 79%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.signUpForm{
+  background: hsl(0, 10%, 94%);
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  min-height: 650px;
+  box-shadow: 5px 5px 10px hsl(0, 2%, 25%);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.signupFormCont{
+  flex: 1;
+  background: hsl(0, 10%, 94%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+.formHeader{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.signupHeader{
+  margin-bottom: 50px;
+  font-size: 2rem;
+  letter-spacing: 2px;
+}
+
+.form{
+  width: 90%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.fnamelnameMainCont{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: stretch;
+  width: 100%;
+  margin-bottom: 12px;
+  min-width: 0;     
+}
+
+.fistNlastnameCont, .fistNlastnameCont2{
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0; 
+}
+
+.fistNlastnameCont label, .fistNlastnameCont2 label {
+  font-size: 1rem;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  margin-bottom: 6px;
+  padding-left: 0.5rem; 
+  text-indent: 3%;
+}
+
+.fistNlastnameCont input, .fistNlastnameCont2 input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 20px;
+  color: hsl(0, 2%, 38%);
+  box-shadow: 3px 3px 5px hsl(0, 4%, 63%);
+  transition: box-shadow .18s ease;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.emailFieldCont{
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.emailFieldCont label{
+  font-size: 1rem;
+  letter-spacing: 2px;
+  text-indent: 3%;
+  opacity: 0.8;
+}
+
+.inputFields{
+  display: flex;
+  flex-direction: column;
+}
+
+.inputLabel{
+  font-size: 1rem;
+  letter-spacing: 2px;
+  text-indent: 3%;
+  opacity: 0.8;
+}
+
+.inputFields input{
+  color: hsl(0, 2%, 38%);
+  padding: 12px;
+  font-size: 1.2rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 3px 3px 5px hsl(0, 4%, 63%);
+}
+
+.inputFields input:hover{
+  box-shadow: 3px 3px 5px hsl(0, 2%, 53%);
+}
+
+.inputField2{
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 5px;
+}
+
+.checkbox{
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.checkbox:hover{
+  transform: scale(1.30);
+  cursor: pointer;
+}
+
+.AlreadyHaveAnAccount{
+  text-decoration: none;
+}
+
+.AlreadyHaveAnAccount:hover{
+  text-decoration: underline;
+}
+
+.createBttn{
+  background: hsl(0, 0%, 6%);
+  color: hsl(0, 0%, 100%);
+  font-size: 1.5rem;
+  padding: 5px;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 5px 8px hsl(0, 2%, 35%);
+  transition: all 0.2s ease-in-out;
+}
+
+.createBttn:hover{
+  box-shadow: 0 5px 8px hsl(0, 2%, 12%);
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.socMedBttn{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.socMedBttn button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 20px;
+  width: 300px;
+  height: 40px;
+  border: none;
+  background: #ffff;
+  box-shadow: 3px 3px 5px hsl(0, 4%, 63%);
+  transition: all 0.2s ease-in-out;
+}
+
+.socMedBttn button:hover{
+  box-shadow: 3px 3px 5px hsl(0, 2%, 37%);
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.gmailLogo{
+  background-image: url("./assets/gmailLogo.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 30px;
+  height: 30px;
+}
+
+.facebookLogo{
+  background-image: url("./assets/facebook.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 30px;
+   height: 30px;
+}
+
+.login{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.login a{
+  text-decoration: none;
+}
+
+.login a:hover{
+  text-decoration: underline;
+}
+
+.signupImgBgCont{
+  flex: 1;
+  background-image: url("./assets/loginFinalBg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.signupRightCont{
+  margin: 10px;
+}
+
+.signupRightCont p{
+  color: #fff;
+  margin-top: 30px;
+  margin-bottom: 90px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(2px);
+  padding: 5px 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+}
+
+.signupImgBgCont h2{
+  color: #ffff;
+  text-align: start;
+  font-size: 2rem;
+  letter-spacing: 2px;
+  padding: 5px;
+  border-bottom: 1px solid #ffff;
+}
+
+.signupRightCont2 button{
+  color: hsl(0, 0%, 100%);
+  font-size: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(2px);
+  padding: 10px 30px;
+  border: none;
+  border-radius: 50px;
+  width: 200px;
+  height: 55px;
+  box-shadow: 3px 3px 5px hsl(0, 1%, 21%);
+  transition: all 0.3s ease;
+}
+
+.signupRightCont2 button:hover{
+  box-shadow: 3px 3px 5px hsl(0, 2%, 12%);
+  transform: scale(1.06);
+  cursor: pointer;
+}
+
+.signupRightCont2{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
+  margin-bottom: 20px;
+}
+
+.signupRightCont2 p{
+  color: hsl(0, 8%, 90%);
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .signUpForm {
+    flex-direction: column;
+    width: 90%;
+    height: auto;
+    max-width: 800px;
+  }
+
+  .signupFormCont, .signupImgBgCont {
+    flex: none;
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .signupImgBgCont {
+    min-height: 300px;
+    text-align: center;
+    background-position: center;
+    background-size: cover;
+  }
+
+  .signupImgBgCont h2 {
+    font-size: 1.6rem;
+  }
+
+  .createBttn {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .signUpForm {
+    width: 100%;
+    flex-direction: column-reverse;
+    box-shadow: none;
+  }
+
+  .signupFormCont {
+    width: 100%;
+    padding: 25px;
+  }
+
+  .signupHeader {
+    font-size: 1.6rem;
+    text-align: center;
+  }
+
+  .form {
+    width: 100%;
+  }
+
+  .fistNlastBaneLabelCont {
+    flex-direction: column;
+    gap: 5px;
+    text-indent: 5%;
+  }
+
+  .fistNlastBaneInputCont {
+    flex-direction: column;
+  }
+
+  .fistNlastBaneInputCont input {
+    width: 100%;
+  }
+
+  .inputFields input {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .socMedBttn {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .socMedBttn button {
+    width: 90%;
+  }
+
+  .signupImgBgCont h2 {
+    font-size: 1.4rem;
+    text-align: center;
+  }
+
+  .signupRightCont2 button {
+    width: 160px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signUpForm {
+    border-radius: 0;
+    width: 100%;
+    flex-direction: column-reverse;
+  }
+
+  .signupImgBgCont {
+    display: none;
+  }
+
+  .signupFormCont {
+    padding: 15px;
+  }
+
+  .signupHeader {
+    font-size: 1.3rem;
+  }
+
+  .inputFields input {
+    font-size: 0.95rem;
+    padding: 8px;
+  }
+
+  .createBttn {
+    font-size: 1rem;
+    padding: 8px;
+  }
+
+  .socMedBttn button {
+    width: 100%;
+    height: 40px;
+  }
+}

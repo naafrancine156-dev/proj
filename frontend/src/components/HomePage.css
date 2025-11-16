@@ -1,0 +1,605 @@
+:root{
+    --primarybgcolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybgcolor: --hsl(47, 47%, 93%); /* beige */
+    --optionalbgcolor: --hsl(0, 0%, 100%); /* white lang */
+    --primarytxtcolor: --hsl(0, 0%, 100%); /* white lang */
+    --secondarytxtcolor: --hsl(0, 1%, 25%); /* gray lang */
+    --primarybttncolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybttncolor: --hsl(0, 0%, 6%); /* black lang */
+}
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body{
+    background: hsl(0, 0%, 100%);
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    animation: fadeAnimation 1.5s ease-in 1 forwards;
+}
+
+#root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+/* eat bulaga animation */
+@keyframes fadeAnimation{
+    0%{
+        opacity: 0;
+    }100%{
+        opacity: 1;
+    }
+}
+
+.navHeaderCont{
+    background-color: hsl(164, 31%, 17%);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+    padding: 10px 15px;
+}
+
+.logoCont{
+    color: hsl(0, 0%, 100%);
+    display: flex;
+    align-items: center;
+}
+
+.logoCont img{
+    background-color: #ffff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.navLogoText{
+    color: hsl(0, 0%, 100%);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navHeaderBttnCont{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+.navHeaderBttnCont button{
+    background: none;
+    color: hsl(0, 0%, 100%);
+    border: none;
+    font-size: 1rem;
+    padding: 8px 12px;
+    box-shadow: none;
+}
+
+.navHeaderBttnCont button:hover{
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+    border-bottom: 1px solid hsl(0, 1%, 44%);
+    box-shadow: 0 5px 5px hsl(0, 0%, 52%);
+    cursor: pointer;
+}
+
+.navHeaderLogoBttonCont{
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navHeaderLogoBttonCont button{
+    width: 33px;
+    height: 33px;
+    background: transparent;
+    border-radius: 50%;
+    border: none;
+}
+
+.navSearch{
+    background-image: url("./assets/whitesearch.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+}
+
+.navCard{
+    background-image: url("./assets/whitecart.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+}
+
+.navAcc{
+    background-image: url("./assets/whiteaccount.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 28px;
+    height: 28px;
+    display: inline-block;
+}
+
+.navHeaderLogoBttonCont i:hover{
+    transform: scale(1.06);
+    transition: all 0.2s ease-in;
+    box-shadow: 0 0 20px hsl(165, 33%, 2%);
+    cursor: pointer;
+}
+
+.textQuoteHeader{
+    background-color: hwb(0 100% 0%);
+    text-align: center;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    animation: scrolling 20s linear infinite;
+}
+
+/* wala lang trip ko lang tong animation na marquee */
+@keyframes scrolling {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+.pageHeaderCont {
+  background-image: url("./assets/loginFinalBg.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  /* 🧭 Remove fixed height — allow it to expand naturally */
+  min-height: 45vh;
+  padding: 60px 15px;
+  gap: 10px;
+
+  /* 🪶 Optional: add a soft overlay for readability */
+  position: relative;
+}
+
+.pageHeaderCont::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25); /* slight dark overlay */
+  z-index: 0;
+}
+
+.pageHeaderCont h1,
+.pageHeaderCont p,
+.pageHeaderCont button {
+  position: relative;
+  z-index: 1;
+}
+
+
+.pageHeader {
+    font-size: 2.5rem;
+    color: hsl(0, 0%, 100%);
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.pageSubHeader {
+    color: hsl(0, 0%, 100%);
+    font-size: 1rem;
+    opacity: 0.7;
+    margin-bottom: 25px;
+}
+
+.exploreCollectionBttn{
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    padding: 10px 20px 10px 20px;
+    margin-top: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+.exploreCollectionBttn:hover{
+    transform: scale(1.05);
+    box-shadow: 0 3px 5px hsl(0, 0%, 9%);
+    cursor: pointer;
+}
+
+.cont2{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 15px;
+}
+
+.subHeaderCont h3 {
+    font-size: 1.6rem;
+    margin-bottom: 25px;
+}
+
+.imgCardCont{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.card1, .card2, .card3{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: hsl(0, 0%, 100%);
+    border-radius: 10px;
+    border: none;
+    width: auto;
+    box-shadow: 5px 6px 10px hsl(0, 1%, 42%);
+    transition: all 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.card1:hover, .card2:hover, .card3:hover{
+    transform: scale(1.05);
+    transition: transform 0.2s;
+    box-shadow: 7px 7px 10px hsl(0, 1%, 31%);
+}
+
+/* REMOVED background-image here - images will come from database */
+.imgCardCont img{
+    width: 100%;
+    height: 200px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    margin-bottom: 10px;
+    object-fit: cover; /* Added to properly fit images */
+}
+
+h3{
+    color: hsl(131, 100%, 2%);
+}
+
+.imgCardCont h3{
+    padding-bottom: 5px;
+}
+
+.imgCardCont p{
+    color: hsl(40, 3%, 23%);
+    padding: 0 10px 15px 10px;
+}
+
+.cont3{
+    align-items: center;
+    background-color: hsl(47, 47%, 93%);
+    padding: 50px 15px;
+}
+
+.subHeader2text{
+    text-align: center;
+}
+
+.subHeader2text {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    font-style: italic;
+}
+
+.imgCardCont2, .imgCardCont3{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px;
+}
+
+.card{
+    background-color: hsl(0, 0%, 100%);
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+    border-radius: 10px;
+    border: none;
+    width: auto;
+    box-shadow: 5px 6px 10px hsl(0, 1%, 42%);
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover{
+    transform: scale(1.05);
+    box-shadow: 7px 7px 10px hsl(0, 1%, 31%);
+}
+
+.cardDetail{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.card1Detail{
+    padding-top: 5px;
+}
+
+.prodStatusCont label{
+    background-color: hsl(132, 90%, 31%);
+    color: hwb(0 81% 18%);
+    padding: 3px 6px 3px 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* REMOVED background-image here - images will come from database */
+.cont3 img{
+    width: 100%;
+    height: 200px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    object-fit: cover; /* Added to properly fit images */
+}
+
+.priceAndBttnCont{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.priceAndBttnCont label{
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.addTocardBttn{
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    padding: 8px 12px 8px 12px;
+    font-size: 0.7rem;
+    border-radius: 5px;
+    border: none;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+.addTocardBttn:hover{
+    transform: scale(1.05);
+    box-shadow: 0 3px 5px hsl(0, 0%, 18%);
+    cursor: pointer;
+}
+
+footer{
+    background-color: hsl(164, 31%, 17%);
+    color: hsl(0, 0%, 100%);
+    padding: 50px 30px 20px;
+}
+
+.otherInfoCont{
+    color: hsl(0, 0%, 70%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    border-bottom: 1px solid hsl(0, 0%, 100%);
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.footerHeader{
+    color: hsl(0, 0%, 100%);
+    border-top: 1px solid hsl(0, 0%, 100%);
+    padding-top: 10px;
+    margin-bottom: 10px;
+}
+
+.infoCont1, .infoCont2, .infoCont3, .infoCont4{
+    width: 250px;
+    margin-bottom: 15px;
+}
+
+ui{
+    list-style: none;
+}
+
+li{
+    padding-bottom: 5px;
+}
+
+.infoCont2 li:hover{
+    color: hsl(0, 0%, 100%);
+    transform: scale(1.1);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.infoCont3 li{
+    text-decoration: none;
+}
+
+.infoCont3 li:hover{
+    transform: scale(1.1);
+    transition: all 0.2s ease-in-out;
+    text-decoration: underline;
+}
+
+.compyRight{
+    color: hsl(0, 8%, 90%);
+    font-weight: bold;
+    text-align: center;
+}
+
+/* lalaki tapos biglang liit siya T0T */
+@keyframes scaleAnimation{
+    0%{
+        transform: scale(1.0);
+    }50%{
+        transform: scale(1.1);
+    }100%{
+        transform: scale(1.0);
+    }
+}
+
+/* Tablets (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .navHeaderBttnCont {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .pageHeader { font-size: 2rem; }
+  .imgCardCont img, .card img {
+    height: 160px;
+  }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  .navHeaderCont {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .navHeaderBttnCont button {
+    font-size: 0.9rem;
+  }
+
+  .pageHeader {
+    font-size: 1.8rem;
+  }
+
+  .imgCardCont{
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+  }
+
+  .imgCardCont2, .imgCardCont3 {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card, .card1, .card2, .card3 {
+    width: 70%;
+  }
+
+  .footerHeader {
+    text-align: center;
+  }
+
+  .infoCont1, .infoCont2, .infoCont3, .infoCont4 {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  .navHeaderCont {
+    padding: 10px;
+  }
+
+  .logoCont img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .navLogoText {
+    font-size: 1.2rem;
+  }
+
+  .pageHeader {
+    font-size: 1.5rem;
+  }
+
+  .pageSubHeader {
+    font-size: 0.9rem;
+  }
+
+  .exploreCollectionBttn {
+    font-size: 0.9rem;
+  }
+
+  .card, .card1, .card2, .card3 {
+    width: 100%;
+  }
+
+  .otherInfoCont {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* 🛒 Cart Badge Wrapper */
+.navCartWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.cartBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: red;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 2px 6px;
+  animation: bounce 0.3s ease;
+}
+
+@keyframes bounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* ✅ Popup Message Animation */
+.addedMsg {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background-color: hsl(164, 31%, 17%);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  font-size: 0.9rem;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: showMsg 2.5s ease forwards;
+  z-index: 999;
+}
+
+@keyframes showMsg {
+  0% {opacity: 0; transform: translateY(-10px);}
+  10% {opacity: 1; transform: translateY(0);}
+  90% {opacity: 1;}
+  100% {opacity: 0; transform: translateY(-10px);}
+}

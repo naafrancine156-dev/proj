@@ -1,0 +1,238 @@
+:root{
+    --primarybgcolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybgcolor: --hsl(47, 47%, 93%); /* beige */
+    --optionalbgcolor: --hsl(0, 0%, 100%); /* white lang */
+    --primarytxtcolor: --hsl(0, 0%, 100%); /* white lang */
+    --secondarytxtcolor: --hsl(0, 1%, 25%); /* gray lang */
+    --primarybttncolor: --hsl(164, 31%, 17%); /* minty green something */
+    --secondarybttncolor: --hsl(0, 0%, 6%); /* black lang */
+}
+
+*{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+body{
+  background-image: url("./assets/loginFinalBg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.resetFormCont{
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 50px;
+  border-radius: 20px;
+  box-shadow: 8px 8px 20px hsl(0, 0%, 2%);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+}
+
+.header h1{
+  color: hsl(0, 8%, 90%);
+  font-size: 2.5rem;
+  margin-bottom: 25px;
+}
+
+.formCont{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.formLabelCont{
+  margin-bottom: 15px;
+}
+
+.formHeader {
+  color: hsl(0, 8%, 90%);
+  font-size: 1.6rem;
+  margin-bottom: 5px;
+}
+
+.subHeader {
+  color: hsl(0, 8%, 90%);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.inputFieldCont{
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.inputFieldCont label{
+  color: hsl(0, 8%, 90%);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  text-indent: 3%;
+  margin-bottom: 5px;
+}
+
+.inputFieldCont input{
+  color: hsl(0, 2%, 32%);
+  padding: 10px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 20px;
+  box-shadow: 3px 3px 5px hsl(0, 3%, 23%);
+}
+
+.newPassField, .confirmPassField{
+  margin-bottom: 10px;
+}
+
+.inputFieldCont input:hover{
+  box-shadow: 3px 3px 5px hsl(0, 2%, 11%);
+}
+
+.rememberMeCont{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-left: 8px;
+  color: hsl(0, 0%, 100%);
+  font-size: 1rem;
+}
+
+.checkbox:hover{
+  transform: scale(1.30);
+  cursor: pointer;
+}
+
+button{
+  background: hsl(0, 0%, 6%);
+  color: hsl(0, 8%, 90%);
+  font-size: 1.5rem;
+  padding: 5px;
+  margin-bottom: 30px;
+  border-radius: 20px;
+  border: none;
+  box-shadow: 0 5px 8px hsl(0, 2%, 18%);
+  transition: all 0.2s ease-in-out;
+}
+
+button:hover{
+  box-shadow: 0 5px 8px hsl(0, 2%, 8%);
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.footerTextCont {
+  margin-top: 10px;
+}
+
+.footerTextCont p {
+  color: hsl(0, 8%, 90%);
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .resetFormCont {
+    max-width: 80%;
+    padding: 40px;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .formHeader {
+    font-size: 1.4rem;
+  }
+
+  button {
+    font-size: 1.3rem;
+    padding: 9px;
+  }
+}
+
+@media (max-width: 768px) {
+  .resetFormCont {
+    max-width: 90%;
+    padding: 30px;
+  }
+
+  .header h1 {
+    font-size: 1.8rem;
+  }
+
+  .formHeader {
+    font-size: 1.3rem;
+  }
+
+  .subHeader {
+    font-size: 0.95rem;
+  }
+
+  .inputFieldCont input{
+    font-size: 1.1rem;
+    padding: 8px;
+  }
+
+  button {
+    width: 100%;
+    font-size: 1.2rem;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .resetFormCont {
+    width: 95%;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .header h1 {
+    font-size: 1.5rem;
+  }
+
+  .formHeader {
+    font-size: 1.1rem;
+  }
+
+  .subHeader {
+    font-size: 0.85rem;
+  }
+
+  .inputFieldCont label {
+    font-size: 0.9rem;
+  }
+
+  .inputFieldCont input {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .rememberMeCont {
+    font-size: 0.9rem;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 8px;
+  }
+
+  .footerTextCont p {
+    font-size: 0.75rem;
+  }
+}
