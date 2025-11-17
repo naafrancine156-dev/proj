@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
-import ForgotForm from "./components/ForgotPassForm"; // Import ForgotForm
+import ForgotForm from "./components/ForgotPassForm";
 import Dashboard from "./components/dashboard";
 import Homepage from "./components/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -11,56 +11,47 @@ import Inventory from "./components/inventory";
 import Shop from "./components/Shop";
 import Track from "./components/TrackOrderForm";
 import ContactUs from "./components/ContactUs";
-import Cart from"./components/Cart";
+import Cart from "./components/Cart";
 import ProductList from "./components/ProductList";
 import ProductDetails from "./components/ProductDetails";
-import Order from "./components/ordermanagement"
-import CheckoutPage from "./components/Checkout"
-import CheckoutSuccess from "./components/CheckoutSuccess"
+import Order from "./components/ordermanagement";
+import CheckoutPage from "./components/Checkout";
+import CheckoutSuccess from "./components/CheckoutSuccess";
 import MyProfile from "./components/MyProfile,";
 import EditAccount from "./components/EditAccount";
-import Customers from"./components/customers"
-
-
-
+import Customers from "./components/customers";
 
 function App() {
-  
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
+        {/* ===== AUTH ROUTES (Public) ===== */}
         <Route path="/" element={<LoginForm />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signUpForm" element={<SignupForm />} />
         <Route path="/forgotpassform" element={<ForgotForm />} />
-        <Route path="/product" element={<Product />} />
-        <Route path="/inventory" element={<Inventory/ >} />
+
+        {/* ===== SHOP/PRODUCT ROUTES (Public) ===== */}
         <Route path="/shop" element={<ProductList />} />
-        <Route path="/track" element={<Track />} />
-        <Route path="/contactus" element={<ContactUs />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/category" element={<ProductList />} />
+        <Route path="/product" element={<Product />} />
         <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/category" element={<ProductList />} />
+        
+        {/* ===== CART & CHECKOUT ROUTES (Public/Protected) ===== */}
         <Route path="/cart" element={<Cart />} />
-        <Route path="/orders" element={<Order />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/thankyou" element={<CheckoutSuccess />} />
+
+        {/* ===== USER ROUTES (Public/Protected) ===== */}
         <Route path="/myprofile" element={<MyProfile />} />
         <Route path="/editacc" element={<EditAccount />} />
-        <Route path="/customers" element={<Customers />} />
+        <Route path="/orders" element={<Order />} />
+        <Route path="/track" element={<Track />} />
+        
+        {/* ===== CONTACT ROUTES (Public) ===== */}
+        <Route path="/contactus" element={<ContactUs />} />
 
-
-
-
-
-
-
-
-
-
-
-        {/* Protected routes */}
+        {/* ===== ADMIN ROUTES (Protected) ===== */}
         <Route
           path="/dashboard"
           element={
@@ -69,6 +60,24 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/inventory"
+          element={
+            <ProtectedRoute role="admin">
+              <Inventory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute role="admin">
+              <Customers />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ===== HOMEPAGE (Protected User Route) ===== */}
         <Route
           path="/homepage"
           element={
