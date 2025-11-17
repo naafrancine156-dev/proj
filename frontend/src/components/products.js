@@ -305,6 +305,12 @@ export default function ProductsPage() {
     filteredProducts = filteredProducts.filter((product) => product.quantity === 0);
   }
 
+  const handleAdminLogout = () => {
+    localStorage.removeItem("token");  // delete token
+    navigate("/admin/login");          // redirect to admin login page
+  };
+
+
   return (
     <div className="container">
       <Toaster />
@@ -320,11 +326,12 @@ export default function ProductsPage() {
             className={`nav-item ${activeItem === "Dashboard" ? "active" : ""}`}
             onClick={() => {
               setActiveItem("Dashboard");
-              navigate("/");
+              navigate("/dashboard");
             }}
           >
-            ⊞ Dashboard
+            <span className="nav-icon">⊞</span> Dashboard
           </button>
+
           <button
             className={`nav-item ${activeItem === "Products" ? "active" : ""}`}
             onClick={() => {
@@ -332,8 +339,9 @@ export default function ProductsPage() {
               navigate("/product");
             }}
           >
-            ⊞ Products
+            <span className="nav-icon">⊞</span> Products
           </button>
+
           <button
             className={`nav-item ${activeItem === "Order" ? "active" : ""}`}
             onClick={() => {
@@ -341,18 +349,23 @@ export default function ProductsPage() {
               navigate("/orders");
             }}
           >
-            ⊞ Order
+            <span className="nav-icon">⊞</span> Order Management
           </button>
+
           <button
-            className="nav-item"
-            onClick={() => navigate("/inventory")}
+            className={`nav-item ${activeItem === "Customers" ? "active" : ""}`}
+            onClick={() => {
+              setActiveItem("Customers");
+              navigate("/customers");
+            }}
           >
-            ⊞ Inventory
+            <span className="nav-icon">⊞</span> User Management
           </button>
-          <button className="nav-item">⊞ User</button>
         </nav>
 
-        <button className="nav-item logout">⊙ Logout</button>
+        <button className="nav-item logout" onClick={handleAdminLogout}>
+          <span className="nav-icon">⊙</span> Logout
+        </button>
       </aside>
 
       {/* Main Content */}

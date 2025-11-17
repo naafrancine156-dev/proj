@@ -27,6 +27,8 @@ export default function InventoryPage() {
   const categories = [
     { id: 1, name: "Indoor Plants" },
     { id: 2, name: "Outdoor Plants" },
+    { id: 3, name: "Air Purifying Plants" },
+
   ]
   const subCategories = [
     { id: 1, categoryId: 1, name: "Foliage" },

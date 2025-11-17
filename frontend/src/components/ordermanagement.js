@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom";
+
 
 export default function OrderManagement() {
   const [activeItem, setActiveItem] = useState("Order")
@@ -10,6 +12,12 @@ export default function OrderManagement() {
   const [statusUpdating, setStatusUpdating] = useState({})
   const [editingStatusId, setEditingStatusId] = useState(null)
   const [tempStatus, setTempStatus] = useState({})
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false)
+  const [sortBy, setSortBy] = useState("latest")
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const navigate = useNavigate();
+
 
   // Fetch all orders from backend
   useEffect(() => {
@@ -46,16 +54,11 @@ export default function OrderManagement() {
   }, [])
 
   const sidebarItems = [
-    { id: 1, icon: "⊞", label: "Dashboard" },
-    { id: 2, icon: "⊞", label: "Products" },
-    { id: 3, icon: "⊞", label: "Categories" },
-    { id: 4, icon: "⊞", label: "Order" },
-    { id: 5, icon: "⊞", label: "User" },
-    { id: 6, icon: "⊞", label: "Inventory" },
-    { id: 7, icon: "⊞", label: "Customer Service" },
-    { id: 8, icon: "⊞", label: "Admin Account" },
-    { id: 9, icon: "⊞", label: "Additional" },
-  ]
+    { id: 1, icon: "⊞", label: "Dashboard", path: "/dashboard" },
+    { id: 2, icon: "⊞", label: "Products", path: "/product" },
+    { id: 4, icon: "⊞", label: "Order Management", path: "/orders" },
+    { id: 5, icon: "⊞", label: "User Management", path: "/customers" },
+  ];
 
   // Format date
   const formatDate = (dateString) => {
@@ -66,6 +69,70 @@ export default function OrderManagement() {
   // Calculate total for items
   const calculateItemTotal = (price, quantity) => {
     return (price * quantity).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })
+  }
+
+  // Sort orders based on sort option
+  const getSortedOrders = () => {
+    let sorted = [...orders];
+
+    switch(sortBy) {
+      case "latest":
+        sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case "oldest":
+        sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        break;
+      case "highest-price":
+        sorted.sort((a, b) => b.total - a.total);
+        break;
+      case "lowest-price":
+        sorted.sort((a, b) => a.total - b.total);
+        break;
+      case "alphabetical":
+        sorted.sort((a, b) => 
+          (a.contactDetails?.firstName + a.contactDetails?.lastName).localeCompare(
+            b.contactDetails?.firstName + b.contactDetails?.lastName
+          )
+        );
+        break;
+      default:
+        break;
+    }
+
+    return sorted;
+  }
+
+  // Filter orders based on search query
+  const getFilteredOrders = () => {
+    let filtered = getSortedOrders();
+    
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(order => 
+        order._id.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }
+
+  // Get search suggestions
+  const getSearchSuggestions = () => {
+    if (!searchQuery.trim()) return [];
+    
+    return orders
+      .filter(order => order._id.toLowerCase().includes(searchQuery.toLowerCase()))
+      .slice(0, 5)
+      .map(order => ({
+        id: order._id,
+        displayId: `#${order._id.slice(-6).toUpperCase()}`,
+        customer: `${order.contactDetails?.firstName} ${order.contactDetails?.lastName}`
+      }));
+  }
+
+  const handleSelectSuggestion = (orderId) => {
+    setSelectedOrderId(orderId)
+    setSearchQuery("")
+    setShowSearchSuggestions(false)
   }
 
   // Handle status update
@@ -117,14 +184,21 @@ export default function OrderManagement() {
   }
 
   const selectedOrder = orders.find(o => o._id === selectedOrderId)
+  const filteredOrders = getFilteredOrders()
+  const searchSuggestions = getSearchSuggestions()
 
   if (loading) {
     return <div style={{ padding: '20px' }}>Loading orders...</div>
   }
 
+  const handleAdminLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/admin/login");
+  };
+
   return (
     <div className="container">
-      <div className="sidebar">
+      <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="logo">
           <h1>Eric's Garden</h1>
           <p>Smart Plant Care & Shopping System</p>
@@ -132,44 +206,79 @@ export default function OrderManagement() {
 
         <nav className="nav-menu">
           {sidebarItems.map((item) => (
-            <a
+            <button
               key={item.id}
-              href="#"
               className={`nav-item ${activeItem === item.label ? "active" : ""}`}
-              onClick={() => setActiveItem(item.label)}
+              onClick={() => {
+                setActiveItem(item.label);
+                navigate(item.path);
+                setSidebarOpen(false);
+              }}
             >
               <span className="nav-icon">{item.icon}</span>
               {item.label}
-            </a>
+            </button>
           ))}
         </nav>
 
-        <a href="#" className="nav-item logout">
-          <span className="nav-icon">⊙</span>
-          Logout
-        </a>
+        <button className="nav-item logout" onClick={handleAdminLogout}>
+          <span className="nav-icon">⊙</span> Logout
+        </button>
       </div>
 
+      <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+        ☰
+      </button>
+
       <div className="main-content">
-        <div className="header">
-          <div className="greeting">
-            <h2>Hello, Admin!</h2>
-            <p>Welcome to the Eric's Garden Dashboard</p>
-          </div>
-          <input type="text" placeholder="Search" className="search-bar" />
-          <div className="profile">
-            <div className="profile-icon">AD</div>
-            <div className="profile-text">
-              Admin
-              <br />
-              <span className="profile-role">Administrator</span>
+        {/* Orders Table Section with Search & Sort */}
+        <div className="orders-table-section">
+          <div className="table-header">
+            <h3>All Orders</h3>
+            <div className="search-sort-container">
+              <div className="search-wrapper">
+                <input 
+                  type="text" 
+                  placeholder="Search by Order ID..." 
+                  className="search-bar"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value)
+                    setShowSearchSuggestions(true)
+                  }}
+                  onFocus={() => setShowSearchSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSearchSuggestions(false), 200)}
+                />
+                {showSearchSuggestions && searchSuggestions.length > 0 && (
+                  <div className="search-suggestions">
+                    {searchSuggestions.map((suggestion) => (
+                      <div 
+                        key={suggestion.id}
+                        className="suggestion-item"
+                        onClick={() => handleSelectSuggestion(suggestion.id)}
+                      >
+                        <span className="suggestion-id">{suggestion.displayId}</span>
+                        <span className="suggestion-customer">{suggestion.customer}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="sort-dropdown"
+              >
+                <option value="latest">Latest Orders</option>
+                <option value="oldest">Oldest Orders</option>
+                <option value="highest-price">Highest Price</option>
+                <option value="lowest-price">Lowest Price</option>
+                <option value="alphabetical">Alphabetical (A-Z)</option>
+              </select>
             </div>
           </div>
-        </div>
 
-        {/* Orders Table */}
-        <div className="orders-table-section">
-          <h3>All Orders</h3>
           <table className="orders-table">
             <thead>
               <tr>
@@ -183,7 +292,7 @@ export default function OrderManagement() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {filteredOrders.map((order) => (
                 <tr key={order._id} className={selectedOrderId === order._id ? 'active-row' : ''}>
                   <td>
                     <button 
@@ -376,6 +485,23 @@ export default function OrderManagement() {
           overflow-y: auto;
           height: 100vh;
           position: fixed;
+          z-index: 999;
+        }
+
+        .sidebar-toggle {
+          display: none;
+          position: fixed;
+          top: 20px;
+          left: 20px;
+          z-index: 1000;
+          background-color: #1E3932;
+          color: white;
+          border: none;
+          font-size: 24px;
+          width: 40px;
+          height: 40px;
+          border-radius: 6px;
+          cursor: pointer;
         }
 
         .logo {
@@ -415,6 +541,8 @@ export default function OrderManagement() {
           font-size: 14px;
           transition: all 0.3s ease;
           cursor: pointer;
+          background: none;
+          border: none;
         }
 
         .nav-item:hover {
@@ -450,77 +578,6 @@ export default function OrderManagement() {
           height: 100vh;
         }
 
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-          background-color: white;
-          padding: 20px;
-          border-radius: 8px;
-        }
-
-        .greeting {
-          flex: 1;
-        }
-
-        .greeting h2 {
-          font-size: 20px;
-          font-weight: bold;
-          color: #1E3932;
-          margin-bottom: 5px;
-        }
-
-        .greeting p {
-          font-size: 13px;
-          color: #999;
-        }
-
-        .search-bar {
-          width: 250px;
-          padding: 10px 15px;
-          background-color: #1E3932;
-          border: none;
-          border-radius: 6px;
-          color: white;
-          font-size: 13px;
-          margin: 0 30px;
-        }
-
-        .search-bar::placeholder {
-          color: white;
-        }
-
-        .profile {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-        }
-
-        .profile-icon {
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          background-color: #1E3932;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-weight: bold;
-          font-size: 14px;
-        }
-
-        .profile-text {
-          font-size: 13px;
-          color: #333;
-          line-height: 1.4;
-        }
-
-        .profile-role {
-          font-size: 11px;
-          color: #999;
-        }
-
         .orders-table-section {
           background: white;
           border-radius: 8px;
@@ -529,10 +586,117 @@ export default function OrderManagement() {
           overflow-x: auto;
         }
 
-        .orders-table-section h3 {
+        .table-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .table-header h3 {
           font-size: 16px;
-          margin-bottom: 15px;
           color: #333;
+          margin: 0;
+        }
+
+        .search-sort-container {
+          display: flex;
+          gap: 15px;
+          align-items: center;
+        }
+
+        .search-wrapper {
+          position: relative;
+          flex: 1;
+          max-width: 400px;
+        }
+
+        .search-bar {
+          width: 100%;
+          padding: 10px 15px;
+          background-color: #f5f5f5;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          color: #333;
+          font-size: 13px;
+          transition: all 0.2s;
+        }
+
+        .search-bar:focus {
+          outline: none;
+          border-color: #1E3932;
+          background-color: white;
+          box-shadow: 0 0 0 2px rgba(30, 57, 50, 0.1);
+        }
+
+        .search-bar::placeholder {
+          color: #999;
+        }
+
+        .search-suggestions {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: white;
+          border: 1px solid #ddd;
+          border-top: none;
+          border-radius: 0 0 6px 6px;
+          max-height: 300px;
+          overflow-y: auto;
+          z-index: 10;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .suggestion-item {
+          padding: 10px 15px;
+          border-bottom: 1px solid #f0f0f0;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: background-color 0.2s;
+        }
+
+        .suggestion-item:hover {
+          background-color: #f9f9f9;
+        }
+
+        .suggestion-item:last-child {
+          border-bottom: none;
+        }
+
+        .suggestion-id {
+          font-weight: 600;
+          color: #1E3932;
+          font-size: 13px;
+        }
+
+        .suggestion-customer {
+          color: #666;
+          font-size: 12px;
+          margin-left: 10px;
+        }
+
+        .sort-dropdown {
+          padding: 10px 15px;
+          border-radius: 6px;
+          border: 1px solid #ddd;
+          font-size: 13px;
+          background-color: white;
+          color: #333;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .sort-dropdown:hover {
+          border-color: #1E3932;
+        }
+
+        .sort-dropdown:focus {
+          outline: none;
+          border-color: #1E3932;
+          box-shadow: 0 0 0 2px rgba(30, 57, 50, 0.1);
         }
 
         .orders-table {
@@ -842,22 +1006,36 @@ export default function OrderManagement() {
         @media (max-width: 768px) {
           .main-content {
             margin-left: 0;
+            padding-top: 70px;
           }
 
           .sidebar {
             position: fixed;
             left: -200px;
             z-index: 1000;
+            transition: left 0.3s ease;
           }
 
-          .header {
+          .sidebar.open {
+            left: 0;
+          }
+
+          .sidebar-toggle {
+            display: block;
+          }
+
+          .search-sort-container {
             flex-direction: column;
-            gap: 15px;
+            width: 100%;
+            gap: 10px;
           }
 
-          .search-bar {
+          .search-wrapper {
+            max-width: 100%;
+          }
+
+          .sort-dropdown {
             width: 100%;
-            margin: 0;
           }
 
           .orders-table {
@@ -867,6 +1045,16 @@ export default function OrderManagement() {
           .orders-table td,
           .orders-table th {
             padding: 8px 10px;
+          }
+
+          .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+          }
+
+          .details-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>

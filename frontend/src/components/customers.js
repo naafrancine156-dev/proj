@@ -3,20 +3,30 @@ import { useState, useEffect } from "react";
 export default function UsersPage() {
   const [activeItem, setActiveItem] = useState("Users");
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedUsers, setSelectedUsers] = useState(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filterRole, setFilterRole] = useState("all");
+  const [sortBy, setSortBy] = useState("default");
   const itemsPerPage = 10;
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    filterAndSort();
+  }, [users, filterRole, sortBy, searchQuery]);
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token"); // Get auth token
+      const token = localStorage.getItem("token");
       
       if (!token) {
         setError("No authentication token found. Please login first.");
@@ -47,11 +57,105 @@ export default function UsersPage() {
     }
   };
 
-  const paginatedUsers = users.slice(
+  const filterAndSort = () => {
+    let filtered = users;
+
+    if (filterRole !== "all") {
+      filtered = filtered.filter(u => u.role.toLowerCase() === filterRole.toLowerCase());
+    }
+
+    if (searchQuery.trim()) {
+      const lowerQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(u => {
+        const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
+        return fullName.includes(lowerQuery) ||
+               u.firstName.toLowerCase().includes(lowerQuery) ||
+               u.lastName.toLowerCase().includes(lowerQuery) ||
+               u.email.toLowerCase().includes(lowerQuery);
+      });
+    }
+
+    // Apply sorting
+    let sorted = [...filtered];
+    if (sortBy === "name-asc") {
+      sorted.sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`));
+    } else if (sortBy === "name-desc") {
+      sorted.sort((a, b) => `${b.firstName} ${b.lastName}`.localeCompare(`${a.firstName} ${a.lastName}`));
+    } else if (sortBy === "time-newest") {
+      sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else if (sortBy === "time-oldest") {
+      sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
+
+    setFilteredUsers(sorted);
+    setCurrentPage(1);
+  };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    
+    if (query.trim()) {
+      const lowerQuery = query.toLowerCase();
+      const searchResults = users.filter(u => {
+        const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
+        return fullName.includes(lowerQuery) ||
+               u.firstName.toLowerCase().includes(lowerQuery) ||
+               u.lastName.toLowerCase().includes(lowerQuery) ||
+               u.email.toLowerCase().includes(lowerQuery);
+      });
+
+      const uniqueSuggestions = [...new Set(
+        searchResults.map(u => `${u.firstName} ${u.lastName}`).slice(0, 5)
+      )];
+      setSuggestions(uniqueSuggestions);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+    // Trigger filter with the suggestion
+    setTimeout(() => {
+      const lowerQuery = suggestion.toLowerCase();
+      let filtered = users;
+
+      if (filterRole !== "all") {
+        filtered = filtered.filter(u => u.role.toLowerCase() === filterRole.toLowerCase());
+      }
+
+      filtered = filtered.filter(u => {
+        const fullName = `${u.firstName} ${u.lastName}`.toLowerCase();
+        return fullName.includes(lowerQuery) ||
+               u.firstName.toLowerCase().includes(lowerQuery) ||
+               u.lastName.toLowerCase().includes(lowerQuery) ||
+               u.email.toLowerCase().includes(lowerQuery);
+      });
+
+      let sorted = [...filtered];
+      if (sortBy === "name-asc") {
+        sorted.sort((a, b) => `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`));
+      } else if (sortBy === "name-desc") {
+        sorted.sort((a, b) => `${b.firstName} ${b.lastName}`.localeCompare(`${a.firstName} ${a.lastName}`));
+      } else if (sortBy === "time-newest") {
+        sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } else if (sortBy === "time-oldest") {
+        sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      }
+
+      setFilteredUsers(sorted);
+      setCurrentPage(1);
+    }, 0);
+  };
+
+  const paginatedUsers = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(users.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -84,6 +188,7 @@ export default function UsersPage() {
 
     try {
       const token = localStorage.getItem("token");
+      const deleteCount = selectedUsers.size;
       
       for (let userId of selectedUsers) {
         const response = await fetch(`http://localhost:5000/api/user/${userId}`, {
@@ -100,12 +205,30 @@ export default function UsersPage() {
       }
 
       setSelectedUsers(new Set());
-      fetchUsers();
-      alert(`Successfully deleted ${selectedUsers.size} user(s)`);
+      await fetchUsers();
+      alert(`Successfully deleted ${deleteCount} user(s)`);
     } catch (err) {
       alert("Error deleting users: " + err.message);
       console.error("Error deleting users:", err);
     }
+  };
+
+  const handleNavigation = (item) => {
+    setActiveItem(item);
+    if (item === "Dashboard") {
+      window.location.href = "/dashboard";
+    } else if (item === "Products") {
+      window.location.href = "/products";
+    } else if (item === "Order") {
+      window.location.href = "/orders";
+    } else if (item === "Users") {
+      window.location.href = "/users";
+    }
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
   };
 
   return (
@@ -118,51 +241,91 @@ export default function UsersPage() {
         </div>
 
         <nav className="nav-menu">
-          <button className={`nav-item ${activeItem === "Dashboard" ? "active" : ""}`} onClick={() => setActiveItem("Dashboard")}>
+          <button 
+            className={`nav-item ${activeItem === "Dashboard" ? "active" : ""}`} 
+            onClick={() => handleNavigation("Dashboard")}
+          >
             <span className="nav-icon">⊞</span> Dashboard
           </button>
-          <button className={`nav-item ${activeItem === "Products" ? "active" : ""}`} onClick={() => setActiveItem("Products")}>
+          <button 
+            className={`nav-item ${activeItem === "Products" ? "active" : ""}`} 
+            onClick={() => handleNavigation("Products")}
+          >
             <span className="nav-icon">⊞</span> Products
           </button>
-          <button className={`nav-item ${activeItem === "Order" ? "active" : ""}`} onClick={() => setActiveItem("Order")}>
-            <span className="nav-icon">⊞</span> Order
+          <button 
+            className={`nav-item ${activeItem === "Order" ? "active" : ""}`} 
+            onClick={() => handleNavigation("Order")}
+          >
+            <span className="nav-icon">⊞</span> Order Management
           </button>
-          <button className={`nav-item ${activeItem === "Users" ? "active" : ""}`} onClick={() => setActiveItem("Users")}>
+          <button 
+            className={`nav-item ${activeItem === "Users" ? "active" : ""}`} 
+            onClick={() => handleNavigation("Users")}
+          >
             <span className="nav-icon">⊞</span> User Management
           </button>
         </nav>
 
-        <button className="nav-item logout">
+        <button className="nav-item logout" onClick={handleAdminLogout}>
           <span className="nav-icon">⊙</span> Logout
         </button>
       </aside>
 
       {/* Main Content */}
       <div className="main-content">
-        <div className="header">
-          <div className="greeting">
-            <h2>Hello, Admin!</h2>
-            <p>Welcome to the User Management Dashboard</p>
-          </div>
-          <input type="text" placeholder="Search" className="search-bar" />
-          <div className="profile">
-            <div className="profile-icon">AD</div>
-            <div className="profile-text">
-              Admin User
-              <br />
-              <span className="profile-role">Admin</span>
-            </div>
-          </div>
-        </div>
-
         <div className="products-header">
           <h1>Users Management</h1>
+          <div className="search-filter-container">
+            <div className="search-wrapper">
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                className="search-bar"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                onFocus={() => searchQuery && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="suggestions-dropdown">
+                  {suggestions.map((suggestion, idx) => (
+                    <div
+                      key={idx}
+                      className="suggestion-item"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                    >
+                      {suggestion}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <select
+              className="filter-select"
+              value={filterRole}
+              onChange={(e) => setFilterRole(e.target.value)}
+            >
+              <option value="all">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
+            <select
+              className="filter-select"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="default">Sort By</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+              <option value="time-newest">Newest First</option>
+              <option value="time-oldest">Oldest First</option>
+            </select>
+          </div>
           <div className="actions">
-            <button className="btn btn-filter">Filter</button>
             <button className="btn btn-delete" onClick={deleteUsers} disabled={selectedUsers.size === 0}>
               Delete ({selectedUsers.size})
             </button>
-            <button className="btn btn-add">+ Add New User</button>
           </div>
         </div>
 
@@ -180,8 +343,6 @@ export default function UsersPage() {
                   <th>Email</th>
                   <th>Role</th>
                   <th>Joined Date</th>
-                  <th>Action</th>
-                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>
@@ -205,18 +366,16 @@ export default function UsersPage() {
                         <span className={`role-badge ${user.role}`}>{user.role}</span>
                       </td>
                       <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                      <td><button className="btn-edit">✎ Edit</button></td>
-                      <td><button className="btn-details">⋮</button></td>
                     </tr>
                   ))
                 ) : (
-                  <tr><td colSpan="8" style={{textAlign: "center", padding: "20px"}}>No users found</td></tr>
+                  <tr><td colSpan="6" style={{textAlign: "center", padding: "20px"}}>No users found</td></tr>
                 )}
               </tbody>
             </table>
 
             <div className="pagination">
-              <span>Showing {paginatedUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, users.length)} of {users.length} Users</span>
+              <span>Showing {paginatedUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, filteredUsers.length)} of {filteredUsers.length} Users</span>
               <div className="page-controls">
                 <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>&lt;</button>
                 {Array.from({ length: totalPages }, (_, i) => (
@@ -255,22 +414,26 @@ export default function UsersPage() {
         .logout { margin-top:auto; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px; color:#f5f5f0; }
 
         .main-content { margin-left:220px; flex:1; padding:20px; overflow-y:auto; }
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; background:white; padding:20px; border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.05); }
-        .greeting h2 { font-size:20px; font-weight:bold; color:#2d5a3d; margin-bottom:5px; }
-        .greeting p { font-size:13px; color:#999; }
-        .search-bar { width:250px; padding:10px 15px; background:#1E3932; border:none; border-radius:6px; color:white; font-size:13px; margin:0 30px; }
-        .search-bar::placeholder { color:rgba(255,255,255,0.6); }
-        .profile { display:flex; align-items:center; gap:15px; }
-        .profile-icon { width:40px; height:40px; border-radius:50%; background:#1E3932; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:14px; }
-        .profile-text { font-size:13px; color:#333; line-height:1.4; }
-        .profile-role { font-size:11px; color:#999; }
+        .products-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:20px; flex-wrap:wrap; }
+        .products-header h1 { font-size:28px; font-weight:bold; color:#1E3932; white-space:nowrap; }
+        
+        .search-filter-container { display:flex; gap:15px; flex:1; align-items:center; }
+        .search-wrapper { position:relative; flex:1; max-width:400px; }
+        .search-bar { width:100%; padding:10px 15px; background:white; border:1px solid #ddd; border-radius:6px; color:#333; font-size:13px; }
+        .search-bar::placeholder { color:#999; }
+        .search-bar:focus { outline:none; border-color:#1E3932; }
+        
+        .suggestions-dropdown { position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ddd; border-top:none; border-radius:0 0 6px 6px; max-height:200px; overflow-y:auto; z-index:10; box-shadow:0 4px 6px rgba(0,0,0,0.1); }
+        .suggestion-item { padding:10px 15px; cursor:pointer; font-size:13px; color:#333; transition:0.2s; border-bottom:1px solid #f0f0f0; }
+        .suggestion-item:hover { background:#f5f5f5; color:#1E3932; }
+        .suggestion-item:last-child { border-bottom:none; }
+        
+        .filter-select { padding:8px 12px; background:white; border:1px solid #ddd; border-radius:6px; font-size:13px; cursor:pointer; color:#333; }
+        .filter-select:focus { outline:none; border-color:#1E3932; }
 
-        .products-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
-        .products-header h1 { font-size:28px; font-weight:bold; color:#1E3932; }
         .actions { display:flex; gap:10px; }
         .btn { padding:8px 16px; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; transition:0.3s; }
-        .btn-filter, .btn-delete, .btn-add { background:#1E3932; color:white; }
-        .btn-add:hover, .btn-filter:hover { background:#15261e; }
+        .btn-delete { background:#1E3932; color:white; }
         .btn-delete:hover:not(:disabled) { background:#c62828; }
         .btn-delete:disabled { opacity:0.5; cursor:not-allowed; }
 
@@ -285,11 +448,6 @@ export default function UsersPage() {
         .role-badge { padding:6px 12px; border-radius:4px; font-size:12px; font-weight:600; }
         .role-badge.admin { background:#e8f5e9; color:#2d7a5e; }
         .role-badge.user { background:#e3f2fd; color:#1565c0; }
-
-        .btn-edit { background:white; color:#1E3932; border:1px solid #ddd; padding:6px 12px; border-radius:4px; font-size:12px; cursor:pointer; font-weight:600; transition:0.2s; }
-        .btn-edit:hover { background:#f0f0f0; }
-        .btn-details { background:none; border:none; font-size:18px; cursor:pointer; color:#666; transition:0.2s; }
-        .btn-details:hover { color:#1E3932; }
 
         .pagination { display:flex; justify-content:space-between; align-items:center; padding:15px; border-top:1px solid #f0f0f0; font-size:12px; color:#666; background:white; }
         .page-controls { display:flex; gap:8px; align-items:center; }

@@ -80,21 +80,17 @@ export default function MyProfile(){
     }, []);
 
     const handleLogoutConfirm = () => {
-        setShowLogoutModal(false);
-        navigate("/");
-    };
+    localStorage.removeItem("token"); // ❗ delete token
+    setShowLogoutModal(false);
 
-    if (loading) {
-        return <div style={{padding: '50px', textAlign: 'center'}}>Loading...</div>;
+    // Redirect based on role (optional)
+    if (userData.role === "admin") {
+        navigate("/admin/login");
+    } else {
+        navigate("/login");
     }
+};
 
-    if (error) {
-        return <div style={{padding: '50px', textAlign: 'center', color: 'red'}}>Error: {error}</div>;
-    }
-
-    if (!userData) {
-        return <div style={{padding: '50px', textAlign: 'center'}}>No user data found</div>;
-    }
 
     return(
         <>
