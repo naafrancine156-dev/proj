@@ -30,7 +30,6 @@ export const UserProvider = ({ children }) => {
             const userProfile = JSON.parse(cachedUser);
             console.log("✅ User loaded from localStorage cache:", userProfile);
             setUser(userProfile);
-            // Don't set loading to false yet - wait for fresh data
           } catch (e) {
             console.error("❌ Error parsing cached user:", e);
           }
@@ -41,34 +40,38 @@ export const UserProvider = ({ children }) => {
         console.log("📤 Sending request to /api/auth/me with token");
 
         const res = await axios.get("/api/auth/me");
-        console.log("✅ User data received from backend:", res.data);
+        console.log("✅ Full user data received from backend:", res.data);
+        console.log("🔍 FULL RESPONSE OBJECT:", JSON.stringify(res.data, null, 2));
+        console.log("🔍 res.data._id:", res.data._id);
+        console.log("🔍 res.data.id:", res.data.id);
+        console.log("🔍 res.data keys:", Object.keys(res.data));
 
-        // Ensure id is set (handle both id and _id from backend)
-        const userId = res.data.id || res.data._id;
-        console.log("✅ User ID extracted:", userId);
-
-        // Store user data WITH the token
+        // Map _id or id to id
+        const userId = res.data._id || res.data.id;
+        console.log("🆔 Extracted userId:", userId);
+        
         const userData = {
           ...res.data,
           id: userId,
-          token: token
+          _id: userId
         };
         
-        console.log("✅ Setting user in context:", userData);
+        console.log("✅ Setting user in context with ID:", userData.id);
+        console.log("📦 Full userData object:", userData);
         setUser(userData);
 
         // Cache user data to localStorage
         localStorage.setItem("userProfile", JSON.stringify(userData));
         console.log("💾 User profile cached to localStorage");
 
-        // NOW set loading to false after user data is set
         setLoading(false);
 
       } catch (err) {
         console.error("❌ Error fetching user:", {
           status: err.response?.status,
           message: err.response?.data?.message,
-          error: err.message
+          error: err.message,
+          fullResponse: err.response?.data
         });
         setUser(null);
         localStorage.removeItem("token");
@@ -80,25 +83,35 @@ export const UserProvider = ({ children }) => {
     fetchUser();
   }, []);
 
-  const login = (userData) => {
-    console.log("🔐 Login function called with:", userData);
+  const login = (loginResponse) => {
+    console.log("🔐 Login function called with:", loginResponse);
+    console.log("🔍 FULL LOGIN RESPONSE:", JSON.stringify(loginResponse, null, 2));
     
-    if (userData.token) {
-      localStorage.setItem("token", userData.token);
+    // Extract user and token from response
+    const token = loginResponse.token;
+    const userData = loginResponse.user;
+    
+    console.log("🔍 Extracted user data:", userData);
+    console.log("🔍 Extracted token:", token);
+    
+    if (token) {
+      localStorage.setItem("token", token);
       console.log("💾 Token saved to localStorage");
-      axios.defaults.headers.common["Authorization"] = `Bearer ${userData.token}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     }
     
-    // Ensure id is set
-    const userId = userData.id || userData._id;
+    const userId = userData._id || userData.id;
+    console.log("🆔 Extracted userId from user:", userId);
     
     const userWithId = {
       ...userData,
       id: userId,
-      token: userData.token
+      _id: userId,
+      token: token
     };
     
-    console.log("✅ User set in context:", userWithId);
+    console.log("✅ User set in context with ID:", userWithId.id);
+    console.log("📦 Full userWithId object:", userWithId);
     setUser(userWithId);
 
     // Cache user data to localStorage

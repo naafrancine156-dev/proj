@@ -8,7 +8,7 @@ import AccIcon from "./assets/whiteaccount.png";
 import PlantLogo from "./assets/plantlogo.png";
 
 function Checkout() {
-  const { cart, removeFromCart, updateQuantity } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
   const { user, loading } = useUser();
   const navigate = useNavigate();
 
@@ -37,15 +37,19 @@ function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [showCardForm, setShowCardForm] = useState(false);
   const [savedCards, setSavedCards] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(null);
   const [saveCard, setSaveCard] = useState(false);
   const [cardNumber, setCardNumber] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [cvv, setCvv] = useState("");
   const [cardName, setCardName] = useState("");
 
+  // Voucher/Coupon
+  const [voucherCode, setVoucherCode] = useState("");
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [voucherError, setVoucherError] = useState("");
+
   // Auto-fill form when user data loads
-// Auto-fill form when user data loads (from context)
-// Auto-fill form when user data loads (from context)
   useEffect(() => {
     console.log("🔍 Checkout useEffect - user:", user, "loading:", loading);
     
@@ -60,7 +64,6 @@ function Checkout() {
   
   // Fetch user's billing addresses and cards on mount
   useEffect(() => {
-    // Get userId - try from user object first, fallback to token
     let userId = user?.id;
     
     if (!userId) {
@@ -94,7 +97,6 @@ function Checkout() {
         const addresses = await response.json();
         console.log("✅ Billing addresses fetched:", addresses);
         if (addresses.length > 0) {
-          // Auto-fill with first/default address
           const defaultAddress = addresses.find(a => a.isDefault) || addresses[0];
           setBillingName(defaultAddress.name || "");
           setBillingPhone(defaultAddress.phone || "");
@@ -117,6 +119,9 @@ function Checkout() {
         const cards = await response.json();
         console.log("✅ Saved cards fetched:", cards);
         setSavedCards(cards);
+        if (cards.length > 0) {
+          setSelectedCard(cards[0].id);
+        }
       }
     } catch (error) {
       console.error("Error fetching saved cards:", error);
@@ -125,140 +130,164 @@ function Checkout() {
 
   const shippingCost = deliveryOption === "door-to-door" ? 450 : 150;
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const estimatedTax = subtotal * 0.12;
+  
+  // Apply voucher discount
+  let discount = 0;
+  if (appliedVoucher) {
+    if (appliedVoucher.type === "percentage") {
+      discount = subtotal * (appliedVoucher.value / 100);
+    } else if (appliedVoucher.type === "fixed") {
+      discount = appliedVoucher.value;
+    }
+  }
+  
+  const subtotalAfterDiscount = subtotal - discount;
+  const estimatedTax = subtotalAfterDiscount * 0.12;
+  
+  // Free shipping if subtotal (after discount) is over ₱1,000
+  const finalShippingCost = subtotalAfterDiscount >= 1000 ? 0 : shippingCost;
+  
   const paymentFee = paymentMethod === "cash" ? 50 : 0;
-  const estimatedTotal = subtotal + shippingCost + estimatedTax + paymentFee;
+  const estimatedTotal = subtotalAfterDiscount + finalShippingCost + estimatedTax + paymentFee;
 
   const handleAddCard = async (e) => {
-  e.preventDefault();
-  if (cardNumber && expiryDate && cvv && cardName) {
-    const newCard = {
-      number: cardNumber,
-      name: cardName,
-      expiry: expiryDate,
-      display: `${cardName} - **** ${cardNumber.slice(-4)}`
-    };
-    
-    if (saveCard) {
-      try {
-        // Save card to database
-        const response = await fetch("http://localhost:5000/api/user/save-card", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...newCard, userId: user?.id })
-        });
-        if (response.ok) {
-          const savedCardData = await response.json();
-          console.log("✅ Card saved successfully:", savedCardData);
-          
-          // ✅ IMPORTANT: Add the card to the local state immediately
-          setSavedCards([...savedCards, { 
-            id: savedCardData.id, 
-            display: newCard.display,
-            expiryDate: newCard.expiry,
-            cardholderName: newCard.name
-          }]);
-          
-          alert("Card saved successfully!");
-        } else {
-          alert("Failed to save card");
-        }
-      } catch (error) {
-        console.error("Error saving card:", error);
-        alert("Error saving card: " + error.message);
-      }
-    } else {
-      // If not saving, just add to local state for this session
-      setSavedCards([...savedCards, { 
-        id: Date.now().toString(), 
-        display: newCard.display,
-        expiryDate: newCard.expiry,
-        cardholderName: newCard.name
-      }]);
-    }
-    
-    // Reset form
-    setCardNumber("");
-    setExpiryDate("");
-    setCvv("");
-    setCardName("");
-    setSaveCard(false);
-    setShowCardForm(false);
-  } else {
-    alert("Please fill in all card details");
-  }
-};
-
-  const handleSaveBillingAddress = async () => {
-  if (billingName && billingPhone && billingRegion && billingCity && billingPostal && billingAdd) {
-    try {
-      const token = localStorage.getItem('token');
+    e.preventDefault();
+    if (cardNumber && expiryDate && cvv && cardName) {
+      const newCard = {
+        number: cardNumber,
+        name: cardName,
+        expiry: expiryDate,
+        display: `${cardName} - **** ${cardNumber.slice(-4)}`
+      };
       
-      if (!token) {
-        alert("Please login first");
-        return;
-      }
-
-      const response = await fetch("http://localhost:5000/api/user/save-billing-address", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          // ❌ REMOVE: userId: user?.id,
-          name: billingName,
-          phone: billingPhone,
-          region: billingRegion,
-          city: billingCity,
-          postalCode: billingPostal,
-          add: billingAdd,
-          isDefault: setAsDefault
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (response.ok) {
-        console.log("✅ Billing address saved:", result);
-        alert("Billing address saved successfully!");
-        setShowBillingForm(false);
-        setHasBillingAddress(true);
-      } else {
-        console.error("❌ Error:", result);
-        alert("Failed to save billing address: " + result.message);
-      }
-    } catch (error) {
-      console.error("❌ Error saving billing address:", error);
-      alert("Error saving billing address: " + error.message);
-    }
-  } else {
-    alert("Please fill in all billing address fields");
-  }
-};
-
-  // Load saved cards on component mount
-  useEffect(() => {
-    if (user?.id) {
-      const fetchSavedCards = async () => {
+      if (saveCard) {
         try {
-          const response = await fetch(`http://localhost:5000/api/user/saved-cards/${user.id}`);
+          const response = await fetch("http://localhost:5000/api/user/save-card", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...newCard, userId: user?.id })
+          });
           if (response.ok) {
-            const cards = await response.json();
-            setSavedCards(cards);
+            const savedCardData = await response.json();
+            console.log("✅ Card saved successfully:", savedCardData);
+            
+            const newSavedCard = { 
+              id: savedCardData.id, 
+              display: newCard.display,
+              expiryDate: newCard.expiry,
+              cardholderName: newCard.name
+            };
+            setSavedCards([...savedCards, newSavedCard]);
+            setSelectedCard(newSavedCard.id);
+            
+            alert("Card saved successfully!");
+          } else {
+            alert("Failed to save card");
           }
         } catch (error) {
-          console.error("Error fetching saved cards:", error);
+          console.error("Error saving card:", error);
+          alert("Error saving card: " + error.message);
         }
-      };
-      fetchSavedCards();
+      } else {
+        const tempCard = { 
+          id: Date.now().toString(), 
+          display: newCard.display,
+          expiryDate: newCard.expiry,
+          cardholderName: newCard.name
+        };
+        setSavedCards([...savedCards, tempCard]);
+        setSelectedCard(tempCard.id);
+      }
+      
+      // Reset form
+      setCardNumber("");
+      setExpiryDate("");
+      setCvv("");
+      setCardName("");
+      setSaveCard(false);
+      setShowCardForm(false);
+    } else {
+      alert("Please fill in all card details");
     }
-  }, [user]);
+  };
 
-const handlePaymentSubmit = async (e) => {
+  const handleSaveBillingAddress = async () => {
+    if (billingName && billingPhone && billingRegion && billingCity && billingPostal && billingAdd) {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          alert("Please login first");
+          return;
+        }
+
+        const response = await fetch("http://localhost:5000/api/user/save-billing-address", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: billingName,
+            phone: billingPhone,
+            region: billingRegion,
+            city: billingCity,
+            postalCode: billingPostal,
+            add: billingAdd,
+            isDefault: setAsDefault
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          console.log("✅ Billing address saved:", result);
+          alert("Billing address saved successfully!");
+          setShowBillingForm(false);
+          setHasBillingAddress(true);
+        } else {
+          console.error("❌ Error:", result);
+          alert("Failed to save billing address: " + result.message);
+        }
+      } catch (error) {
+        console.error("❌ Error saving billing address:", error);
+        alert("Error saving billing address: " + error.message);
+      }
+    } else {
+      alert("Please fill in all billing address fields");
+    }
+  };
+
+  const handleApplyVoucher = () => {
+    setVoucherError("");
+    
+    // Example voucher codes (you can fetch from backend in production)
+    const validVouchers = {
+      "JKLASWER12345": { type: "percentage", value: 20, description: "20% off" },
+      "FREESHIP": { type: "fixed", value: 0, description: "Free shipping" },
+      "SAVE100": { type: "fixed", value: 100, description: "₱100 off" }
+    };
+    
+    const voucher = validVouchers[voucherCode.toUpperCase()];
+    
+    if (voucher) {
+      setAppliedVoucher(voucher);
+      alert(`Voucher "${voucherCode}" applied! ${voucher.description}`);
+    } else {
+      setVoucherError("Invalid voucher code");
+      setAppliedVoucher(null);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherCode("");
+    setVoucherError("");
+  };
+
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
 
-    // Get token from localStorage
     const token = localStorage.getItem("token");
     
     if (!token) {
@@ -266,11 +295,9 @@ const handlePaymentSubmit = async (e) => {
       return;
     }
 
-    // Try to get userId from user object, fallback to decoding token
     let userId = user?.id;
     
     if (!userId) {
-      // Fallback: decode token manually
       try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -302,27 +329,29 @@ const handlePaymentSubmit = async (e) => {
         phoneNumber 
       },
       billingAddress: useSameAddress 
-        ? { 
-            name: `${firstName} ${lastName}`, 
-            phone: phoneNumber,
-            region: "",
-            city: "",
-            postalCode: "",
-            add: ""
-          } 
-        : { 
-            name: billingName, 
-            phone: billingPhone, 
-            region: billingRegion, 
-            city: billingCity, 
-            postalCode: billingPostal, 
-            add: billingAdd 
-          },
+  ? { 
+      name: `${firstName} ${lastName}`, 
+      phone: phoneNumber,
+      region: user?.region || "",
+      city: user?.city || "",
+      postalCode: user?.postalCode || "",
+      add: user?.add || ""
+    } 
+  : { 
+      name: billingName, 
+      phone: billingPhone, 
+      region: billingRegion, 
+      city: billingCity, 
+      postalCode: billingPostal, 
+      add: billingAdd 
+    },
       deliveryOption,
       paymentMethod,
-      shippingCost,
+      shippingCost: finalShippingCost,
       paymentFee,
       tax: estimatedTax,
+      discount: discount,
+      voucherCode: appliedVoucher ? voucherCode : null,
       total: estimatedTotal
     };
 
@@ -346,7 +375,7 @@ const handlePaymentSubmit = async (e) => {
       const result = await response.json();
       console.log("✅ Order placed successfully:", result);
 
-      // Redirect to success page
+      clearCart();
       navigate("/thankyou");
     } catch (err) {
       console.error("❌ Error placing order:", err);
@@ -657,28 +686,25 @@ const handlePaymentSubmit = async (e) => {
         }
 
         .billingFieldRow2 > div input {
-  max-width: 100%;
-  padding: 6px;               /* smaller padding */
-  font-size: 0.9rem;          /* smaller text */
-}
+          max-width: 100%;
+          padding: 6px;
+          font-size: 0.9rem;
+        }
 
-.billingFieldRow2 > div {
-  flex: 1;
-  min-width: 0;               /* prevents overflow */
-}
+        .billingFieldRow2 > div {
+          flex: 1;
+          min-width: 0;
+        }
 
-
-
-
-        .billingRegionCont, .billingCityCont, .billingPostalCont,  {
+        .billingRegionCont, .billingCityCont, .billingPostalCont {
           flex: 1;
         }
 
         .billingAddCont input {
-  width: 100%;
-  padding: 6px;
-  font-size: 0.9rem;
-}
+          width: 100%;
+          padding: 6px;
+          font-size: 0.9rem;
+        }
 
         .paymentBttn {
           padding: 10px;
@@ -725,6 +751,57 @@ const handlePaymentSubmit = async (e) => {
           display: flex;
           align-items: center;
           gap: 8px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .cardOption:hover {
+          background-color: hsl(47, 47%, 93%);
+        }
+
+        .cardOption.selected {
+          border-color: hsl(164, 31%, 17%);
+          background-color: hsl(164, 31%, 95%);
+        }
+
+        .cardFormSection {
+          background: hsl(47, 47%, 93%);
+          padding: 15px;
+          border-radius: 5px;
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+          margin-top: 10px;
+        }
+
+        .voucherError {
+          color: red;
+          font-size: 0.85rem;
+          margin-top: 5px;
+        }
+
+        .voucherSuccess {
+          color: green;
+          font-size: 0.85rem;
+          margin-top: 5px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .removeVoucherBtn {
+          background: none;
+          border: none;
+          color: red;
+          cursor: pointer;
+          text-decoration: underline;
+          font-size: 0.85rem;
+        }
+
+        .freeShippingBadge {
+          color: green;
+          font-weight: bold;
+          font-size: 0.9rem;
         }
 
         .checkoutProdFormCont {
@@ -902,117 +979,107 @@ const handlePaymentSubmit = async (e) => {
 
               {/* Billing Address Section */}
               <h2>Billing Address</h2>
-              {!hasBillingAddress ? (
-                <button type="button" className="secondaryBttn" onClick={() => {
-                  setHasBillingAddress(true);
-                  setShowBillingForm(true);
-                }}>
-                  + Add Billing Address
-                </button>
-              ) : (
-                <>
-                  <div className="radioGroup">
-                    <label className="radioOption">
+              <div className="radioGroup">
+                <label className="radioOption">
+                  <input
+                    type="radio"
+                    name="billingAddress"
+                    checked={useSameAddress}
+                    onChange={() => setUseSameAddress(true)}
+                  />
+                  <span>Use same address as contact details</span>
+                </label>
+                <label className="radioOption">
+                  <input
+                    type="radio"
+                    name="billingAddress"
+                    checked={!useSameAddress}
+                    onChange={() => setUseSameAddress(false)}
+                  />
+                  <span>Use a different billing address</span>
+                </label>
+              </div>
+
+              {!useSameAddress && (
+                <div className="billingFormSection">
+                  <div className="billingFieldRow1">
+                    <div className="billingNameCont">
+                      <label>Name</label>
                       <input
-                        type="radio"
-                        name="billingAddress"
-                        checked={useSameAddress}
-                        onChange={() => setUseSameAddress(true)}
+                        type="text"
+                        value={billingName}
+                        onChange={(e) => setBillingName(e.target.value)}
+                        required
                       />
-                      <span>Use same address as contact details</span>
-                    </label>
-                    <label className="radioOption">
+                    </div>
+                    <div className="billingPhoneCont">
+                      <label>Phone Number</label>
                       <input
-                        type="radio"
-                        name="billingAddress"
-                        checked={!useSameAddress}
-                        onChange={() => {
-                          setUseSameAddress(false);
-                          setShowBillingForm(true);
-                        }}
+                        type="text"
+                        value={billingPhone}
+                        onChange={(e) => setBillingPhone(e.target.value)}
+                        required
                       />
-                      <span>Use a different billing address</span>
-                    </label>
+                    </div>
                   </div>
 
-                  {!useSameAddress && showBillingForm && (
-                    <div className="billingFormSection">
-                      <div className="billingFieldRow1">
-                        <div className="billingNameCont">
-                          <label>Name</label>
-                          <input
-                            type="text"
-                            value={billingName}
-                            onChange={(e) => setBillingName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="billingPhoneCont">
-                          <label>Phone Number</label>
-                          <input
-                            type="text"
-                            value={billingPhone}
-                            onChange={(e) => setBillingPhone(e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="billingFieldRow2">
-                        <div className="billingRegionCont">
-                          <label>Region</label>
-                          <input
-                            type="text"
-                            value={billingRegion}
-                            onChange={(e) => setBillingRegion(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="billingCityCont">
-                          <label>City</label>
-                          <input
-                            type="text"
-                            value={billingCity}
-                            onChange={(e) => setBillingCity(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="billingPostalCont">
-                          <label>Postal Code</label>
-                          <input
-                            type="text"
-                            value={billingPostal}
-                            onChange={(e) => setBillingPostal(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="billingAddCont">
-                          <label>Address</label>
-                          <input
-                            type="text"
-                            value={billingAdd}
-                            onChange={(e) => setBillingAdd(e.target.value)}
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      <div className="checkboxContainer">
-                        <input
-                          type="checkbox"
-                          id="setDefault"
-                          checked={setAsDefault}
-                          onChange={(e) => setSetAsDefault(e.target.checked)}
-                        />
-                        <label htmlFor="setDefault">Set as default address</label>
-                      </div>
-
-                      <button type="button" className="secondaryBttn" onClick={handleSaveBillingAddress}>
-                        Save Billing Address
-                      </button>
+                  <div className="billingFieldRow2">
+                    <div className="billingRegionCont">
+                      <label>Region</label>
+                      <input
+                        type="text"
+                        value={billingRegion}
+                        onChange={(e) => setBillingRegion(e.target.value)}
+                        required
+                      />
                     </div>
-                  )}
-                </>
+                    <div className="billingCityCont">
+                      <label>City</label>
+                      <input
+                        type="text"
+                        value={billingCity}
+                        onChange={(e) => setBillingCity(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="billingPostalCont">
+                      <label>Postal Code</label>
+                      <input
+                        type="text"
+                        value={billingPostal}
+                        onChange={(e) => setBillingPostal(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="billingAddCont">
+                      <label>Address</label>
+                      <input
+                        type="text"
+                        value={billingAdd}
+                        onChange={(e) => setBillingAdd(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="checkboxContainer">
+                    <input
+                      type="checkbox"
+                      id="setDefault"
+                      checked={setAsDefault}
+                      onChange={(e) => setSetAsDefault(e.target.checked)}
+                    />
+                    <label htmlFor="setDefault">Set as default address</label>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="secondaryBttn"
+                    onClick={handleSaveBillingAddress}
+                  >
+                    Save Billing Address
+                  </button>
+                </div>
               )}
 
               {/* Delivery Option */}
@@ -1084,69 +1151,82 @@ const handlePaymentSubmit = async (e) => {
               {paymentMethod === "card" && (
                 <div className="billingFormSection">
                   {savedCards.length > 0 && (
-                    <div className="cardsList">
-                      <label><strong>Select a saved card:</strong></label>
-                      {savedCards.map((card) => (
-                        <div key={card.id} className="cardOption">
-                          <input type="radio" name="savedCard" defaultChecked />
-                          <span>{card.display}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <>
+                      <div className="cardsList">
+                        <label><strong>Select a saved card:</strong></label>
+                        {savedCards.map((card) => (
+                          <div 
+                            key={card.id} 
+                            className={`cardOption ${selectedCard === card.id ? 'selected' : ''}`}
+                            onClick={() => setSelectedCard(card.id)}
+                          >
+                            <input 
+                              type="radio" 
+                              name="savedCard" 
+                              checked={selectedCard === card.id}
+                              onChange={() => setSelectedCard(card.id)}
+                            />
+                            <span>{card.display}</span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <button 
+                        type="button" 
+                        className="secondaryBttn" 
+                        onClick={() => setShowCardForm(!showCardForm)}
+                      >
+                        {showCardForm ? "Cancel" : "+ Add a different card"}
+                      </button>
+                    </>
                   )}
                   
-                  {showCardForm ? (
-                    <>
-                      <h3 style={{ fontSize: "1rem", marginBottom: "10px" }}>Add Card Details</h3>
-                      <div className="checkoutFieldCont6">
-                        <div className="cardNumberCont">
-                          <label>Card Number</label>
-                          <input
-                            type="text"
-                            placeholder="1234 5678 9012 3456"
-                            value={cardNumber}
-                            onChange={(e) => setCardNumber(e.target.value)}
-                            required
-                          />
-                        </div>
+                  {(showCardForm || savedCards.length === 0) && (
+                    <div className="cardFormSection">
+                      <div className="cardNumberCont">
+                        <label>Card Number</label>
+                        <input
+                          type="text"
+                          value={cardNumber}
+                          onChange={(e) => setCardNumber(e.target.value)}
+                          placeholder="1234 5678 9012 3456"
+                          maxLength="16"
+                        />
                       </div>
-
+                      
                       <div className="checkoutFieldCont7">
                         <div className="expiryCont">
                           <label>Expiry Date</label>
                           <input
                             type="text"
-                            placeholder="MM/YY"
                             value={expiryDate}
                             onChange={(e) => setExpiryDate(e.target.value)}
-                            required
+                            placeholder="MM/YY"
+                            maxLength="5"
                           />
                         </div>
                         <div className="cvvCont">
                           <label>CVV</label>
                           <input
                             type="text"
-                            placeholder="123"
                             value={cvv}
                             onChange={(e) => setCvv(e.target.value)}
-                            required
+                            placeholder="123"
+                            maxLength="3"
                           />
                         </div>
                       </div>
-
-                      <div className="checkoutFieldCont8">
-                        <div className="cardNameCont">
-                          <label>Cardholder Name</label>
-                          <input
-                            type="text"
-                            placeholder="Name on Card"
-                            value={cardName}
-                            onChange={(e) => setCardName(e.target.value)}
-                            required
-                          />
-                        </div>
+                      
+                      <div className="cardNameCont">
+                        <label>Cardholder Name</label>
+                        <input
+                          type="text"
+                          value={cardName}
+                          onChange={(e) => setCardName(e.target.value)}
+                          placeholder="John Doe"
+                        />
                       </div>
-
+                      
                       <div className="checkboxContainer">
                         <input
                           type="checkbox"
@@ -1156,15 +1236,15 @@ const handlePaymentSubmit = async (e) => {
                         />
                         <label htmlFor="saveCardCheckbox">Save this card for future use</label>
                       </div>
-
-                      <button type="button" className="secondaryBttn" onClick={handleAddCard}>
+                      
+                      <button 
+                        type="button" 
+                        className="secondaryBttn" 
+                        onClick={handleAddCard}
+                      >
                         Add Card
                       </button>
-                    </>
-                  ) : (
-                    <button type="button" className="secondaryBttn" onClick={() => setShowCardForm(true)}>
-                      + Tap to add card
-                    </button>
+                    </div>
                   )}
                 </div>
               )}
@@ -1179,54 +1259,107 @@ const handlePaymentSubmit = async (e) => {
               {cart.length === 0 ? (
                 <p>Your cart is empty.</p>
               ) : (
-                cart.map((item) => (
-                  <div className="checkoutProdCard" key={item.id}>
-                    <img src={`http://localhost:5000${item.image}`} alt={item.name} className="prodImg1" />
-                    <div className="prodDetailCont">
-                      <h3>{item.name}</h3>
-                      <label>₱ {item.price.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
-                      <div style={{ display: "flex", gap: "10px", marginTop: "5px" }}>
-                        <button type="button" onClick={() => updateQuantity(item.id, -1)}>-</button>
-                        <span>{item.quantity}</span>
-                        <button type="button" onClick={() => updateQuantity(item.id, 1)}>+</button>
-                        <button
-                          type="button"
-                          onClick={() => removeFromCart(item.id)}
-                          style={{ marginLeft: "10px", color: "red" }}
+                <>
+                  {cart.map((item) => (
+                    <div className="checkoutProdCard" key={item.id}>
+                      <img src={`http://localhost:5000${item.image}`} alt={item.name} className="prodImg1" />
+                      <div className="prodDetailCont">
+                        <h3>{item.name}</h3>
+                        <label>₱ {item.price.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
+                        <span>Quantity: {item.quantity}</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Voucher / Coupon Section */}
+                  <div style={{ marginTop: "15px" }}>
+                    {!appliedVoucher ? (
+                      <>
+                        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                          <input 
+                            type="text" 
+                            placeholder="Enter voucher code" 
+                            value={voucherCode}
+                            onChange={(e) => setVoucherCode(e.target.value)}
+                            style={{ 
+                              flex: 1, 
+                              padding: "8px", 
+                              borderRadius: "5px", 
+                              border: "1px solid #ccc" 
+                            }} 
+                          />
+                          <button 
+                            type="button" 
+                            className="secondaryBttn"
+                            onClick={handleApplyVoucher}
+                          >
+                            Apply
+                          </button>
+                        </div>
+                        {voucherError && <p className="voucherError">{voucherError}</p>}
+                      </>
+                    ) : (
+                      <div className="voucherSuccess">
+                        <span>✅ Voucher applied: {appliedVoucher.description}</span>
+                        <button 
+                          type="button" 
+                          className="removeVoucherBtn"
+                          onClick={handleRemoveVoucher}
                         >
                           Remove
                         </button>
                       </div>
-                    </div>
+                    )}
                   </div>
-                ))
-              )}
 
-              {cart.length > 0 && (
-                <div className="checkoutDetCont">
-                  <div className="subtotalLabelCont">
-                    <label>Subtotal</label>
-                    <label>₱ {subtotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
-                  </div>
-                  <div className="shippingLabelCont">
-                    <label>Shipping</label>
-                    <label>₱ {shippingCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
-                  </div>
-                  <div className="taxLabelCont">
-                    <label>Estimated Tax</label>
-                    <label>₱ {estimatedTax.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
-                  </div>
-                  {paymentMethod === "cash" && (
-                    <div className="feeLabelCont">
-                      <label>Payment Fee</label>
-                      <label>₱ {paymentFee.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
+                  {cart.length > 0 && (
+                    <div className="checkoutDetCont">
+                      <div className="subtotalLabelCont">
+                        <label>Subtotal</label>
+                        <label>₱ {subtotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
+                      </div>
+                      
+                      {appliedVoucher && discount > 0 && (
+                        <div className="subtotalLabelCont" style={{ color: "green" }}>
+                          <label>Discount ({appliedVoucher.description})</label>
+                          <label>-₱ {discount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
+                        </div>
+                      )}
+                      
+                      <div className="shippingLabelCont">
+                        <label>Shipping</label>
+                        <label>
+                          {finalShippingCost === 0 ? (
+                            <span className="freeShippingBadge">FREE</span>
+                          ) : (
+                            `₱ ${finalShippingCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`
+                          )}
+                        </label>
+                      </div>
+                      
+                      {subtotalAfterDiscount >= 1000 && shippingCost > 0 && (
+                        <p style={{ fontSize: "0.85rem", color: "green", marginTop: "-5px" }}>
+                          🎉 Free shipping on orders over ₱1,000!
+                        </p>
+                      )}
+                      
+                      <div className="taxLabelCont">
+                        <label>Estimated Tax</label>
+                        <label>₱ {estimatedTax.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
+                      </div>
+                      {paymentMethod === "cash" && (
+                        <div className="feeLabelCont">
+                          <label>Payment Fee</label>
+                          <label>₱ {paymentFee.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
+                        </div>
+                      )}
+                      <div className="etCont">
+                        <h3>Estimated Total</h3>
+                        <label>₱ {estimatedTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
+                      </div>
                     </div>
                   )}
-                  <div className="etCont">
-                    <h3>Estimated Total</h3>
-                    <label>₱ {estimatedTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
-                  </div>
-                </div>
+                </>
               )}
             </aside>
           </div>

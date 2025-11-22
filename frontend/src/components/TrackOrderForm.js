@@ -12,9 +12,8 @@ export default function TrackOrder() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cartCount, setCartCount] = useState(0);
-  const [searchOpen, setSearchOpen] = useState(false); // 🔍 New state for search
-
-
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [markingReceived, setMarkingReceived] = useState(false);
 
   // Fetch user's orders
   useEffect(() => {
@@ -34,8 +33,11 @@ export default function TrackOrder() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("📦 Orders data:", data);
         setOrders(data);
         if (data.length > 0) {
+          console.log("📋 First order:", data[0]);
+          console.log("🏠 Billing Address:", data[0].billingAddress);
           setSelectedOrder(data[0]);
         }
       } else {
@@ -48,7 +50,7 @@ export default function TrackOrder() {
     }
   };
 
-  // Timeline stages
+  // Timeline stages - includes Order Received
   const timelineStages = [
     { id: 1, label: "Order Placed", status: "placed" },
     { id: 2, label: "Confirmed", status: "confirmed" },
@@ -56,11 +58,12 @@ export default function TrackOrder() {
     { id: 4, label: "Shipped", status: "shipped" },
     { id: 5, label: "Out for Delivery", status: "out_for_delivery" },
     { id: 6, label: "Delivered", status: "delivered" },
+    { id: 7, label: "Order Received", status: "received" },
   ];
 
   // Check if stage is completed
   const isStageDone = (stageStatus) => {
-    const statusOrder = ["placed", "confirmed", "processing", "shipped", "out_for_delivery", "delivered"];
+    const statusOrder = ["placed", "confirmed", "processing", "shipped", "out_for_delivery", "delivered", "received"];
     const currentStatusIndex = statusOrder.indexOf(selectedOrder?.status || "placed");
     const stageIndex = statusOrder.indexOf(stageStatus);
     return stageIndex <= currentStatusIndex;
@@ -76,9 +79,91 @@ export default function TrackOrder() {
     });
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "Pending";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-PH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Get timestamp for a specific status
+  const getStatusTimestamp = (status) => {
+    if (!selectedOrder) return null;
+    
+    const statusMap = {
+      placed: selectedOrder.createdAt,
+      confirmed: selectedOrder.confirmedAt,
+      processing: selectedOrder.processingAt,
+      shipped: selectedOrder.shippedAt,
+      out_for_delivery: selectedOrder.outForDeliveryAt,
+      delivered: selectedOrder.deliveredAt,
+      received: selectedOrder.receivedAt,
+    };
+    
+    return statusMap[status];
+  };
+
+  // Handle marking order as received
+  const handleOrderReceived = async () => {
+    try {
+      setMarkingReceived(true);
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        alert("Authentication token not found. Please log in again.");
+        setMarkingReceived(false);
+        return;
+      }
+
+      if (!selectedOrder?._id) {
+        alert("Order ID not found.");
+        setMarkingReceived(false);
+        return;
+      }
+
+      const orderId = selectedOrder._id.toString();
+      const url = `http://localhost:5000/api/orders/${orderId}/mark-received`;
+      console.log("📤 Sending request to:", url);
+      console.log("🔑 Order ID:", orderId);
+
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json().catch(() => null);
+      console.log("📥 Response status:", response.status);
+      console.log("📥 Response data:", data);
+
+      if (response.ok) {
+        const updatedOrder = data?.order || { ...selectedOrder, status: "received", receivedAt: new Date() };
+        setSelectedOrder(updatedOrder);
+        await fetchUserOrders();
+        alert("✓ Order marked as received!");
+      } else {
+        const errorMsg = data?.message || data?.error || "Unknown error";
+        console.error("❌ Failed with status", response.status, ":", errorMsg);
+        alert(`Failed to mark order as received: ${errorMsg}`);
+      }
+    } catch (error) {
+      console.error("❌ Error marking order as received:", error);
+      alert("Error: " + error.message);
+    } finally {
+      setMarkingReceived(false);
+    }
+  };
+
   return (
     <>
-          <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       <style>{`
         * {
           margin: 0;
@@ -146,6 +231,7 @@ export default function TrackOrder() {
         .navHeaderLogoBttonCont {
           display: flex;
           gap: 15px;
+          position: relative;
         }
 
         .navHeaderLogoBttonCont button {
@@ -191,6 +277,27 @@ export default function TrackOrder() {
           width: 28px;
           height: 28px;
           display: inline-block;
+        }
+
+        .navCartWrapper {
+          position: relative;
+          display: inline-block;
+        }
+
+        .cartBadge {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          background-color: #ff4444;
+          color: white;
+          border-radius: 50%;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.75rem;
+          font-weight: bold;
         }
 
         .textQuoteHeader {
@@ -242,6 +349,8 @@ export default function TrackOrder() {
           border-radius: 10px;
           padding: 20px;
           height: fit-content;
+          max-height: 600px;
+          overflow-y: auto;
         }
 
         .ordersList h3 {
@@ -284,6 +393,7 @@ export default function TrackOrder() {
         .orderItem .orderStatus {
           font-size: 0.85rem;
           opacity: 0.8;
+          text-transform: capitalize;
         }
 
         .trackingSection {
@@ -309,6 +419,54 @@ export default function TrackOrder() {
           font-size: 0.95rem;
           color: #666;
           margin: 5px 0;
+        }
+
+        .orderActionContainer {
+          display: flex;
+          gap: 15px;
+          margin-top: 20px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+
+        .orderReceivedBtn {
+          background-color: #4caf50;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 0.95rem;
+          font-weight: 600;
+          transition: all 0.3s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .orderReceivedBtn:hover:not(:disabled) {
+          background-color: #45a049;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .orderReceivedBtn:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .receivedStatus {
+          display: inline-block;
+          background-color: #4caf50;
+          color: white;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .timeline {
@@ -391,6 +549,17 @@ export default function TrackOrder() {
           margin: 0;
         }
 
+        .timelineTimestamp {
+          font-size: 0.85rem;
+          color: #4caf50;
+          font-weight: 600;
+          margin-top: 3px;
+        }
+
+        .timelineTimestamp.pending {
+          color: #999;
+        }
+
         .noOrder {
           text-align: center;
           padding: 60px 20px;
@@ -399,6 +568,23 @@ export default function TrackOrder() {
 
         .noOrder p {
           font-size: 1.1rem;
+          margin-bottom: 20px;
+        }
+
+        .shopNowBtn {
+          padding: 10px 30px;
+          background: hsl(164, 31%, 17%);
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 1rem;
+          transition: all 0.2s;
+        }
+
+        .shopNowBtn:hover {
+          background: hsl(164, 25%, 12%);
+          transform: scale(1.05);
         }
 
         footer {
@@ -430,6 +616,45 @@ export default function TrackOrder() {
           .trackingSection {
             padding: 20px;
           }
+
+          .navHeaderBttnCont {
+            gap: 10px;
+          }
+
+          .navHeaderBttnCont button {
+            font-size: 0.85rem;
+            padding: 6px 10px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          section {
+            padding: 15px;
+          }
+
+          .pageHeaderCont h1 {
+            font-size: 1.5rem;
+          }
+
+          .trackContainer {
+            gap: 15px;
+          }
+
+          .orderReceivedBtn,
+          .receivedStatus {
+            font-size: 0.85rem;
+            padding: 8px 12px;
+          }
+
+          .navHeaderCont {
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .navHeaderBttnCont {
+            flex-wrap: wrap;
+            justify-content: center;
+          }
         }
       `}</style>
 
@@ -441,35 +666,35 @@ export default function TrackOrder() {
           </div>
 
           <div className="navHeaderBttnCont">
-            <button className="bttn1" onClick={() => navigate("/homepage")}>Home</button>
-              <button className="bttn2" onClick={() => navigate("/shop")}>Shop</button>
-              <button className="bttn3" onClick={() => navigate("/track")}>Track Order</button>
-              <button className="bttn4" onClick={() => navigate("/contactus")}>Contact Us</button>
+            <button onClick={() => navigate("/homepage")}>Home</button>
+            <button onClick={() => navigate("/shop")}>Shop</button>
+            <button onClick={() => navigate("/track")}>Track Order</button>
+            <button onClick={() => navigate("/contactus")}>Contact Us</button>
+          </div>
+
+          <div className="navHeaderLogoBttonCont">
+            <button
+              className="iconBttn1"
+              onClick={() => setSearchOpen(true)}
+              title="Search"
+            >
+              <i className="navSearch"></i>
+            </button>
+
+            <div className="navCartWrapper">
+              <button className="iconBttn2" onClick={() => navigate("/cart")} title="Cart">
+                <i className="navCard"></i>
+              </button>
+              {cartCount > 0 && <span className="cartBadge">{cartCount}</span>}
             </div>
 
-            <div className="navHeaderLogoBttonCont">
-              {/* 🔍 Search Button - Opens Sidebar */}
-              <button
-                className="iconBttn1"
-                onClick={() => setSearchOpen(true)}
-              >
-                <i className="navSearch"></i>
-              </button>
-
-              {/* Cart Icon with Badge */}
-              <div className="navCartWrapper">
-                <button className="iconBttn2" onClick={() => navigate("/cart")}>
-                  <i className="navCard"></i>
-                </button>
-                {cartCount > 0 && <span className="cartBadge">{cartCount}</span>}
-              </div>
-
-              <button
-                className="iconBttn3"
-                onClick={() => navigate("/myprofile")}
-              >
-                <i className="navAcc"></i>
-              </button>
+            <button
+              className="iconBttn3"
+              onClick={() => navigate("/myprofile")}
+              title="Account"
+            >
+              <i className="navAcc"></i>
+            </button>
           </div>
         </div>
       </header>
@@ -485,13 +710,15 @@ export default function TrackOrder() {
         </div>
 
         {loading ? (
-          <p>Loading orders...</p>
-        ) : orders.length > 0 ? (
+          <p style={{ textAlign: "center", fontSize: "1.1rem", color: "#666" }}>
+            Loading orders...
+          </p>
+        ) : orders.filter(o => o.status !== "received").length > 0 ? (
           <div className="trackContainer">
             {/* Orders List */}
             <div className="ordersList">
-              <h3>Your Orders</h3>
-              {orders.map((order) => (
+              <h3>Active Orders</h3>
+              {orders.filter(o => o.status !== "received").map((order) => (
                 <div
                   key={order._id}
                   className={`orderItem ${selectedOrder?._id === order._id ? "active" : ""}`}
@@ -516,13 +743,16 @@ export default function TrackOrder() {
                     <span
                       style={{
                         color:
-                          selectedOrder.status === "delivered"
+                          selectedOrder.status === "received"
                             ? "#4caf50"
-                            : "#ff9800",
+                            : selectedOrder.status === "delivered"
+                            ? "#ff9800"
+                            : "#2196f3",
                         fontWeight: "bold",
+                        textTransform: "capitalize",
                       }}
                     >
-                      {selectedOrder.status.toUpperCase()}
+                      {selectedOrder.status.replace(/_/g, " ")}
                     </span>
                   </p>
                   <p>
@@ -541,8 +771,12 @@ export default function TrackOrder() {
                       </p>
                       <p>
                         <strong>Delivery Address:</strong>{" "}
-                        {selectedOrder.billingAddress?.city},{" "}
-                        {selectedOrder.billingAddress?.region}
+                        {selectedOrder.billingAddress?.add || "N/A"},{" "}
+                        {selectedOrder.billingAddress?.city || "N/A"},{" "}
+                        {selectedOrder.billingAddress?.region || "N/A"}
+                      </p>
+                      <p>
+                        <strong>Contact:</strong> {selectedOrder.contactDetails.phoneNumber}
                       </p>
                     </>
                   )}
@@ -551,7 +785,7 @@ export default function TrackOrder() {
                 {/* Timeline */}
                 <div className="timeline">
                   <h3>Delivery Timeline</h3>
-                  {timelineStages.map((stage, index) => (
+                  {timelineStages.map((stage) => (
                     <div
                       key={stage.id}
                       className={`timelineStep ${
@@ -568,10 +802,35 @@ export default function TrackOrder() {
                             ? "Completed"
                             : "Pending"}
                         </p>
+                        <div className={`timelineTimestamp ${isStageDone(stage.status) ? "" : "pending"}`}>
+                          {getStatusTimestamp(stage.status)
+                            ? formatDateTime(getStatusTimestamp(stage.status))
+                            : "Awaiting..."}
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {/* Order Received Button - After Out for Delivery */}
+                {selectedOrder.status === "delivered" && (
+                  <div className="orderActionContainer" style={{ marginTop: "30px" }}>
+                    <button
+                      className="orderReceivedBtn"
+                      onClick={handleOrderReceived}
+                      disabled={markingReceived}
+                    >
+                      {markingReceived ? "Processing..." : "✓ Mark as Received"}
+                    </button>
+                  </div>
+                )}
+
+                {/* Show received status badge when already received */}
+                {selectedOrder.status === "received" && (
+                  <div className="orderActionContainer" style={{ marginTop: "30px" }}>
+                    <span className="receivedStatus">✓ Order Received</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -580,16 +839,7 @@ export default function TrackOrder() {
             <p>No orders found. Start shopping!</p>
             <button
               onClick={() => navigate("/shop")}
-              style={{
-                marginTop: "20px",
-                padding: "10px 30px",
-                background: "hsl(164, 31%, 17%)",
-                color: "white",
-                border: "none",
-                borderRadius: "5px",
-                cursor: "pointer",
-                fontSize: "1rem",
-              }}
+              className="shopNowBtn"
             >
               Shop Now
             </button>

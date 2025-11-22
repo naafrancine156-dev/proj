@@ -19,56 +19,54 @@ function LoginForm() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setErrorMsg("");
+  e.preventDefault();
+  setLoading(true);
+  setErrorMsg("");
 
-    try {
-      const payload = {
-        email: formData.email.trim(),
-        password: formData.password.trim(),
-      };
+  try {
+    const payload = {
+      email: formData.email.trim(),
+      password: formData.password.trim(),
+    };
 
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
+    console.log("🔍 Login response:", data);
 
-      if (res.ok) {
-        // ✅ Store token in localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        localStorage.setItem("userId", data.id);
+    if (res.ok) {
+      // ✅ Extract user from data.user
+      const user = data.user;
+      const token = data.token;
 
-        // ✅ Call login() with user data INCLUDING token
-        login({
-          id: data.id,
-          email: data.email,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          role: data.role,
-          token: data.token // ✅ IMPORTANT: Include token
-        });
+      // Store token in localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", user.role);
+      localStorage.setItem("userId", user._id);
 
-        // Navigate based on role
-        if (data.role === "admin") {
-          navigate("/dashboard");
-        } else {
-          navigate("/homepage");
-        }
+      // ✅ Call login() with entire response object
+      login(data);
+
+      // Navigate based on role
+      if (user.role === "admin") {
+        navigate("/dashboard");
       } else {
-        setErrorMsg(data.message || "❌ Login failed");
+        navigate("/homepage");
       }
-    } catch (err) {
-      console.error(err);
-      setErrorMsg("❌ Failed to connect to server");
+    } else {
+      setErrorMsg(data.message || "❌ Login failed");
     }
+  } catch (err) {
+    console.error(err);
+    setErrorMsg("❌ Failed to connect to server");
+  }
 
-    setLoading(false);
-  };
+  setLoading(false);
+};
 
   // Google Sign In with Firebase
   const handleGoogleSignIn = async () => {

@@ -1,3 +1,6 @@
+// Update your OrderHistory component to fetch data from backend and show status
+
+import { useState, useEffect } from "react";
 //import "./TrackMyOrder.css";
 import SearchIcon from "./assets/whitesearch.png";
 import CartIcon from "./assets/whitecart.png";
@@ -5,10 +8,79 @@ import AccIcon from "./assets/whiteaccount.png";
 import PlantLogo from "./assets/plantlogo.png";
 
 function OrderHistory(){
-    return(
-        <>
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-            <style>{`
+  useEffect(() => {
+    fetchOrderHistory();
+  }, []);
+
+  const fetchOrderHistory = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/orders", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data);
+      } else {
+        console.error("Failed to fetch order history");
+      }
+    } catch (error) {
+      console.error("Error fetching order history:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusColors = {
+      placed: "#ff9800",
+      confirmed: "#2196f3",
+      processing: "#2196f3",
+      shipped: "#9c27b0",
+      out_for_delivery: "#ffc107",
+      delivered: "#ff9800",
+      received: "#4caf50",
+    };
+
+    const statusLabels = {
+      placed: "Placed",
+      confirmed: "Confirmed",
+      processing: "Processing",
+      shipped: "Shipped",
+      out_for_delivery: "Out for Delivery",
+      delivered: "Delivered",
+      received: "✓ Received",
+    };
+
+    return (
+      <span
+        style={{
+          display: "inline-block",
+          backgroundColor: statusColors[status] || "#999",
+          color: "white",
+          padding: "5px 12px",
+          borderRadius: "15px",
+          fontSize: "0.85rem",
+          fontWeight: "600",
+        }}
+      >
+        {statusLabels[status] || status}
+      </span>
+    );
+  };
+
+  // Replace the hardcoded order cards with this dynamic rendering:
+  return (
+    <>
+      <style>{`
             
                 :root{
                     --primarybgcolor: --hsl(164, 31%, 17%); /* minty green something */
@@ -427,103 +499,108 @@ function OrderHistory(){
                 }
             
             `}</style>
-            <header>
-                <div className="headerCont">
-                    <div className="navHeaderCont">
-                        <div className="logoCont">
-                            <p className="navLogo"><img src={PlantLogo} alt="Logo"></img></p>
-                            <p className="navLogoText">Eric's Garden</p>
-                        </div>
-                
-                        <div className="navHeaderBttnCont">
-                            <button className="bttn1">Eric's Garden</button>
-                            <button className="bttn2">Eric's Garden</button>
-                            <button className="bttn3">Eric's Garden</button>
-                            <button className="bttn4">Eric's Garden</button>
-                            <button className="bttn5">Eric's Garden</button>
-                        </div>
-                
-                        <div className="navHeaderLogoBttonCont">
-                            <button className="iconBttn1">
-                                <i className="navSearch"></i>
-                            </button>
-                            <button className="iconBttn2">
-                                <i className="navCard"></i>
-                            </button>
-                            <button className="iconBttn3">
-                                <i className="navAcc"></i>
-                             </button>
-                         </div>
+
+      <section>
+        <div className="orderHistCont">
+          <div className="pageHeaderCont">
+            <div className="headerCont">
+              <h1 className="pageHeader">Order History</h1>
+              <p className="pageSubHeader">View your recent orders</p>
+            </div>
+          </div>
+
+          {loading ? (
+            <p>Loading your orders...</p>
+          ) : orders.length > 0 ? (
+            <div className="orderHistFormCont">
+              <aside className="sideBarMenuCont">
+                <nav className="sideBarBttn">
+                  <button className="profile">Profile</button>
+                  <button className="ediAccount">Edit Account</button>
+                  <button className="createHistory">Order History</button>
+                  <button className="trackMyOrder">Track My Order</button>
+                  <button className="security">Security</button>
+                </nav>
+              </aside>
+
+              <div className="orderHIstForm">
+                {orders.map((order) => (
+                  <div
+                    key={order._id}
+                    className="orderHistCard"
+                    style={{
+                      border: "1px solid black",
+                      borderRadius: "10px",
+                      padding: "20px 30px",
+                      display: "flex",
+                      alignItems: "start",
+                      justifyContent: "space-between",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    <div className="orderHistCardDet">
+                      <h3 className="orderIdentity">
+                        Order no. {order._id?.slice(-6).toUpperCase()}
+                      </h3>
+                      <label className="orderLabel">
+                        Placed on {new Date(order.createdAt).toLocaleDateString("en-PH", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </label>
+                      <label className="orderQnttyLabel2">
+                        {order.items?.length || 0} Items
+                        {order.items?.[0]?.name && (
+                          <i className="orderNameLabel"> - {order.items[0].name}</i>
+                        )}
+                      </label>
+                      <label className="orderTotalPriceLabel">
+                        Total: <i className="orderPriceLabel">₱ {order.total?.toLocaleString("en-PH")}</i>
+                      </label>
+                      <div style={{ marginTop: "10px" }}>
+                        {getStatusBadge(order.status)}
+                      </div>
+                      <button
+                        className="viewDetailsBttn"
+                        style={{
+                          marginTop: "10px",
+                          padding: "5px 15px",
+                          borderRadius: "5px",
+                          fontWeight: "bold",
+                          background: "transparent",
+                          cursor: "pointer",
+                          border: "1px solid #333",
+                        }}
+                        onClick={() => window.location.href = "/track"}
+                      >
+                        View Details
+                      </button>
                     </div>
-                </div>
-                
-                <p className="textQuoteHeader">Claim Your 20% Discount Using The Code: "JKLASWER12345"</p>
-            </header>
-
-            <section>
-                <div className="orderHistCont">
-                    <div className="pageHeaderCont">
-                        <div className="headerCont">
-                            <h1 className="pageHeader">Order History</h1>
-                            <p className="pageSubHeader">View your recent orders</p>
-                        </div>
+                    <div>
+                      <button
+                        className="removeBttn"
+                        style={{
+                          padding: "5px 5px",
+                          borderRadius: "5px",
+                          fontWeight: "bold",
+                          background: "transparent",
+                          cursor: "pointer",
+                          border: "1px solid #ccc",
+                        }}
+                      >
+                        Remove
+                      </button>
                     </div>
-
-                    <div className="orderHistFormCont">
-                        <aside className="sideBarMenuCont">
-                            <nav className="sideBarBttn">
-                                <button className="profile">Profile</button>
-                                <button className="ediAccount">Edit Account</button>
-                                <button className="createHistory">Creat History</button>
-                                <button className="trackMyOrder">Track My Order</button>
-                                <button className="security">Security</button>
-                            </nav>
-                        </aside>
-
-                        <div className="orderHIstForm">
-                            <duv className="orderHistCard1">
-                                <div className="orderHistCardDet">
-                                    <h3 className="orderIdentity">Order no. 5125-12</h3>
-                                    <label className="orderLabel">Placed on November 2, 2003</label>
-                                    <label className="orderQnttyLabel2">4 Items<i className="orderNameLabel"> - Snake Plants</i></label>
-                                    <label className="orderTotalPriceLabel">Total: <i className="orderPriceLabel">$5,499.99</i></label>
-                                    <button className="viewDetailsBttn">View Details</button>
-                                </div>
-                                <div>
-                                    <button className="removeBttn">Remove</button>
-                                </div>
-                            </duv>
-
-                            <duv className="orderHistCard2">
-                                <div className="orderHistCardDet">
-                                    <h3 className="orderIdentity">Order no. 5125-12</h3>
-                                    <label className="orderLabel">Placed on November 2, 2003</label>
-                                    <label className="orderQnttyLabel2">4 Items<i className="orderNameLabel"> - Snake Plants</i></label>
-                                    <label className="orderTotalPriceLabel">Total: <i className="orderPriceLabel">$5,499.99</i></label>
-                                    <button className="viewDetailsBttn">View Details</button>
-                                </div>
-                                <div>
-                                    <button className="removeBttn">Remove</button>
-                                </div>
-                            </duv>
-
-                            <duv className="orderHistCard3">
-                                <div className="orderHistCardDet">
-                                    <h3 className="orderIdentity">Order no. 5125-12</h3>
-                                    <label className="orderLabel">Placed on November 2, 2003</label>
-                                    <label className="orderQnttyLabel2">4 Items<i className="orderNameLabel"> - Snake Plants</i></label>
-                                    <label className="orderTotalPriceLabel">Total: <i className="orderPriceLabel">$5,499.99</i></label>
-                                    <button className="viewDetailsBttn">View Details</button>
-                                </div>
-                                <div>
-                                    <button className="removeBttn">Remove</button>
-                                </div>
-                            </duv>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p>No orders found.</p>
+          )}
+        </div>
+      </section>
             <footer>
                 <div className="compyRight">
                     <p>@ 2025 Eric's Garden. All Rights Reserved.</p>

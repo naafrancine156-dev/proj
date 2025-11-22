@@ -8,16 +8,17 @@ import AccIcon from "./assets/whiteaccount.png";
 import PlantLogo from "./assets/plantlogo.png";
 
 function Cart() {
-  const { cart, removeFromCart, loading, saveCart } = useCart();
+  const { cart, removeFromCart, loading, updateQuantity, isUserLoggedIn } = useCart();
   const { user } = useUser();
   const navigate = useNavigate();
   const [selectedItems, setSelectedItems] = useState({});
 
+  // Redirect if not logged in
   useEffect(() => {
-    if (user?.id && cart.length > 0) {
-      saveCart(cart);
+    if (!loading && !isUserLoggedIn) {
+      navigate("/login");
     }
-  }, [cart, user?.id]);
+  }, [isUserLoggedIn, loading, navigate]);
 
   const handleCheckboxChange = (itemId) => {
     setSelectedItems((prev) => ({
@@ -44,6 +45,14 @@ function Cart() {
     return (
       <div style={{ padding: "40px 80px", textAlign: "center", fontSize: "1.2rem" }}>
         Loading cart...
+      </div>
+    );
+  }
+
+  if (!isUserLoggedIn) {
+    return (
+      <div style={{ padding: "40px 80px", textAlign: "center", fontSize: "1.2rem" }}>
+        Please log in to view your cart
       </div>
     );
   }
@@ -556,7 +565,11 @@ function Cart() {
                           <label className="qnttyLabel">Qty: {item.quantity}</label>
 
                           <div className="qntyAndPriceCont">
-                            <select className="prodQntty" defaultValue={item.quantity}>
+                            <select
+                              className="prodQntty"
+                              value={item.quantity}
+                              onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
+                            >
                               {[1, 2, 3, 4, 5].map((q) => (
                                 <option key={q} value={q}>
                                   Quantity {q}

@@ -1,3 +1,4 @@
+// models/Order_temp.js
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
@@ -8,23 +9,23 @@ const orderSchema = new mongoose.Schema({
   },
   items: [
     {
-      productId: String,
+      productId: mongoose.Schema.Types.ObjectId,
       name: String,
       price: Number,
-      quantity: Number
+      quantity: Number,
+      image: String
     }
   ],
   contactDetails: {
     firstName: String,
     lastName: String,
-    email: String,
-    phoneNumber: String
+    phoneNumber: String,
+    email: String
   },
   billingAddress: {
-    name: String,
-    phone: String,
-    region: String,
+    add: String,
     city: String,
+    region: String,
     postalCode: String
   },
   deliveryOption: String,
@@ -35,8 +36,21 @@ const orderSchema = new mongoose.Schema({
   total: Number,
   status: {
     type: String,
-    enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
+    enum: [
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "out_for_delivery",
+      "delivered",
+      "received",  // ← ADD THIS LINE
+      "cancelled"
+    ],
     default: "pending"
+  },
+  receivedAt: {
+    type: Date,
+    default: null
   },
   createdAt: {
     type: Date,
@@ -48,4 +62,4 @@ const orderSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = mongoose.model("Order_temp", orderSchema);

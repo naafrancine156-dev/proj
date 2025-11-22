@@ -184,6 +184,7 @@ router.get("/:orderId", auth, async (req, res) => {
 });
 
 // PUT - Update order status (admin only or order owner)
+// PUT - Update order status (admin only or order owner)
 router.put("/:orderId/status", auth, async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -195,8 +196,8 @@ router.put("/:orderId/status", auth, async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // Verify user owns this order (or is admin)
-    if (req.user.id !== order.userId.toString()) {
+    // ✅ ALLOW ADMIN OR ORDER OWNER
+    if (req.user.id !== order.userId.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "Unauthorized" });
     }
 
@@ -232,4 +233,82 @@ router.put("/:orderId/status", auth, async (req, res) => {
   }
 });
 
+// PUT - Mark order as received (user only)
+router.put("/:orderId/mark-received", auth, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    console.log("🔍 DEBUG: Mark received request");
+    console.log("   orderId:", orderId);
+    console.log("   userId:", req.user.id);
+    console.log("   userRole:", req.user.role);
+
+    // Validate orderId format
+    if (!orderId || orderId === "undefined") {
+      return res.status(400).json({ message: "Invalid order ID" });
+    }
+
+    // Find the order
+    const order = await Order.findById(orderId);
+    console.log("   Order found:", !!order);
+
+    if (!order) {
+      console.error("❌ Order not found:", orderId);
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    console.log("   Order userId:", order.userId);
+    console.log("   Order status:", order.status);
+    console.log("   User ID type:", typeof req.user.id);
+    console.log("   Order userId type:", typeof order.userId);
+
+    // Verify user owns this order (comparing as strings)
+    const orderUserId = order.userId.toString();
+    const currentUserId = req.user.id.toString();
+    
+    console.log("   Comparing:", currentUserId, "===", orderUserId);
+
+    if (currentUserId !== orderUserId) {
+      console.error("❌ Unauthorized - User mismatch");
+      return res.status(403).json({ 
+        message: "Unauthorized - This is not your order",
+        userIdMismatch: {
+          currentUser: currentUserId,
+          orderUser: orderUserId
+        }
+      });
+    }
+
+    // Check if order is in delivered status
+    if (order.status !== "delivered") {
+      console.error("❌ Invalid status - Current status:", order.status);
+      return res.status(400).json({ 
+        message: `Cannot mark as received. Current status: ${order.status}. Order must be 'delivered' first.`
+      });
+    }
+
+    // Update status to received
+    order.status = "received";
+    order.receivedAt = new Date();
+    order.updatedAt = new Date();
+    
+    const updatedOrder = await order.save();
+    console.log("✅ Order marked as received:", orderId);
+    console.log("   Received at:", updatedOrder.receivedAt);
+    console.log("   New status:", updatedOrder.status);
+
+    res.json({
+      message: "Order marked as received successfully",
+      order: updatedOrder
+    });
+  } catch (error) {
+    console.error("❌ Error marking order as received:", error.message);
+    console.error("   Error stack:", error.stack);
+    res.status(500).json({
+      message: "Error marking order as received",
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+    });
+  }
+});
 module.exports = router;

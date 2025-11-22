@@ -20,6 +20,7 @@ import CheckoutSuccess from "./components/CheckoutSuccess";
 import MyProfile from "./components/MyProfile,";
 import EditAccount from "./components/EditAccount";
 import Customers from "./components/customers";
+import OrderHistory from "./components/OrderHistory";
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
         <Route path="/editacc" element={<EditAccount />} />
         <Route path="/orders" element={<Order />} />
         <Route path="/track" element={<Track />} />
+        <Route path="/history" element={<OrderHistory />} />
         
         {/* ===== CONTACT ROUTES (Public) ===== */}
         <Route path="/contactus" element={<ContactUs />} />

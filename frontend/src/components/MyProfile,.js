@@ -7,105 +7,101 @@ import { useNavigate } from "react-router-dom";
 import SearchSidebar from "./SearchSidebar";
 import LogoutModal from "./LogoutModal";
 
-
-export default function MyProfile(){
+export default function MyProfile() {
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [cartCount, setCartCount] = useState(0);
     const [error, setError] = useState(null);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
-    const [searchOpen, setSearchOpen] = useState(false); // 🔍 New state for search
+    const [searchOpen, setSearchOpen] = useState(false);
 
     useEffect(() => {
-        // Fetch user data from your backend
-        const fetchUserData = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                
-                if (!token) {
-                    throw new Error('No token found. Please login again.');
-                }
+    const fetchUserData = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("No token found. Please login again.");
 
-                const response = await fetch('http://localhost:5000/api/auth/me', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+            const response = await fetch("http://localhost:5000/api/auth/me", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user data');
-                }
+            if (!response.ok) throw new Error("Failed to fetch user data");
 
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Map the backend response to match your UI structure
-                    const hasAddress = result.region || result.city || result.postalCode || result.add;
-                    
-                    setUserData({
-                        firstName: result.firstName,
-                        lastName: result.lastName,
-                        email: result.email,
-                        phoneNumber: result.phone || null,
-                        role: result.role,
-                        hasAddress: hasAddress,
-                        address: hasAddress ? {
-                            region: result.region || null,
-                            city: result.city || null,
-                            postalCode: result.postalCode || null,
-                            add: result.add || null,
-                            country: result.country || null
-                        } : null
-                    });
-                } else {
-                    throw new Error('Invalid response from server');
-                }
-            } catch (err) {
-                setError(err.message);
-                // Redirect to login if no token or invalid token
-                if (err.message.includes('token')) {
-                    setTimeout(() => {
-                        window.location.href = '/login';
-                    }, 2000);
-                }
-            } finally {
-                setLoading(false);
+            const result = await response.json();
+            console.log("🔍 Profile fetch result:", result);
+
+            // ✅ Backend returns user object directly, not wrapped in success
+            // No need to check result.success
+            
+            const hasAddress = result.region || result.city || result.postalCode || result.add;
+
+            setUserData({
+                firstName: result.firstName,
+                lastName: result.lastName,
+                email: result.email,
+                phoneNumber: result.phone || null,
+                role: result.role,
+                hasAddress: hasAddress,
+                address: hasAddress
+                    ? {
+                          region: result.region || null,
+                          city: result.city || null,
+                          postalCode: result.postalCode || null,
+                          add: result.add || null,
+                          country: result.country || null,
+                      }
+                    : null,
+            });
+        } catch (err) {
+            console.error("❌ Profile fetch error:", err);
+            setError(err.message);
+            if (err.message.includes("token")) {
+                setTimeout(() => {
+                    window.location.href = "/login";
+                }, 2000);
             }
-        };
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchUserData();
-    }, []);
+    fetchUserData();
+}, []);
 
     const handleLogoutConfirm = () => {
-    localStorage.removeItem("token"); // ❗ delete token
-    setShowLogoutModal(false);
+        localStorage.removeItem("token");
+        setShowLogoutModal(false);
 
-    // Redirect based on role (optional)
-    if (userData.role === "admin") {
-        navigate("/admin/login");
-    } else {
-        navigate("/login");
-    }
-};
+        if (userData?.role === "admin") {
+            navigate("/admin/login");
+        } else {
+            navigate("/login");
+        }
+    };
 
+    if (loading) return <p style={{ padding: 40 }}>Loading...</p>;
+    if (error) return <p style={{ padding: 40, color: "red" }}>{error}</p>;
+    if (!userData) return <p style={{ padding: 40 }}>No user data found.</p>;
 
-    return(
+    return (
         <>
             <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-        <style>{`
+            <style>{`
             
                 :root{
-                    --primarybgcolor: hsl(164, 31%, 17%); /* minty green something */
-                    --secondarybgcolor: hsl(47, 47%, 93%); /* beige */
-                    --optionalbgcolor: hsl(0, 0%, 100%); /* white lang */
-                    --primarytxtcolor: hsl(0, 0%, 100%); /* white lang */
-                    --secondarytxtcolor: hsl(0, 1%, 25%); /* gray lang */
-                    --primarybttncolor: hsl(164, 31%, 17%); /* minty green something */
-                    --secondarybttncolor: hsl(0, 0%, 6%); /* black lang */
+                    --primarybgcolor: hsl(164, 31%, 17%);
+                    --secondarybgcolor: hsl(47, 47%, 93%);
+                    --optionalbgcolor: hsl(0, 0%, 100%);
+                    --primarytxtcolor: hsl(0, 0%, 100%);
+                    --secondarytxtcolor: hsl(0, 1%, 25%);
+                    --primarybttncolor: hsl(164, 31%, 17%);
+                    --secondarybttncolor: hsl(0, 0%, 6%);
                 }
 
                 *{
@@ -113,6 +109,11 @@ export default function MyProfile(){
                     margin: 0;
                     padding: 0;
                     font-family: 'Times New Roman', Times, serif;
+                }
+
+                html, body{
+                    margin: 0;
+                    padding: 0;
                 }
 
                 body{
@@ -123,9 +124,9 @@ export default function MyProfile(){
                     flex-direction: column;
                     opacity: 0;
                     animation: fadeAnimation 1.5s ease-in 1 forwards;
+                    margin: 0;
                 }
 
-                /* eat bulaga animation */
                 @keyframes fadeAnimation{
                     0%{
                         opacity: 0;
@@ -254,7 +255,6 @@ export default function MyProfile(){
                     animation: scrolling 20s linear infinite;
                 }
 
-                /* wala lang trip ko lang tong animation na marquee */
                 @keyframes scrolling {
                     0% { transform: translateX(100%); }
                     100% { transform: translateX(-100%); }
@@ -495,6 +495,7 @@ export default function MyProfile(){
                     font-weight: bold;
                     text-align: center;
                     padding: 15px 0;
+                    margin: 0;
                 }
 
                 @media (max-width: 1024px) {
@@ -615,6 +616,7 @@ export default function MyProfile(){
                 }
             
             `}</style>
+
             <header>
                 <div className="mPheaderCont">
                     <div className="mPnavHeaderCont">
@@ -623,37 +625,29 @@ export default function MyProfile(){
                             <p className="mPnavLogoText">Eric's Garden</p>
                         </div>
                 
-                        <div className="navHeaderBttnCont">
+                        <div className="mPnavHeaderBttnCont">
                             <button className="bttn1" onClick={() => navigate("/homepage")}>Home</button>
                             <button className="bttn2" onClick={() => navigate("/shop")}>Shop</button>
                             <button className="bttn3" onClick={() => navigate("/track")}>Track Order</button>
                             <button className="bttn4" onClick={() => navigate("/contactus")}>Contact Us</button>
-                            </div>
+                        </div>
 
-                            <div className="navHeaderLogoBttonCont">
-                            {/* 🔍 Search Button - Opens Sidebar */}
-                            <button
-                                className="iconBttn1"
-                                onClick={() => setSearchOpen(true)}
-                            >
-                                <i className="navSearch"></i>
+                        <div className="mPnavHeaderLogoBttonCont">
+                            <button className="iconBttn1" onClick={() => setSearchOpen(true)}>
+                                <i className="mPnavSearch"></i>
                             </button>
 
-                            {/* Cart Icon with Badge */}
                             <div className="navCartWrapper">
                                 <button className="iconBttn2" onClick={() => navigate("/cart")}>
-                                <i className="navCard"></i>
+                                    <i className="mPnavCart"></i>
                                 </button>
                                 {cartCount > 0 && <span className="cartBadge">{cartCount}</span>}
                             </div>
 
-                            <button
-                                className="iconBttn3"
-                                onClick={() => navigate("/myprofile")}
-                            >
-                                <i className="navAcc"></i>
+                            <button className="iconBttn3" onClick={() => navigate("/myprofile")}>
+                                <i className="mPnavAcc"></i>
                             </button>
-                         </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -682,7 +676,7 @@ export default function MyProfile(){
                             <nav className="mPsideBarBttn">
                                 <button className="mPprofile">Profile</button>
                                 <button className="mPediAccount" onClick={() => navigate("/editacc")}>Edit Account</button>
-                                <button className="mPcreateHistory">Create History</button>
+                                <button className="mPcreateHistory" onClick={() => navigate("/history")}>Create History</button>
                                 <button className="mPtrackMyOrder" onClick={() => navigate("/track")}>Track My Order</button>
                                 <button 
                                     onClick={() => setShowLogoutModal(true)}
@@ -692,9 +686,7 @@ export default function MyProfile(){
                                         color: "hsl(0, 1%, 25%)",
                                         cursor: "pointer",
                                         padding: "10px 40px 10px 10px",
-                                        textAlign: "left",
-                                        transition: "all 0.2s",
-                                        marginBottom: "5px"
+                                        textAlign: "left"
                                     }}
                                 >
                                     🚪 Logout
@@ -711,7 +703,7 @@ export default function MyProfile(){
                                         <label className="profileLabel">{userData.role}</label>
                                     </div>
                                 </div>
-                                
+
                                 <div className="mPsettingsCont">
                                     <button className="mPsettings" onClick={() => navigate("/editacc")}>Settings</button>
                                 </div>
@@ -754,7 +746,7 @@ export default function MyProfile(){
                             {userData.hasAddress && userData.address && (
                                 <div className="addressCont">
                                     <h3 className="addressHeader">Address</h3>
-                                    
+
                                     {userData.address.add && (
                                         <div style={{ marginBottom: "15px" }}>
                                             <label className="address">Street Address</label>
@@ -801,7 +793,6 @@ export default function MyProfile(){
                 </div>
             </footer>
 
-            {/* Logout Modal */}
             <LogoutModal
                 isOpen={showLogoutModal}
                 onClose={() => setShowLogoutModal(false)}

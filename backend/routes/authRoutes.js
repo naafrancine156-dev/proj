@@ -13,6 +13,7 @@ if (!JWT_SECRET) {
   console.error("❌ JWT_SECRET not loaded in authRoutes!");
 }
 // ===== SIGNUP ROUTE =====
+// ===== SIGNUP ROUTE =====
 router.post("/signup", async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
@@ -57,10 +58,12 @@ router.post("/signup", async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    // ✅ RETURN USER DATA WITH TOKEN
     res.status(201).json({
       success: true,
       token,
       user: {
+        _id: newUser._id,
         id: newUser._id,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
@@ -105,6 +108,7 @@ router.post("/login", async (req, res) => {
         success: true,
         token,
         user: {
+          _id: "admin",
           id: "admin",
           email: normalizedEmail,
           firstName: "Admin",
@@ -145,10 +149,12 @@ router.post("/login", async (req, res) => {
 
     console.log("✅ Login successful for:", user.email);
 
+    // ✅ RETURN USER DATA WITH TOKEN
     res.json({
       success: true,
       token,
       user: {
+        _id: user._id,
         id: user._id,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -174,16 +180,11 @@ router.get("/me", auth, async (req, res) => {
     if (req.user.id === "admin") {
       console.log("✅ Admin user");
       return res.json({
-        success: true,
+        _id: "admin",
         firstName: "Admin",
         lastName: "User",
         email: req.user.email || "admin@example.com",
-        role: "admin",
-        phone: "",
-        region: "",
-        city: "",
-        postalCode: "",
-        add: ""
+        role: "admin"
       });
     }
 
@@ -192,7 +193,6 @@ router.get("/me", auth, async (req, res) => {
     if (!user) {
       console.log("❌ User not found in database");
       return res.status(404).json({ 
-        success: false,
         message: "User not found" 
       });
     }
@@ -204,14 +204,11 @@ router.get("/me", auth, async (req, res) => {
     });
 
     console.log("✅ User found:", user.email);
-    if (billing) {
-      console.log("📍 Billing address found");
-    } else {
-      console.log("⚠️ No billing address found");
-    }
+    console.log("✅ User ID (_id):", user._id);
 
+    // ✅ Return user object directly - _id comes automatically from MongoDB
     res.json({
-      success: true,
+      _id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
@@ -225,7 +222,6 @@ router.get("/me", auth, async (req, res) => {
   } catch (err) {
     console.error("❌ Error in GET /me:", err);
     res.status(500).json({ 
-      success: false,
       message: "Server error" 
     });
   }

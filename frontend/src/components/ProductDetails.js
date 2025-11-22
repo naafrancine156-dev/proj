@@ -47,7 +47,7 @@ function ProductDetails() {
       name: product.name,
       price: product.price,
       image: product.imageURLs[0],
-      quantity: quantity,
+      quantity,
       potStyle: selectedPot,
     });
     setQuantity(1);
@@ -60,17 +60,35 @@ function ProductDetails() {
     }));
   };
 
-  if (loading) return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", fontSize: "1.2rem" }}>
-      Loading product...
-    </div>
-  );
-  
-  if (!product) return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", fontSize: "1.2rem" }}>
-      Product not found.
-    </div>
-  );
+  if (loading)
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          fontSize: "1.2rem",
+        }}
+      >
+        Loading product...
+      </div>
+    );
+
+  if (!product)
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "100vh",
+          fontSize: "1.2rem",
+        }}
+      >
+        Product not found.
+      </div>
+    );
 
   return (
     <>
@@ -622,7 +640,9 @@ function ProductDetails() {
         <div className="pdheaderCont">
           <div className="pdnavHeaderCont">
             <div className="pdlogoCont">
-              <p className="pdnavLogo"><img src={PlantLogo} alt="Logo" /></p>
+              <p className="pdnavLogo">
+                <img src={PlantLogo} alt="Logo" />
+              </p>
               <p className="pdnavLogoText">Plantasy Garden</p>
             </div>
 
@@ -648,7 +668,9 @@ function ProductDetails() {
           </div>
         </div>
 
-        <p className="textQuoteHeader">Claim Your 20% Discount Using The Code: "JKLASWER12345"</p>
+        <p className="textQuoteHeader">
+          Claim Your 20% Discount Using The Code: "JKLASWER12345"
+        </p>
       </header>
 
       <section>
@@ -668,7 +690,7 @@ function ProductDetails() {
                 className="pdproductDetailsImg"
               />
             </div>
-            
+
             {product.imageURLs && product.imageURLs.length > 1 && (
               <div className="pdthumbnailContainer">
                 {product.imageURLs.map((img, index) => (
@@ -691,88 +713,75 @@ function ProductDetails() {
               ₱ {product.price.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
             </p>
 
+            <p className="pdproductStock">
+              {product.quantity > 0 ? `${product.quantity} item(s) available` : "Out of Stock"}
+            </p>
+
             <p className="pdproductDetailsDesc">{product.description}</p>
 
+            {/* Pot Style Selection */}
             <div className="pdpotStyleSection">
               <div className="pdpotStyleLabel">Pot Style: {selectedPot}</div>
               <div className="pdpotOptionsContainer">
-                {product.potSizes && product.potSizes.length > 0
-                  ? product.potSizes.map((pot) => (
-                      <button
-                        key={pot}
-                        className={`pdpotOption ${selectedPot === pot ? "active" : ""}`}
-                        onClick={() => setSelectedPot(pot)}
-                      >
-                        {pot}
-                      </button>
-                    ))
-                  : ["Nursery", "Sahara", "Nook", "Sienna", "Lily"].map((pot) => (
-                      <button
-                        key={pot}
-                        className={`pdpotOption ${selectedPot === pot ? "active" : ""}`}
-                        onClick={() => setSelectedPot(pot)}
-                      >
-                        {pot}
-                      </button>
-                    ))}
+                {(product.potSizes && product.potSizes.length > 0
+                  ? product.potSizes
+                  : ["Nursery", "Sahara", "Nook", "Sienna", "Lily"]
+                ).map((pot) => (
+                  <button
+                    key={pot}
+                    className={`pdpotOption ${selectedPot === pot ? "active" : ""}`}
+                    onClick={() => setSelectedPot(pot)}
+                  >
+                    {pot}
+                  </button>
+                ))}
               </div>
             </div>
 
+            {/* Quantity and Add to Cart */}
             <div className="pdquantitySection">
               <div className="pdquantityControl">
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>−</button>
                 <input type="number" value={quantity} readOnly />
-                <button onClick={() => setQuantity(quantity + 1)}>+</button>
+                <button onClick={() => setQuantity(Math.min(quantity + 1, product.quantity))}>+</button>
               </div>
-              <button className="pdaddToCartBtn" onClick={addToCartHandler}>
-                Add to cart
+              <button
+                className="pdaddToCartBtn"
+                onClick={addToCartHandler}
+                disabled={product.quantity === 0}
+                style={{
+                  cursor: product.quantity === 0 ? "not-allowed" : "pointer",
+                  opacity: product.quantity === 0 ? 0.6 : 1,
+                }}
+              >
+                {product.quantity === 0 ? "Out of Stock" : "Add to cart"}
               </button>
             </div>
 
-            <div className="pdexpandableSection">
-              <div
-                className="pdexpandableHeader"
-                onClick={() => toggleSection("care")}
-              >
-                <span>Plant Care and Details</span>
-                <span className={`pdexpandableIcon ${expandedSections.care ? "open" : ""}`}>+</span>
-              </div>
-              <div className={`pdexpandableContent ${expandedSections.care ? "open" : ""}`}>
-                <div className="pdexpandableText">
-                  {product.plantCare || "Care instructions not available."}
+            {/* Expandable Sections */}
+            {["care", "shipping", "disclaimer"].map((section) => (
+              <div key={section} className="pdexpandableSection">
+                <div className="pdexpandableHeader" onClick={() => toggleSection(section)}>
+                  <span>
+                    {section === "care"
+                      ? "Plant Care and Details"
+                      : section === "shipping"
+                      ? "Shipping Policy"
+                      : "Disclaimer"}
+                  </span>
+                  <span className={`pdexpandableIcon ${expandedSections[section] ? "open" : ""}`}>+</span>
+                </div>
+                <div className={`pdexpandableContent ${expandedSections[section] ? "open" : ""}`}>
+                  <div className="pdexpandableText">
+                    {section === "care"
+                      ? product.plantCare || "Care instructions not available."
+                      : section === "shipping"
+                      ? "We offer free shipping on orders over ₱1,000. Standard delivery takes 3-5 business days within Metro Manila, and 5-7 business days for provincial areas. All plants are carefully packed to ensure they arrive in perfect condition. Please note that delivery times may vary during peak seasons."
+                      : "Plant sizes and colors may vary slightly from images due to natural variations and photography lighting. We strive to match descriptions accurately, but slight differences in appearance are normal. Plants are living organisms and require proper care as outlined. Plantasy Garden is not responsible for plant health after purchase unless otherwise stated in our warranty policy."}
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="pdexpandableSection">
-              <div
-                className="pdexpandableHeader"
-                onClick={() => toggleSection("shipping")}
-              >
-                <span>Shipping Policy</span>
-                <span className={`pdexpandableIcon ${expandedSections.shipping ? "open" : ""}`}>+</span>
-              </div>
-              <div className={`pdexpandableContent ${expandedSections.shipping ? "open" : ""}`}>
-                <div className="pdexpandableText">
-                  We offer free shipping on orders over ₱1,000. Standard delivery takes 3-5 business days within Metro Manila, and 5-7 business days for provincial areas. All plants are carefully packed to ensure they arrive in perfect condition. Please note that delivery times may vary during peak seasons.
-                </div>
-              </div>
-            </div>
-
-            <div className="pdexpandableSection">
-              <div
-                className="pdexpandableHeader"
-                onClick={() => toggleSection("disclaimer")}
-              >
-                <span>Disclaimer</span>
-                <span className={`pdexpandableIcon ${expandedSections.disclaimer ? "open" : ""}`}>+</span>
-              </div>
-              <div className={`pdexpandableContent ${expandedSections.disclaimer ? "open" : ""}`}>
-                <div className="pdexpandableText">
-                  Plant sizes and colors may vary slightly from images due to natural variations and photography lighting. We strive to match descriptions accurately, but slight differences in appearance are normal. Plants are living organisms and require proper care as outlined. Plantasy Garden is not responsible for plant health after purchase unless otherwise stated in our warranty policy.
-                </div>
-              </div>
-            </div>
+            ))}
 
             <button className="pdbackBtn" onClick={() => navigate(-1)}>
               Go Back
