@@ -6,23 +6,86 @@ import PlantLogo from "./assets/plantlogo.png";
 import HeaderBG from "./assets/loginFinalBg.jpg";
 import PlantBG from "./assets/bgplants1.jpg";
 import IG from "./assets/gmailLogo.png";
-import Email from "./assets/gmailLogo.png";
-import Twt from "./assets/gmailLogo.png";
+// Import your team member images here
+import EricPhoto from "./assets/eric.jpg"; // Add Eric's photo
+import MariaPhoto from "./assets/pam.jpg"; // Add Maria's photo
+import AlexPhoto from "./assets/ian.jpg"; // Add Alex's photo
+import JordanPhoto from "./assets/pat.jpg"; // Add Jordan's photo // Changed to facebook logo
+
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import SearchSidebar from "./SearchSidebar";
 
 function AboutUs(){
+    const navigate = useNavigate();
+
+    const [cartCount, setCartCount] = useState(0);
+    const [searchOpen, setSearchOpen] = useState(false);
+
+    const [email, setEmail] = useState("");
+
+    // --- SUBSCRIBE FUNCTION ---
+    const handleSubscribe = () => {
+        if (!email || !email.includes('@')) {
+            alert("Please enter a valid email address.");
+            return;
+        }
+        alert(`Subscribing with email: ${email}`);
+        setEmail('');
+    };
+
+    const colors = {
+      primaryGreen: 'hsl(164, 31%, 17%)',
+      secondaryBg: 'hsl(47, 47%, 93%)',
+      white: '#ffffff',
+      darkText: '#222222',
+      lightText: '#666666',
+      accentRed: 'red',
+  };
+
+  const styles = {
+    subscribeInputCont: {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          marginTop: '15px',
+      },
+      subscribeInput: {
+          padding: '10px',
+          borderRadius: '5px',
+          border: 'none',
+          fontSize: '1rem',
+          width: '100%',
+          boxSizing: 'border-box',
+          fontFamily: 'inherit',
+      },
+      subscribeButton: {
+          backgroundColor: colors.white,
+          color: colors.primaryGreen,
+          border: 'none',
+          padding: '10px',
+          borderRadius: '5px',
+          fontSize: '1rem',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          transition: 'opacity 0.2s',
+          fontFamily: 'inherit',
+      },
+  }
+
     return(
         <>
 
             <style>{`
             
                 :root{
-                    --primarybgcolor: hsl(164, 31%, 17%); /* minty green something */
-                    --secondarybgcolor: hsl(47, 47%, 93%); /* beige */
-                    --optionalbgcolor: hsl(0, 0%, 100%); /* white lang */
-                    --primarytxtcolor: hsl(0, 0%, 100%); /* white lang */
-                    --secondarytxtcolor: hsl(0, 1%, 25%); /* gray lang */
-                    --primarybttncolor: hsl(164, 31%, 17%); /* minty green something */
-                    --secondarybttncolor: hsl(0, 0%, 6%); /* black lang */
+                    --primarybgcolor: hsl(164, 31%, 17%);
+                    --secondarybgcolor: hsl(47, 47%, 93%);
+                    --optionalbgcolor: hsl(0, 0%, 100%);
+                    --primarytxtcolor: hsl(0, 0%, 100%);
+                    --secondarytxtcolor: hsl(0, 1%, 25%);
+                    --primarybttncolor: hsl(164, 31%, 17%);
+                    --secondarybttncolor: hsl(0, 0%, 6%);
                 }
 
                 *{
@@ -42,7 +105,6 @@ function AboutUs(){
                     animation: fadeAnimation 1.5s ease-in 1 forwards;
                 }
 
-                /* eat bulaga animation */
                 @keyframes fadeAnimation{
                     0%{
                         opacity: 0;
@@ -179,7 +241,6 @@ function AboutUs(){
                     background-size: cover;
                     text-align: center;
                     padding: 70px 15px;
-                    text-align: center;
                     margin-bottom: 30px;
                     padding-bottom: 15px;
                     border-bottom: 1px solid var(--primarybgcolor);
@@ -311,6 +372,7 @@ function AboutUs(){
                     align-items: center;
                     margin: 40px 30px;
                     gap: 10px;
+                    flex-wrap: wrap;
                 }
 
                 .teamCardCont{
@@ -318,116 +380,99 @@ function AboutUs(){
                     border: none;
                     border-radius: 10px;
                     padding: 30px 20px;
+                    transition: all 0.3s ease;
+                }
+
+                .teamCardCont:hover{
+                    transform: translateY(-8px);
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
                 }
 
                 .cardCont1, .cardCont2, .cardCont3, .cardCont4{
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 10px;
-                    padding-top: 20px;
-                    border-top: 1px solid black;
+                    gap: 15px;
+                    padding: 0;
+                    border: none;
                     border-radius: 10px;
                 }
 
                 .memName{
-                    padding: 10px;
+                    padding: 0;
+                    font-weight: bold;
+                    color: var(--secondarytxtcolor);
+                    font-size: 1.1rem;
+                    text-align: center;
                 }
 
                 .img3, .img4, .img5, .img6{
-                    width: 50px;
-                    height: 50px;
+                    width: 120px;
+                    height: 120px;
                     border-radius: 50%;
-                    border-bottom: 3px solid black;
+                    border: 3px solid var(--primarybgcolor);
                     background: rgb(255, 255, 255);
-                    display: inline-block;
+                    display: block;
+                    background-size: contain;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    margin-bottom: 20px;
                 }
 
                 .img3{
-                    background-image: url(${PlantLogo});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 50px;
-                    height: 50px;
-                    display: inline-block;
+                    background-image: url(${EricPhoto});
                 }
 
                 .img4{
-                    background-image: url(${PlantLogo});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 50px;
-                    height: 50px;
-                    display: inline-block;
+                    background-image: url(${MariaPhoto});
                 }
 
                 .img5{
-                    background-image: url(${PlantLogo});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 50px;
-                    height: 50px;
-                    display: inline-block;
+                    background-image: url(${AlexPhoto});
                 }
 
                 .img6{
-                    background-image: url(${PlantLogo});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 50px;
-                    height: 50px;
-                    display: inline-block;
+                    background-image: url(${JordanPhoto});
                 }
 
                 .cardBttn{
                     display: flex;
                     flex-direction: row;
                     align-items: center;
-                    gap: 10px;
+                    gap: 15px;
+                    margin-top: 10px;
                 }
 
                 .cardBttn button{
-                    width: 40px;
-                    height: 40px;
+                    width: 50px;
+                    height: 50px;
                     border: none;
                     border-radius: 50%;
-                    background: transparent;
+                    background: white;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    background-size: 60%;
+                    background-position: center;
+                    background-repeat: no-repeat;
+                    border: 2px solid var(--primarybgcolor);
                 }
 
                 .cardBttn button:hover{
-                    text-shadow: 0 0 10px black;
-                    cursor: pointer;
+                    transform: scale(1.15);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                    background-color: var(--primarybgcolor);
                 }
 
                 .cardBttn .Instagram{
-                    background-image: url(${IG});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 40px;
-                    height: 40px;
+                    background-image: url('https://cdn-icons-png.flaticon.com/512/174/174855.png');
                 }
 
                 .cardBttn .Email{
-                    background-image: url(${Email});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 40px;
-                    height: 40px;
+                    background-image: url('https://cdn-icons-png.flaticon.com/512/281/281769.png');
                 }
 
                 .cardBttn .Twitter{
-                    background-image: url(${Twt});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 40px;
-                    height: 40px;
+                    background-image: url('https://cdn-icons-png.flaticon.com/512/174/174848.png');
                 }
 
                 footer{
@@ -496,7 +541,6 @@ function AboutUs(){
                     padding-top: 10px; 
                 }
 
-                /* lalaki tapos biglang liit siya T0T */
                 @keyframes scaleAnimation{
                     0%{
                         transform: scale(1.0);
@@ -596,30 +640,36 @@ function AboutUs(){
             
             `}</style>
 
+            <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
             <header>
                 <div className="headerCont">
                     <div className="navHeaderCont">
                         <div className="logoCont">
                             <p className="navLogo"><img src={PlantLogo} alt="Eric's Garden Logo"></img></p>
-                            <p className="navLogoText">Eric's Garden</p>
+                            <p className="navLogoText">Plantasy Garden</p>
                         </div>
                                 
                         <div className="navHeaderBttnCont">
-                            <button className="bttn1">Home</button>
-                            <button className="bttn2">Shop</button>
-                            <button className="bttn3">Plant Care</button>
-                            <button className="bttn4">Track Order</button>
-                            <button className="bttn5">Contact Us</button>
+                        <button className="bttn1" onClick={() => navigate("/homepage")}>Home</button>
+                        <button className="bttn2" onClick={() => navigate("/shop")}>Shop</button>
+                        <button className="bttn3" onClick={() => navigate("/track")}>Track Order</button>
+                        <button className="bttn4" onClick={() => navigate("/contactus")}>Contact Us</button>
                         </div>
                                 
                         <div className="navHeaderLogoBttonCont">
-                            <button className="iconBttn1" aria-label="Search">
+                            <button className="iconBttn1" onClick={() => setSearchOpen(true)}>
                                 <i className="navSearch"></i>
                             </button>
-                            <button className="iconBttn2" aria-label="Cart">
+
+                            <div className="navCartWrapper">
+                                <button className="iconBttn2" onClick={() => navigate("/cart")}>
                                 <i className="navCard"></i>
-                            </button>
-                            <button className="iconBttn3" aria-label="Account">
+                                </button>
+                                {cartCount > 0 && <span className="cartBadge">{cartCount}</span>}
+                            </div>
+
+                            <button className="iconBttn3" onClick={() => navigate("/myprofile")}>
                                 <i className="navAcc"></i>
                             </button>
                         </div>
@@ -628,7 +678,7 @@ function AboutUs(){
                     <p className="textQuoteHeader">Claim Your 20% Discount Using The Code: "JKLASWER12345"</p>
 
                     <div className="pageHeaderCont">
-                        <h1 className="pageHeader">Bring Nature into Your Sanctuary</h1>
+                        <h1 className="pageHeader">About Us</h1>
                         <p className="pageSubHeader">Curated Collection of Rare and Beautiful Plants for Mindful Living.</p>
                     </div>
                 </div>
@@ -636,7 +686,7 @@ function AboutUs(){
 
             <main className="mainSection">
                 <section className="plantasyHistSec">
-                    <h2 className="histHeader">🧭 Our Story: Eric's Garden</h2>
+                    <h2 className="histHeader">🧭 Our Story: Plantasy</h2>
 
                     <div className="storyCont">
                         <i className="img1" role="img" aria-label="A lush indoor plant display"></i>
@@ -649,7 +699,7 @@ function AboutUs(){
                                 Welcome to **The Urban Oasis**, where lush greenery meets modern convenience. We **hand-select and deliver healthy, vibrant plants** right to your doorstep, making it easy to bring nature's beauty indoors. Start exploring our curated collection and find the perfect botanical companion for your home or office today!
                             </p>
                             <p className="storyDetail">
-                                Founded on a passion for connecting people with nature, Eric's Garden believes every space deserves a touch of green. We are committed to sustainable practices and providing the highest quality plants to help you grow your personal indoor jungle.
+                                Founded on a passion for connecting people with nature, Plantasy believes every space deserves a touch of green. We are committed to sustainable practices and providing the highest quality plants to help you grow your personal indoor jungle.
                             </p>
                         </div>
                     </div>
@@ -676,7 +726,7 @@ function AboutUs(){
                 </section>
 
                 <section className="plantasyTeamSec">
-                    <h2 className="teamHeader">Meet Eric's Garden Team</h2>
+                    <h2 className="teamHeader">Meet Plantasy Team</h2>
 
                     <div className="cont">
                         <div className="teamCardCont">
@@ -695,7 +745,7 @@ function AboutUs(){
                         <div className="teamCardCont">
                             <div className="cardCont2">
                                 <i className="img4" role="img" aria-label="Team member photo"></i>
-                                <label className="memName">Eric, Founder</label>
+                                <label className="memName">Francine, Founder</label>
 
                                 <div className="cardBttn">
                                     <button className="Instagram"></button>
@@ -708,7 +758,7 @@ function AboutUs(){
                         <div className="teamCardCont">
                             <div className="cardCont3">
                                 <i className="img5" role="img" aria-label="Team member photo"></i>
-                                <label className="memName">Eric, Founder</label>
+                                <label className="memName">Patrick, Founder</label>
 
                                 <div className="cardBttn">
                                     <button className="Instagram"></button>
@@ -721,7 +771,7 @@ function AboutUs(){
                         <div className="teamCardCont">
                             <div className="cardCont4">
                                 <i className="img6" role="img" aria-label="Team member photo"></i>
-                                <label className="memName">Eric, Founder</label>
+                                <label className="memName">Ian, Founder</label>
 
                                 <div className="cardBttn">
                                     <button className="Instagram"></button>
@@ -738,7 +788,7 @@ function AboutUs(){
                 <div className="footerCont">
                     <div className="otherInfoCont">
                         <div className="infoCont1">
-                            <h3 className="footerHeader">Eric's Garden</h3>
+                            <h3 className="footerHeader">Plantasy</h3>
                             <p className="infoDetails">Bringing the Beauty of Nature into Homes and Hearts. Curated Plants and Mindful Living.</p>
                         </div>
 
@@ -748,27 +798,41 @@ function AboutUs(){
                                 <li>Indoor Plants</li>
                                 <li>Outdoor Plants</li>
                                 <li>Succulents Plants</li>
-                                <li>Rare Finds</li>
                             </ul>
                         </div>
 
                         <div className="infoCont3">
                             <h3 className="footerHeader">Support</h3>
                             <ul>
-                                <li><a href="platsCare">Plant Care</a></li>
-                                <li><a href="shippingInfo">Shipping Info</a></li>
+                                <li><a href="">About Us</a></li>
+                                <li><a href="ShippingInfo">Shipping Info</a></li>
                                 <li><a href="returns">Returns</a></li>
-                                <li><a href="faqs">FAQS</a></li>
+                                <li><a href="FAQS">FAQS</a></li>
                             </ul>
                         </div>
 
                         <div className="infoCont4">
                             <h3 className="footerHeader">Stay Connected</h3>
                             <p className="infoDetails">Subscribe for plant care tips and exclusive offers</p>
+                            <div style={styles.subscribeInputCont}>
+                                <input
+                                    type="email"
+                                    placeholder="Enter your email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    style={styles.subscribeInput}
+                                />
+                                <button
+                                    onClick={handleSubscribe}
+                                    style={styles.subscribeButton}
+                                >
+                                    Subscribe
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div className="compyRight">
-                        <p>&copy; 2025 Eric's Garden. All Rights Reserved.</p>
+                        <p>&copy; 2025 Plantasy. All Rights Reserved.</p>
                     </div>
                 </div>
             </footer>

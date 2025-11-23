@@ -4,9 +4,16 @@ import CartIcon from "./assets/whitecart.png";
 import AccIcon from "./assets/whiteaccount.png";
 import PlantLogo from "./assets/plantlogo.png";
 import { useNavigate } from "react-router-dom";
+import SearchSidebar from "./SearchSidebar";
+import LogoutModal from "./LogoutModal";
 
 export default function EditAccount(){
     const navigate = useNavigate();
+
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
+    const [cartCount, setCartCount] = useState(0);
+    const [searchOpen, setSearchOpen] = useState(false); 
+
     const [formData, setFormData] = useState({
         firstName: '',
         lastName: '',
@@ -71,6 +78,11 @@ export default function EditAccount(){
         fetchUserData();
     }, []);
 
+    const handleLogoutConfirm = () => {
+        setShowLogoutModal(false);
+        navigate("/");
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -94,7 +106,11 @@ export default function EditAccount(){
             }
 
             // Build update object with only changed fields
-            const updateData = {};
+            const updateData = {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                email: formData.email
+            };
             
             // Add fields that have values
             if (formData.firstName) updateData.firstName = formData.firstName;
@@ -102,7 +118,14 @@ export default function EditAccount(){
             if (formData.email) updateData.email = formData.email;
 
             // Billing address fields (can be partial)
-            const billingData = {};
+            const billingData = {
+                phone: formData.phone,
+                add: formData.add,
+                city: formData.city,
+                postalCode: formData.postalCode,
+                region: formData.region
+            };
+
             if (formData.phone) billingData.phone = formData.phone;
             if (formData.add) billingData.add = formData.add;
             if (formData.city) billingData.city = formData.city;
@@ -118,7 +141,7 @@ export default function EditAccount(){
                 },
                 body: JSON.stringify({
                     ...updateData,
-                    ...(Object.keys(billingData).length > 0 && { billingAddress: billingData })
+                    billingAddress: billingData
                 })
             });
 
@@ -142,454 +165,349 @@ export default function EditAccount(){
     };
 
     if (loading) {
-        return <div style={{padding: '50px', textAlign: 'center'}}>Loading...</div>;
+        return <div style={{padding: '50px', textAlign: 'center', fontFamily: "'Times New Roman', Times, serif"}}>Loading...</div>;
     }
 
+    // ----- Definition of commonly used styles to keep JSX cleaner -----
+    const colors = {
+        primaryBg: 'hsl(164, 31%, 17%)',
+        secondaryBg: 'hsl(47, 47%, 93%)',
+        primaryTxt: 'hsl(0, 0%, 100%)',
+        secondaryTxt: 'hsl(0, 1%, 25%)',
+        disabledBtn: 'hsla(164, 31%, 17%, 0.5)',
+        darkTxt: 'hsla(0, 0%, 10%, 1.00)',
+    };
+
+    const styles = {
+        // Imitating body and global reset styles
+        pageWrapper: {
+            background: 'hsl(0, 0%, 100%)',
+            width: '100%',
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            fontFamily: "'Times New Roman', Times, serif",
+            boxSizing: 'border-box',
+            margin: 0,
+            padding: 0,
+             // Animation removed as keyframes cannot be inlined strictly
+        },
+        navHeaderCont: {
+            backgroundColor: colors.primaryBg,
+            display: 'flex',
+            flexWrap: 'nowrap',
+            alignItems: 'center',
+            borderBottom: '1px solid #eee',
+            justifyContent: 'space-between',
+            gap: '20px',
+            width: '100%',
+            padding: '10px 15px',
+            boxSizing: 'border-box',
+            overflow: 'scroll',
+        },
+        logoCont: {
+            color: colors.primaryTxt,
+            display: 'flex',
+            alignItems: 'center',
+            marginLeft: '10px',
+        },
+        logoImg: {
+            backgroundColor: '#ffff',
+            borderRadius: '50%',
+            width: '50px',
+            height: '50px',
+            marginRight: '10px',
+        },
+        navLogoText: {
+            color: colors.primaryTxt,
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            margin: 0,
+        },
+        navHeaderBttnCont: {
+            display: 'flex',
+            flexWrap: 'nowrap',
+            justifyContent: 'center',
+            gap: '15px',
+        },
+        navButton: {
+            background: 'none',
+            color: colors.primaryTxt,
+            border: 'none',
+            fontSize: '1rem',
+            padding: '8px 12px',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+            // Hover effects removed as they cannot be inlined without JS
+        },
+        iconButtonCont: {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '20px',
+        },
+        iconButton: {
+            width: '33px',
+            height: '33px',
+            background: 'transparent',
+            borderRadius: '50%',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
+            position: 'relative', // for badge
+        },
+        iconSearch: {
+            backgroundImage: `url(${SearchIcon})`,
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            width: '28px',
+            height: '28px',
+            display: 'inline-block',
+        },
+        iconCart: {
+            backgroundImage: `url(${CartIcon})`,
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            width: '28px',
+            height: '28px',
+            display: 'inline-block',
+        },
+        iconAcc: {
+            backgroundImage: `url(${AccIcon})`,
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
+            width: '28px',
+            height: '28px',
+            display: 'inline-block',
+        },
+        cartBadge: {
+             position: 'absolute',
+             top: '-5px',
+             right: '-5px',
+             backgroundColor: 'red',
+             color: 'white',
+             borderRadius: '50%',
+             padding: '2px 6px',
+             fontSize: '10px',
+             fontWeight: 'bold'
+        },
+        // Marquee effect is complex inline. Using basic overflow hidden for now.
+        textQuoteHeader: {
+            backgroundColor: 'hwb(0 100% 0%)',
+            textAlign: 'center',
+            fontSize: '0.9rem',
+            letterSpacing: '1px',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            padding: '5px 0',
+            margin: 0,
+             // Animation removed as keyframes cannot be inlined
+        },
+        section: {
+            backgroundColor: colors.secondaryBg,
+            padding: '40px 80px',
+            flex: 1,
+            boxSizing: 'border-box',
+        },
+        pageHeaderCont: {
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '30px',
+            paddingBottom: '15px',
+            borderBottom: `1px solid ${colors.primaryBg}`,
+        },
+        pageHeaderH1: {
+            fontSize: '2.5rem',
+            margin: 0,
+        },
+        pageSubHeader: {
+            fontSize: '1rem',
+            color: 'hsl(0, 0%, 30%)',
+            margin: 0,
+        },
+        editAccFormCont: {
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            gap: '10px',
+            paddingTop: '20px',
+            width: '100%',
+            minWidth: '100px',
+        },
+        sidebarNav: {
+            background: '#ffffff',
+            color: colors.primaryTxt,
+            border: '1px solid black',
+            borderRadius: '10px',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+        },
+        sidebarButton: {
+            background: 'transparent',
+            borderBottom: '1px solid black',
+            padding: '10px 15px', // Standardized padding
+            textAlign: 'left',
+            color: colors.secondaryTxt,
+            cursor: 'pointer',
+            marginBottom: '0', // Removed manual margin
+            fontFamily: 'inherit',
+            fontSize: '1rem',
+            width: '100%', // Explicit width
+            borderRadius: '5px',
+            boxShadow: 'none', // Removes any default box-shadow
+            outline: 'none',
+        },
+        formContainer: {
+            display: 'flex',
+            flexDirection: 'column',
+            background: 'hsl(0, 0%, 100%)',
+            border: '1px solid black',
+            borderRadius: '10px',
+            padding: '25px',
+            gap: '20px',
+            //width: '30%',
+            boxSizing: 'border-box',
+            flex: '0.6',
+        },
+        formRow: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: '10px',
+        },
+        inputGroup: {
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            flex: 1,
+        },
+        label: {
+            fontWeight: 'bold',
+            color: colors.secondaryTxt,
+        },
+        input: {
+            padding: '8px',
+            fontSize: '1rem',
+            background: 'transparent',
+            border: '1px solid #ccc',
+            borderRadius: '5px',
+            width: '100%',
+            boxSizing: 'border-box',
+            fontFamily: 'inherit',
+            // Focus styles like outline/box-shadow cannot be done strictly inline easily
+        },
+        fieldHelper: {
+            fontSize: '0.85rem',
+            color: 'hsl(0, 1%, 40%)',
+            marginTop: '-5px',
+            display: 'block',
+        },
+        saveButton: {
+            border: '1px solid black',
+            background: 'transparent',
+            color: colors.darkTxt,
+            borderRadius: '5px',
+            fontSize: '1.1rem',
+            padding: '10px',
+            fontWeight: 'bold',
+            marginTop: '10px',
+            cursor: saving ? 'not-allowed' : 'pointer',
+            opacity: saving ? 0.5 : 1,
+            fontFamily: 'inherit',
+            boxShadow: 'none',
+            outline: 'none',
+        },
+        saveButtonHover: {
+            backgroundColor: colors.primaryBg,
+            color: colors.primaryTxt,
+        },
+        successMessage: {
+            padding: '10px',
+            backgroundColor: '#d4edda',
+            color: '#155724',
+            border: '1px solid #c3e6cb',
+            borderRadius: '5px',
+            marginBottom: '15px',
+        },
+        errorMessage: {
+            padding: '10px',
+            backgroundColor: '#f8d7da',
+            color: '#721c24',
+            border: '1px solid #f5c6cb',
+            borderRadius: '5px',
+            marginBottom: '15px',
+        },
+        footer: {
+            backgroundColor: colors.primaryBg,
+            color: colors.primaryTxt,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            padding: '15px 0',
+            marginTop: 'auto', // ensures footer stays at bottom if content is short
+        }
+    };
+
+
     return(
-        <>
-
-            <style>{`
+        // Wrapping the whole content to imitate body styles
+        <div style={styles.pageWrapper}>
             
-                :root{
-                    --primarybgcolor: hsl(164, 31%, 17%);
-                    --secondarybgcolor:-hsl(47, 47%, 93%);
-                    --optionalbgcolor: hsl(0, 0%, 100%);
-                    --primarytxtcolor: hsl(0, 0%, 100%);
-                    --secondarytxtcolor: hsl(0, 1%, 25%);
-                    --primarybttncolor: hsl(164, 31%, 17%);
-                    --secondarybttncolor: hsl(0, 0%, 6%);
-                }
-
-                *{
-                    box-sizing: border-box;
-                    margin: 0;
-                    padding: 0;
-                    font-family: 'Times New Roman', Times, serif;
-                }
-
-                body{
-                    background: hsl(0, 0%, 100%);
-                    width: 100%;
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                    opacity: 0;
-                    animation: fadeAnimation 1.5s ease-in 1 forwards;
-                }
-
-                @keyframes fadeAnimation{
-                    0%{
-                        opacity: 0;
-                    }100%{
-                        opacity: 1;
-                    }
-                }
-
-                .editAccNavHeaderCont{
-                    background-color: hsl(164, 31%, 17%);
-                    display: flex;
-                    flex-wrap: nowrap;
-                    align-items: center;
-                    border-bottom: 1px solid #eee;
-                    justify-content: space-between;
-                    gap: 20px;
-                    width: 100%;
-                    padding: 10px 15px;
-                }
-
-                .editAccLogoCont{
-                    color: hsl(0, 0%, 100%);
-                    display: flex;
-                    align-items: center;
-                }
-
-                .editAccLogoCont img{
-                    background-color: #ffff;
-                    border-radius: 50%;
-                    width: 50px;
-                    height: 50px;
-                    margin-right: 10px;
-                }
-
-                .editAccNavLogoText{
-                    color: hsl(0, 0%, 100%);
-                    font-size: 1.5rem;
-                    font-weight: bold;
-                }
-
-                .editAccNavHeaderBttnCont{
-                    display: flex;
-                    flex-wrap: wrap;
-                    justify-content: center;
-                    gap: 15px;
-                }
-
-                .editAccNavHeaderBttnCont button{
-                    background: none;
-                    color: hsl(0, 0%, 100%);
-                    border: none;
-                    font-size: 1rem;
-                    padding: 8px 12px;
-                }
-
-                .editAccNavHeaderBttnCont button:hover{
-                    transform: scale(1.05);
-                    transition: all 0.2s ease-in-out;
-                    border-bottom: 1px solid hsl(0, 1%, 44%);
-                    box-shadow: 0 5px 5px hsl(0, 0%, 52%);
-                    cursor: pointer;
-                }
-
-                .editAccNavHeaderLogoBttonCont{
-                    display: flex;
-                    align-items: center;
-                    gap: 20px;
-                }
-
-                .editAccNavHeaderLogoBttonCont button{
-                    width: 33px;
-                    height: 33px;
-                    background: transparent;
-                    border-radius: 50%;
-                    border: none;
-                }
-
-                .editAccNavSearch{
-                    background-image: url(${SearchIcon});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 28px;
-                    height: 28px;
-                    display: inline-block;
-                }
-
-                .editAccNavCard{
-                    background-image: url(${CartIcon});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 28px;
-                    height: 28px;
-                    display: inline-block;
-                }
-
-                .editAccNavAcc{
-                    background-image: url(${AccIcon});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 28px;
-                    height: 28px;
-                    display: inline-block;
-                }
-
-                .editAccNavHeaderLogoBttonCont i:hover{
-                    transform: scale(1.06);
-                    transition: all 0.2s ease-in;
-                    box-shadow: 0 0 20px hsl(165, 33%, 2%);
-                    cursor: pointer;
-                }
-
-                .textQuoteHeader{
-                    background-color: hwb(0 100% 0%);
-                    text-align: center;
-                    font-size: 0.9rem;
-                    letter-spacing: 1px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    animation: scrolling 20s linear infinite;
-                }
-
-                @keyframes scrolling {
-                    0% { transform: translateX(100%); }
-                    100% { transform: translateX(-100%); }
-                }
-
-                section{
-                    background-color: hsl(47, 47%, 93%);
-                    padding: 40px 80px;
-                    flex: 1;
-                }
-
-                .editAccPageHeaderCont{
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 30px;
-                    padding-bottom: 15px;
-                    border-bottom: 1px solid hsl(164, 31%, 17%);
-                }
-
-                .editAccPageHeaderCont h1{
-                    font-size: 2.5rem;
-                }
-
-                .editAccPageHeaderCont p {
-                    font-size: 1rem;
-                    color: hsl(0, 0%, 30%);
-                }
-
-                .EditAccFormCont{
-                    display: flex;
-                    align-items: flex-start;
-                    justify-content: center;
-                    gap: 10px;
-                    padding-top: 20px;
-                    width: 100%;
-                    min-width: 100px;
-                }
-
-                .eAsideBarBttn {
-                    background: #ffffff;
-                    color: var(--primarytxtcolor);
-                    border: 1px solid black;
-                    border-radius: 10px;
-                    padding: 20px;
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .eAprofile, .eAediAccount, .eAcreateHistory, .eAtrackMyOrder, .eAsecurity {
-                    background: transparent;
-                    border: none;
-                    padding: 10px 40px 10px 10px;
-                }
-
-                nav button {
-                    margin-bottom: 5px;
-                    text-align: left;
-                }
-
-                nav button:hover {
-                    transform: scale(1.05);
-                    transition: all 0.2s ease-in;
-                    box-shadow: 0 0 5px hsl(0, 1%, 28%);
-                    cursor: pointer;
-                }
-
-                .editAccForm{
-                    display: flex;
-                    flex-direction: column;
-                    background: hsl(0, 0%, 100%);
-                    border: 1px solid black;
-                    border-radius: 10px;
-                    padding: 25px;
-                    gap: 20px;
-                    width: 40%;
-                }
-
-                .editFieldCont1, .editFieldCont3, .editFieldCont4{
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 10px;
-                }
-
-                .editAccFnameCont, .editAccLnameCont, .editAccAddressCont, 
-                .editAccCityNpostalCode, .editAccPostalCodeCont, .editAccRegionCont,
-                .editAccEmailCont, .editAccPhoneNumCont{
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                    flex: 1;
-                }
-
-                .editAccForm input{
-                    padding: 8px;
-                    font-size: 1rem;
-                    background: transparent;
-                    border: 1px solid #ccc;
-                    border-radius: 5px;
-                    width: 100%;
-                }
-
-                .editAccForm input:focus{
-                    outline: none;
-                    border-color: hsl(164, 31%, 17%);
-                    box-shadow: 0 0 5px hsl(164, 31%, 17%);
-                }
-
-                .editAccForm label{
-                    font-weight: bold;
-                    color: hsl(0, 1%, 25%);
-                }
-
-                .editAccForm button{
-                    background: hsl(164, 31%, 17%);
-                    color: hsl(0, 0%, 100%);
-                    border: none;
-                    border-radius: 5px;
-                    font-size: 1.1rem;
-                    padding: 10px;
-                    font-weight: bold;
-                    margin-top: 10px;
-                }
-
-                .editAccForm button:hover{
-                    cursor: pointer;
-                    opacity: 0.9;
-                    transition: all 0.2s;
-                }
-
-                .editAccForm button:disabled{
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                }
-
-                .fieldHelper{
-                    font-size: 0.85rem;
-                    color: hsl(0, 1%, 40%);
-                    margin-top: -5px;
-                }
-
-                .successMessage{
-                    padding: 10px;
-                    background-color: #d4edda;
-                    color: #155724;
-                    border: 1px solid #c3e6cb;
-                    border-radius: 5px;
-                    margin-bottom: 15px;
-                }
-
-                .errorMessage{
-                    padding: 10px;
-                    background-color: #f8d7da;
-                    color: #721c24;
-                    border: 1px solid #f5c6cb;
-                    border-radius: 5px;
-                    margin-bottom: 15px;
-                }
-
-                footer{
-                    background-color: hsl(164, 31%, 17%);
-                    color: hsl(0, 0%, 100%);
-                    font-weight: bold;
-                    text-align: center;
-                    padding: 15px 0;
-                }
-
-                @media (max-width: 1024px) {
-                    section {
-                        padding: 30px 40px;
-                    }
-
-                    .EditAccFormCont{
-                        flex-direction: row;
-                        padding-left: 50px;
-                        padding-right: 50px;
-                    }
-
-                    .editAccForm{
-                        width: 70%;
-                    }
-                }
-
-                @media (max-width: 768px) {
-                    .editAccNavHeaderCont {
-                        flex-direction: column;
-                        align-items: center;
-                        text-align: center;
-                    }
-
-                    section {
-                        padding: 20px 25px; 
-                    }
-
-                    .EditAccFormCont{
-                        flex-direction: column;
-                        padding: 20px;
-                    }
-
-                    .eAsideBarBttn {
-                        flex-direction: row; 
-                        flex-wrap: wrap;
-                        justify-content: space-around;
-                        gap: 5px; 
-                        padding: 15px 10px;
-                        width: 100%;
-                    }
-                    
-                    .eAsideBarBttn button {
-                        flex: 1 1 auto; 
-                        text-align: center;
-                        padding: 8px 10px;
-                        margin-bottom: 5px;
-                    }
-
-                    .editAccForm{
-                        width: 100%;
-                    }
-
-                    .editFieldCont1, .editFieldCont3, .editFieldCont4 {
-                        flex-direction: column;
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .editAccNavHeaderCont {
-                        padding: 10px;
-                    }
-
-                    .editAccNavHeaderBttnCont button {
-                        font-size: 0.8rem;
-                        padding: 5px 8px;
-                    }
-
-                    .editAccLogoCont img {
-                        width: 40px;
-                        height: 40px;
-                    }
-
-                    .editAccNavLogoText {
-                        font-size: 1.2rem;
-                    }
-
-                    .editAccPageHeader {
-                        font-size: 1.5rem;
-                    }
-
-                    .editAccForm{
-                        padding: 15px;
-                    }
-                }
+            {/* SearchSidebar component handles its own styling mostly, kept as is */}
+            <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
             
-            `}</style>
-
-            <header>
+            <header style={{boxSizing: 'border-box', margin: 0, padding: 0}}>
                 <div className="editAccHeaderCont">
-                    <div className="editAccNavHeaderCont">
-                        <div className="editAccLogoCont">
-                            <p className="editAccNavLogo"><img src={PlantLogo} alt="Logo"></img></p>
-                            <p className="editAccNavLogoText">Plantasy Garden</p>
+                    <div style={styles.navHeaderCont}>
+                        <div style={styles.logoCont}>
+                            <p style={{margin: 0}}><img src={PlantLogo} alt="Logo" style={styles.logoImg}></img></p>
+                            <p style={styles.navLogoText}>Plantasy Garden</p>
                         </div>
                 
-                        <div className="editAccNavHeaderBttnCont">
-                            <button className="bttn1">Home</button>
-                            <button className="bttn2">Shop</button>
-                            <button className="bttn3">Track Order</button>
-                            <button className="bttn4">Contact Us</button>
+                        <div style={styles.navHeaderBttnCont}>
+                            <button style={styles.navButton} onClick={() => navigate("/HomePage")}>Home</button>
+                            <button style={styles.navButton} onClick={() => navigate("/Shop")}>Shop</button>
+                            <button style={styles.navButton} onClick={() => navigate("/Track")}>Track Order</button>
+                            <button style={styles.navButton} onClick={() => navigate("/ContactUs")}>Contact Us</button>
                         </div>
                 
-                        <div className="editAccNavHeaderLogoBttonCont">
-                            <button className="editAccIconBttn1">
-                                <i className="editAccNavSearch"></i>
+                        <div style={styles.iconButtonCont}>
+                            {/* 🔍 Search Button */}
+                            <button
+                                style={styles.iconButton}
+                                onClick={() => setSearchOpen(true)}
+                            >
+                                <i style={styles.iconSearch}></i>
                             </button>
-                            <button className="editAccIconBttn2">
-                                <i className="editAccNavCard"></i>
+
+                            {/* Cart Icon with Badge */}
+                            <div style={{position: 'relative', display: 'inline-block'}}>
+                                <button style={styles.iconButton} onClick={() => navigate("/cart")}>
+                                    <i style={styles.iconCart}></i>
+                                </button>
+                                {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
+                            </div>
+
+                            <button
+                                style={styles.iconButton}
+                                onClick={() => navigate("/myprofile")}
+                            >
+                                <i style={styles.iconAcc}></i>
                             </button>
-                            <button className="editAccIconBttn3">
-                                <i className="editAccNavAcc"></i>
-                             </button>
                          </div>
                     </div>
                 </div>
                 
-                <p className="textQuoteHeader">Claim Your 20% Discount Using The Code: "JKLASWER12345"</p>
+                {/* Note: Marquee animation removed as keyframes cannot be inlined */}
+                <p style={styles.textQuoteHeader}>Claim Your 20% Discount Using The Code: "JKLASWER12345"</p>
 
-                <div style={{ padding: "0 10px", backgroundColor: "hsl(47, 47%, 93%)" }}>
-                    <nav style={{ margin: "0", fontSize: "14px", color: "hsl(0, 1%, 25%)" }}>
+                <div style={{ padding: "0 10px", backgroundColor: colors.secondaryBg, boxSizing: 'border-box' }}>
+                    <nav style={{ margin: "0", fontSize: "14px", color: colors.secondaryTxt, padding: '10px 0' }}>
                         <span>Home</span>
                         <span> / </span>
                         <span style={{ fontWeight: "bold" }}>Edit Account</span>
@@ -597,138 +515,172 @@ export default function EditAccount(){
                 </div>
             </header>
 
-            <section>
+            <section style={styles.section}>
                 <div className="EditAccCont">
-                    <div className="editAccPageHeaderCont">
-                        <div className="editAccHeaderCont">
-                            <h1 className="editAccPageHeader">Edit Account</h1>
-                            <p className="editAccPageSubHeader">Update only the fields you want to change</p>
+                    <div style={styles.pageHeaderCont}>
+                        <div>
+                            <h1 style={styles.pageHeaderH1}>Edit Account</h1>
+                            <p style={styles.pageSubHeader}>Update only the fields you want to change</p>
                         </div>
                     </div>
 
-                    <div className="EditAccFormCont">
-                        <aside className="eAsideBarMenuCont">
-                            <nav className="eAsideBarBttn">
-                                <button className="eAprofile" onClick={() => navigate("/myprofile")}>Profile</button>
-                                <button className="eAediAccount">Edit Account</button>
-                                <button className="eAcreateHistory">Create History</button>
-                                <button className="eAtrackMyOrder">Track My Order</button>
+                    {/* Note: Media queries removed. This container will not stack vertically on mobile. */}
+                    <div style={styles.editAccFormCont}>
+                        <aside>
+                            <nav style={styles.sidebarNav}>
+                                <button style={styles.sidebarButton} onClick={() => navigate("/Myprofile")}>Profile</button>
+                                <button style={styles.sidebarButton} disabled>Edit Account</button>
+                                <button style={styles.sidebarButton} onClick={() => navigate("/OrderHist")}>Order History</button>
+                                <button style={styles.sidebarButton} onClick={() => navigate("/Track")}>Track My Order</button>
+                                <button 
+                                    onClick={() => setShowLogoutModal(true)}
+                                    style={styles.sidebarButton}
+                                >
+                                    🚪 Logout
+                                </button>
                             </nav>
                         </aside>
 
-                        <form className="editAccForm" onSubmit={handleSaveChanges}>
-                            {error && <div className="errorMessage">{error}</div>}
-                            {success && <div className="successMessage">{success}</div>}
+                        {/* Note: Media queries removed. Width is fixed to 40% as per original desktop CSS. */}
+                        <form style={styles.formContainer} onSubmit={handleSaveChanges}>
+                            {error && <div style={styles.errorMessage}>{error}</div>}
+                            {success && <div style={styles.successMessage}>{success}</div>}
 
-                            <div className="editFieldCont1">
-                                <div className="editAccFnameCont">
-                                    <label htmlFor="firstName">First Name (Optional)</label>
+                            {/* Note: Media queries removed. Rows will not stack on mobile. */}
+                            <div style={styles.formRow}>
+                                <div style={styles.inputGroup}>
+                                    <label htmlFor="firstName" style={styles.label}>First Name (Optional)</label>
                                     <input 
                                         type="text" 
                                         id="firstName"
                                         name="firstName"
                                         value={formData.firstName}
                                         onChange={handleInputChange}
-                                        placeholder="Enter first name..." 
+                                        placeholder="Enter first name..."
+                                        style={styles.input}
                                     />
-                                    <span className="fieldHelper">Leave blank to keep current name</span>
+                                    <span style={styles.fieldHelper}>Leave blank to keep current name</span>
                                 </div>
 
-                                <div className="editAccLnameCont">
-                                    <label htmlFor="lastName">Last Name (Optional)</label>
+                                <div style={styles.inputGroup}>
+                                    <label htmlFor="lastName" style={styles.label}>Last Name (Optional)</label>
                                     <input 
                                         type="text" 
                                         id="lastName"
                                         name="lastName"
                                         value={formData.lastName}
                                         onChange={handleInputChange}
-                                        placeholder="Enter last name..." 
+                                        placeholder="Enter last name..."
+                                        style={styles.input}
                                     />
-                                    <span className="fieldHelper">Leave blank to keep current name</span>
+                                    <span style={styles.fieldHelper}>Leave blank to keep current name</span>
                                 </div>
                             </div>
 
-                            <div className="editFieldCont2">
-                                <div className="editAccAddressCont">
-                                    <label htmlFor="add">Street Address (Optional)</label>
+                            <div>
+                                <div style={styles.inputGroup}>
+                                    <label htmlFor="add" style={styles.label}>Street Address (Optional)</label>
                                     <input 
                                         type="text" 
                                         id="add"
                                         name="add"
                                         value={formData.add}
                                         onChange={handleInputChange}
-                                        placeholder="Enter street address..." 
+                                        placeholder="Enter street address..."
+                                        style={styles.input}
                                     />
                                 </div>
                             </div>
 
-                            <div className="editFieldCont3">
-                                <div className="editAccCityNpostalCode">
-                                    <label htmlFor="city">City (Optional)</label>
+                            <div style={styles.formRow}>
+                                <div style={styles.inputGroup}>
+                                    <label htmlFor="city" style={styles.label}>City (Optional)</label>
                                     <input 
                                         type="text" 
                                         id="city"
                                         name="city"
                                         value={formData.city}
                                         onChange={handleInputChange}
-                                        placeholder="Enter city..." 
+                                        placeholder="Enter city..."
+                                        style={styles.input}
                                     />
                                 </div>
 
-                                <div className="editAccPostalCodeCont">
-                                    <label htmlFor="postalCode">Postal Code (Optional)</label>
+                                <div style={styles.inputGroup}>
+                                    <label htmlFor="postalCode" style={styles.label}>Postal Code (Optional)</label>
                                     <input 
                                         type="text" 
                                         id="postalCode"
                                         name="postalCode"
                                         value={formData.postalCode}
                                         onChange={handleInputChange}
-                                        placeholder="Enter postal code..." 
+                                        placeholder="Enter postal code..."
+                                        style={styles.input}
                                     />
                                 </div>
                             </div>
 
-                            <div className="editFieldCont4">
-                                <div className="editAccRegionCont">
-                                    <label htmlFor="region">Region (Optional)</label>
+                            <div style={styles.formRow}>
+                                <div style={styles.inputGroup}>
+                                    <label htmlFor="region" style={styles.label}>Region (Optional)</label>
                                     <input 
                                         type="text" 
                                         id="region"
                                         name="region"
                                         value={formData.region}
                                         onChange={handleInputChange}
-                                        placeholder="Enter region..." 
+                                        placeholder="Enter region..."
+                                        style={styles.input}
                                     />
                                 </div>
 
-                                <div className="editAccPhoneNumCont">
-                                    <label htmlFor="phone">Phone Number (Optional)</label>
+                                <div style={styles.inputGroup}>
+                                    <label htmlFor="phone" style={styles.label}>Phone Number (Optional)</label>
                                     <input 
                                         type="tel" 
                                         id="phone"
                                         name="phone"
                                         value={formData.phone}
                                         onChange={handleInputChange}
-                                        placeholder="Enter phone number..." 
+                                        placeholder="Enter phone number..."
+                                        style={styles.input}
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <div className="editAccEmailCont">
-                                    <label htmlFor="email">Email (Optional)</label>
+                                <div style={styles.inputGroup}>
+                                    <label htmlFor="email" style={styles.label}>Email (Optional)</label>
                                     <input 
                                         type="email" 
                                         id="email"
                                         name="email"
                                         value={formData.email}
                                         onChange={handleInputChange}
-                                        placeholder="Enter email..." 
+                                        placeholder="Enter email..."
+                                        style={styles.input}
                                     />
                                 </div>
                             </div>
 
-                            <button type="submit" className="saveChangesBttn" disabled={saving}>
+                            {/* HOVER EFFECT APPLIED HERE */}
+                            <button 
+                                type="submit" 
+                                style={styles.saveButton} 
+                                disabled={saving}
+                                onMouseEnter={(e) => {
+                                    if (!saving) {
+                                        Object.assign(e.currentTarget.style, styles.saveButtonHover);
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!saving) {
+                                        // Reset to original primaryBg color
+                                        e.currentTarget.style.backgroundColor = colors.primaryTxt;
+                                        e.currentTarget.style.color = colors.darkTxt;
+                                    }
+                                }}
+                            >
                                 {saving ? 'Saving...' : 'Save Changes'}
                             </button>
                         </form>
@@ -736,11 +688,18 @@ export default function EditAccount(){
                 </div>
             </section>
 
-            <footer>
-                <div className="compyRight">
-                    <p>@ 2025 Plantasy Garden. All Rights Reserved.</p>
+            <footer style={styles.footer}>
+                <div>
+                    <p style={{margin: 0}}>@ 2025 Plantasy Garden. All Rights Reserved.</p>
                 </div>
             </footer>
-        </>
+
+            {/* Logout Modal */}
+            <LogoutModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={handleLogoutConfirm}
+            />
+        </div>
     );
 }

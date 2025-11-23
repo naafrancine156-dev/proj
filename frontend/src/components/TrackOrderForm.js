@@ -15,6 +15,15 @@ export default function TrackOrder() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [markingReceived, setMarkingReceived] = useState(false);
 
+  // Color palette matching OrderHistory
+  const colors = {
+    primaryBg: 'hsl(164, 31%, 17%)',
+    secondaryBg: 'hsl(47, 47%, 93%)',
+    primaryTxt: 'hsl(0, 0%, 100%)',
+    secondaryTxt: 'hsl(0, 1%, 25%)',
+    darkTxt: 'hsla(0, 0%, 10%, 1.00)',
+  };
+
   // Fetch user's orders
   useEffect(() => {
     fetchUserOrders();
@@ -161,695 +170,597 @@ export default function TrackOrder() {
     }
   };
 
+  const styles = {
+    pageWrapper: {
+      background: 'hsl(0, 0%, 100%)',
+      width: '100%',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      fontFamily: "'Times New Roman', Times, serif",
+      boxSizing: 'border-box',
+      margin: 0,
+      padding: 0,
+    },
+    navHeaderCont: {
+      backgroundColor: colors.primaryBg,
+      display: 'flex',
+      flexWrap: 'nowrap',
+      alignItems: 'center',
+      borderBottom: '1px solid #eee',
+      justifyContent: 'space-between',
+      gap: '20px',
+      width: '100%',
+      padding: '10px 15px',
+      boxSizing: 'border-box',
+      overflow: 'scroll',
+    },
+    logoCont: {
+      color: colors.primaryTxt,
+      display: 'flex',
+      alignItems: 'center',
+      marginLeft: '10px',
+    },
+    logoImg: {
+      backgroundColor: '#ffff',
+      borderRadius: '50%',
+      width: '50px',
+      height: '50px',
+      marginRight: '10px',
+    },
+    navLogoText: {
+      color: colors.primaryTxt,
+      fontSize: '1.5rem',
+      fontWeight: 'bold',
+      margin: 0,
+    },
+    navHeaderBttnCont: {
+      display: 'flex',
+      flexWrap: 'nowrap',
+      justifyContent: 'center',
+      gap: '15px',
+    },
+    navButton: {
+      background: 'none',
+      color: colors.primaryTxt,
+      border: 'none',
+      fontSize: '1rem',
+      padding: '8px 12px',
+      cursor: 'pointer',
+      fontFamily: 'inherit',
+    },
+    iconButtonCont: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '20px',
+    },
+    iconButton: {
+      width: '33px',
+      height: '33px',
+      background: 'transparent',
+      borderRadius: '50%',
+      border: 'none',
+      padding: 0,
+      cursor: 'pointer',
+      position: 'relative',
+    },
+    iconSearch: {
+      backgroundImage: `url(${SearchIcon})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      width: '28px',
+      height: '28px',
+      display: 'inline-block',
+    },
+    iconCart: {
+      backgroundImage: `url(${CartIcon})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      width: '28px',
+      height: '28px',
+      display: 'inline-block',
+    },
+    iconAcc: {
+      backgroundImage: `url(${AccIcon})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      width: '28px',
+      height: '28px',
+      display: 'inline-block',
+    },
+    cartBadge: {
+      position: 'absolute',
+      top: '-5px',
+      right: '-5px',
+      backgroundColor: 'red',
+      color: 'white',
+      borderRadius: '50%',
+      padding: '2px 6px',
+      fontSize: '10px',
+      fontWeight: 'bold'
+    },
+    textQuoteHeader: {
+      backgroundColor: 'hwb(0 100% 0%)',
+      textAlign: 'center',
+      fontSize: '0.9rem',
+      letterSpacing: '1px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      padding: '5px 0',
+      margin: 0,
+    },
+    section: {
+      backgroundColor: colors.secondaryBg,
+      padding: '40px 80px',
+      flex: 1,
+      boxSizing: 'border-box',
+    },
+    pageHeaderCont: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '30px',
+      paddingBottom: '15px',
+      borderBottom: `1px solid ${colors.primaryBg}`,
+    },
+    pageHeaderH1: {
+      fontSize: '2.5rem',
+      margin: 0,
+    },
+    pageSubHeader: {
+      fontSize: '1rem',
+      color: 'hsl(0, 0%, 30%)',
+      margin: 0,
+    },
+    trackContainer: {
+      display: 'grid',
+      gridTemplateColumns: '300px 1fr',
+      gap: '30px',
+    },
+    ordersList: {
+      background: 'white',
+      border: '1px solid #ddd',
+      borderRadius: '10px',
+      padding: '20px',
+      height: 'fit-content',
+      maxHeight: '600px',
+      overflowY: 'auto',
+    },
+    ordersListH3: {
+      fontSize: '1.2rem',
+      marginBottom: '15px',
+      color: colors.primaryBg,
+    },
+    orderItem: {
+      padding: '12px',
+      marginBottom: '10px',
+      border: '2px solid #ddd',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      transition: 'all 0.2s',
+      background: 'white',
+    },
+    orderItemHover: {
+      borderColor: colors.primaryBg,
+      backgroundColor: '#f9f9f9',
+    },
+    orderItemActive: {
+      backgroundColor: colors.primaryBg,
+      color: 'white',
+      borderColor: colors.primaryBg,
+    },
+    orderItemP: {
+      fontSize: '0.9rem',
+      margin: '5px 0',
+    },
+    orderItemId: {
+      fontWeight: 'bold',
+      fontSize: '1rem',
+    },
+    orderItemStatus: {
+      fontSize: '0.85rem',
+      opacity: 0.8,
+      textTransform: 'capitalize',
+    },
+    trackingSection: {
+      background: 'white',
+      border: '1px solid #ddd',
+      borderRadius: '10px',
+      padding: '40px 30px',
+    },
+    orderInfo: {
+      marginBottom: '30px',
+      paddingBottom: '20px',
+      borderBottom: '2px solid #eee',
+    },
+    orderInfoH2: {
+      fontSize: '1.5rem',
+      color: colors.primaryBg,
+      marginBottom: '10px',
+    },
+    orderInfoP: {
+      fontSize: '0.95rem',
+      color: '#666',
+      margin: '5px 0',
+    },
+    timeline: {
+      marginTop: '40px',
+    },
+    timelineH3: {
+      fontSize: '1.2rem',
+      color: colors.primaryBg,
+      marginBottom: '30px',
+    },
+    timelineStep: {
+      display: 'flex',
+      gap: '20px',
+      marginBottom: '30px',
+      position: 'relative',
+    },
+    timelineCircle: {
+      width: '50px',
+      height: '50px',
+      borderRadius: '50%',
+      border: '3px solid',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: 'bold',
+      flexShrink: 0,
+      position: 'relative',
+      zIndex: 1,
+      background: 'white',
+    },
+    timelineContent: {
+      paddingTop: '5px',
+      flex: 1,
+    },
+    timelineContentH4: {
+      fontSize: '1rem',
+      color: '#333',
+      marginBottom: '5px',
+      fontWeight: 600,
+    },
+    timelineContentP: {
+      fontSize: '0.9rem',
+      color: '#999',
+      margin: 0,
+    },
+    timelineTimestamp: {
+      fontSize: '0.85rem',
+      color: '#4caf50',
+      fontWeight: 600,
+      marginTop: '3px',
+    },
+    timelineTimestampPending: {
+      fontSize: '0.85rem',
+      color: '#999',
+      fontWeight: 600,
+      marginTop: '3px',
+    },
+    orderActionContainer: {
+      display: 'flex',
+      gap: '15px',
+      marginTop: '30px',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    orderReceivedBtn: {
+      backgroundColor: '#4caf50',
+      color: 'white',
+      border: 'none',
+      padding: '12px 24px',
+      borderRadius: '5px',
+      cursor: 'pointer',
+      fontSize: '0.95rem',
+      fontWeight: 600,
+      transition: 'all 0.3s',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+    },
+    receivedStatus: {
+      display: 'inline-flex',
+      backgroundColor: '#4caf50',
+      color: 'white',
+      padding: '8px 16px',
+      borderRadius: '20px',
+      fontSize: '0.9rem',
+      fontWeight: 600,
+      alignItems: 'center',
+      gap: '8px',
+    },
+    noOrder: {
+      textAlign: 'center',
+      padding: '60px 20px',
+      color: '#999',
+    },
+    noOrderP: {
+      fontSize: '1.1rem',
+      marginBottom: '20px',
+    },
+    shopNowBtn: {
+      padding: '10px 30px',
+      background: colors.primaryBg,
+      color: 'white',
+      border: 'none',
+      borderRadius: '5px',
+      cursor: 'pointer',
+      fontSize: '1rem',
+      transition: 'all 0.2s',
+    },
+    footer: {
+      backgroundColor: colors.primaryBg,
+      color: colors.primaryTxt,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      padding: '15px 0',
+      marginTop: 'auto',
+    }
+  };
+
   return (
     <>
       <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-      <style>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background-color: hsl(47, 47%, 93%);
-        }
-
-        header {
-          background-color: hsl(164, 31%, 17%);
-          padding: 15px 20px;
-        }
-
-        .navHeaderCont {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 20px;
-          flex-wrap: wrap;
-        }
-
-        .logoCont {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: white;
-        }
-
-        .logoCont img {
-          width: 50px;
-          height: 50px;
-          background-color: white;
-          border-radius: 50%;
-        }
-
-        .navLogoText {
-          font-size: 1.5rem;
-          font-weight: bold;
-          color: white;
-        }
-
-        .navHeaderBttnCont {
-          display: flex;
-          gap: 15px;
-        }
-
-        .navHeaderBttnCont button {
-          background: none;
-          border: none;
-          color: white;
-          font-size: 1rem;
-          cursor: pointer;
-          padding: 8px 12px;
-          transition: all 0.2s;
-        }
-
-        .navHeaderBttnCont button:hover {
-          border-bottom: 2px solid white;
-        }
-
-        .navHeaderLogoBttonCont {
-          display: flex;
-          gap: 15px;
-          position: relative;
-        }
-
-        .navHeaderLogoBttonCont button {
-          background: none;
-          border: none;
-          width: 35px;
-          height: 35px;
-          cursor: pointer;
-          opacity: 0.8;
-          transition: all 0.2s;
-        }
-
-        .navHeaderLogoBttonCont button:hover {
-          opacity: 1;
-          transform: scale(1.1);
-        }
-
-        .navSearch {
-          background-image: url(${SearchIcon});
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: cover;
-          width: 28px;
-          height: 28px;
-          display: inline-block;
-        }
-
-        .navCard {
-          background-image: url(${CartIcon});
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: cover;
-          width: 28px;
-          height: 28px;
-          display: inline-block;
-        }
-
-        .navAcc {
-          background-image: url(${AccIcon});
-          background-position: center;
-          background-repeat: no-repeat;
-          background-size: cover;
-          width: 28px;
-          height: 28px;
-          display: inline-block;
-        }
-
-        .navCartWrapper {
-          position: relative;
-          display: inline-block;
-        }
-
-        .cartBadge {
-          position: absolute;
-          top: -8px;
-          right: -8px;
-          background-color: #ff4444;
-          color: white;
-          border-radius: 50%;
-          width: 24px;
-          height: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 0.75rem;
-          font-weight: bold;
-        }
-
-        .textQuoteHeader {
-          background-color: white;
-          text-align: center;
-          font-size: 0.9rem;
-          padding: 10px;
-          overflow: hidden;
-          animation: scrolling 20s linear infinite;
-        }
-
-        @keyframes scrolling {
-          0% { transform: translateX(100%); }
-          100% { transform: translateX(-100%); }
-        }
-
-        section {
-          padding: 40px 80px;
-          background-color: hsl(47, 47%, 93%);
-          min-height: calc(100vh - 150px);
-        }
-
-        .pageHeaderCont {
-          margin-bottom: 30px;
-          padding-bottom: 15px;
-          border-bottom: 2px solid hsl(164, 31%, 17%);
-        }
-
-        .pageHeaderCont h1 {
-          font-size: 2.5rem;
-          color: hsl(164, 31%, 17%);
-        }
-
-        .pageHeaderCont p {
-          font-size: 1rem;
-          color: hsl(0, 0%, 30%);
-          margin-top: 5px;
-        }
-
-        .trackContainer {
-          display: grid;
-          grid-template-columns: 300px 1fr;
-          gap: 30px;
-        }
-
-        .ordersList {
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 10px;
-          padding: 20px;
-          height: fit-content;
-          max-height: 600px;
-          overflow-y: auto;
-        }
-
-        .ordersList h3 {
-          font-size: 1.2rem;
-          margin-bottom: 15px;
-          color: hsl(164, 31%, 17%);
-        }
-
-        .orderItem {
-          padding: 12px;
-          margin-bottom: 10px;
-          border: 2px solid #ddd;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
-          background: white;
-        }
-
-        .orderItem:hover {
-          border-color: hsl(164, 31%, 17%);
-          background-color: #f9f9f9;
-        }
-
-        .orderItem.active {
-          background-color: hsl(164, 31%, 17%);
-          color: white;
-          border-color: hsl(164, 31%, 17%);
-        }
-
-        .orderItem p {
-          font-size: 0.9rem;
-          margin: 5px 0;
-        }
-
-        .orderItem .orderId {
-          font-weight: bold;
-          font-size: 1rem;
-        }
-
-        .orderItem .orderStatus {
-          font-size: 0.85rem;
-          opacity: 0.8;
-          text-transform: capitalize;
-        }
-
-        .trackingSection {
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 10px;
-          padding: 40px 30px;
-        }
-
-        .orderInfo {
-          margin-bottom: 30px;
-          padding-bottom: 20px;
-          border-bottom: 2px solid #eee;
-        }
-
-        .orderInfo h2 {
-          font-size: 1.5rem;
-          color: hsl(164, 31%, 17%);
-          margin-bottom: 10px;
-        }
-
-        .orderInfo p {
-          font-size: 0.95rem;
-          color: #666;
-          margin: 5px 0;
-        }
-
-        .orderActionContainer {
-          display: flex;
-          gap: 15px;
-          margin-top: 20px;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-
-        .orderReceivedBtn {
-          background-color: #4caf50;
-          color: white;
-          border: none;
-          padding: 12px 24px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-size: 0.95rem;
-          font-weight: 600;
-          transition: all 0.3s;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .orderReceivedBtn:hover:not(:disabled) {
-          background-color: #45a049;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-        }
-
-        .orderReceivedBtn:disabled {
-          background-color: #ccc;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .receivedStatus {
-          display: inline-block;
-          background-color: #4caf50;
-          color: white;
-          padding: 8px 16px;
-          border-radius: 20px;
-          font-size: 0.9rem;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .timeline {
-          margin-top: 40px;
-        }
-
-        .timeline h3 {
-          font-size: 1.2rem;
-          color: hsl(164, 31%, 17%);
-          margin-bottom: 30px;
-        }
-
-        .timelineStep {
-          display: flex;
-          gap: 20px;
-          margin-bottom: 30px;
-          position: relative;
-        }
-
-        .timelineStep:not(:last-child)::after {
-          content: "";
-          position: absolute;
-          left: 24px;
-          top: 60px;
-          width: 3px;
-          height: 60px;
-          background-color: currentColor;
-          color: inherit;
-        }
-
-        .timelineStep.done::after {
-          background-color: #4caf50;
-        }
-
-        .timelineStep.pending::after {
-          background-color: #ccc;
-        }
-
-        .timelineCircle {
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          border: 3px solid;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          flex-shrink: 0;
-          position: relative;
-          z-index: 1;
-          background: white;
-        }
-
-        .timelineStep.done .timelineCircle {
-          border-color: #4caf50;
-          color: #4caf50;
-          font-size: 1.5rem;
-        }
-
-        .timelineStep.pending .timelineCircle {
-          border-color: #ccc;
-          color: #ccc;
-        }
-
-        .timelineContent {
-          padding-top: 5px;
-          flex: 1;
-        }
-
-        .timelineContent h4 {
-          font-size: 1rem;
-          color: #333;
-          margin-bottom: 5px;
-          font-weight: 600;
-        }
-
-        .timelineContent p {
-          font-size: 0.9rem;
-          color: #999;
-          margin: 0;
-        }
-
-        .timelineTimestamp {
-          font-size: 0.85rem;
-          color: #4caf50;
-          font-weight: 600;
-          margin-top: 3px;
-        }
-
-        .timelineTimestamp.pending {
-          color: #999;
-        }
-
-        .noOrder {
-          text-align: center;
-          padding: 60px 20px;
-          color: #999;
-        }
-
-        .noOrder p {
-          font-size: 1.1rem;
-          margin-bottom: 20px;
-        }
-
-        .shopNowBtn {
-          padding: 10px 30px;
-          background: hsl(164, 31%, 17%);
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          font-size: 1rem;
-          transition: all 0.2s;
-        }
-
-        .shopNowBtn:hover {
-          background: hsl(164, 25%, 12%);
-          transform: scale(1.05);
-        }
-
-        footer {
-          background-color: hsl(164, 31%, 17%);
-          color: white;
-          text-align: center;
-          padding: 20px;
-          margin-top: 40px;
-        }
-
-        @media (max-width: 768px) {
-          section {
-            padding: 20px;
-          }
-
-          .pageHeaderCont h1 {
-            font-size: 1.8rem;
-          }
-
-          .trackContainer {
-            grid-template-columns: 1fr;
-          }
-
-          .ordersList {
-            max-height: 300px;
-            overflow-y: auto;
-          }
-
-          .trackingSection {
-            padding: 20px;
-          }
-
-          .navHeaderBttnCont {
-            gap: 10px;
-          }
-
-          .navHeaderBttnCont button {
-            font-size: 0.85rem;
-            padding: 6px 10px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          section {
-            padding: 15px;
-          }
-
-          .pageHeaderCont h1 {
-            font-size: 1.5rem;
-          }
-
-          .trackContainer {
-            gap: 15px;
-          }
-
-          .orderReceivedBtn,
-          .receivedStatus {
-            font-size: 0.85rem;
-            padding: 8px 12px;
-          }
-
-          .navHeaderCont {
-            flex-direction: column;
-            gap: 10px;
-          }
-
-          .navHeaderBttnCont {
-            flex-wrap: wrap;
-            justify-content: center;
-          }
-        }
-      `}</style>
-
-      <header>
-        <div className="navHeaderCont">
-          <div className="logoCont">
-            <img src={PlantLogo} alt="Logo" />
-            <p className="navLogoText">Eric's Garden</p>
-          </div>
-
-          <div className="navHeaderBttnCont">
-            <button onClick={() => navigate("/homepage")}>Home</button>
-            <button onClick={() => navigate("/shop")}>Shop</button>
-            <button onClick={() => navigate("/track")}>Track Order</button>
-            <button onClick={() => navigate("/contactus")}>Contact Us</button>
-          </div>
-
-          <div className="navHeaderLogoBttonCont">
-            <button
-              className="iconBttn1"
-              onClick={() => setSearchOpen(true)}
-              title="Search"
-            >
-              <i className="navSearch"></i>
-            </button>
-
-            <div className="navCartWrapper">
-              <button className="iconBttn2" onClick={() => navigate("/cart")} title="Cart">
-                <i className="navCard"></i>
-              </button>
-              {cartCount > 0 && <span className="cartBadge">{cartCount}</span>}
-            </div>
-
-            <button
-              className="iconBttn3"
-              onClick={() => navigate("/myprofile")}
-              title="Account"
-            >
-              <i className="navAcc"></i>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <p className="textQuoteHeader">
-        Claim Your 20% Discount Using The Code: "JKLASWER12345"
-      </p>
-
-      <section>
-        <div className="pageHeaderCont">
-          <h1>Track My Order</h1>
-          <p>Real-time tracking for your current shipments</p>
-        </div>
-
-        {loading ? (
-          <p style={{ textAlign: "center", fontSize: "1.1rem", color: "#666" }}>
-            Loading orders...
-          </p>
-        ) : orders.filter(o => o.status !== "received").length > 0 ? (
-          <div className="trackContainer">
-            {/* Orders List */}
-            <div className="ordersList">
-              <h3>Active Orders</h3>
-              {orders.filter(o => o.status !== "received").map((order) => (
-                <div
-                  key={order._id}
-                  className={`orderItem ${selectedOrder?._id === order._id ? "active" : ""}`}
-                  onClick={() => setSelectedOrder(order)}
+      
+      <div style={styles.pageWrapper}>
+        <header style={{boxSizing: 'border-box', margin: 0, padding: 0}}>
+          <div style={{width: '100%'}}>
+            <div style={styles.navHeaderCont}>
+              <div style={styles.logoCont}>
+                <p style={{margin: 0}}><img src={PlantLogo} alt="Logo" style={styles.logoImg}></img></p>
+                <p style={styles.navLogoText}>Plantasy</p>
+              </div>
+
+              <div style={styles.navHeaderBttnCont}>
+                <button style={styles.navButton} onClick={() => navigate("/homepage")}>Home</button>
+                <button style={styles.navButton} onClick={() => navigate("/shop")}>Shop</button>
+                <button style={styles.navButton} onClick={() => navigate("/track")}>Track Order</button>
+                <button style={styles.navButton} onClick={() => navigate("/contactus")}>Contact Us</button>
+              </div>
+
+              <div style={styles.iconButtonCont}>
+                <button
+                  style={styles.iconButton}
+                  onClick={() => setSearchOpen(true)}
                 >
-                  <p className="orderId">#{order._id?.slice(-6).toUpperCase()}</p>
-                  <p className="orderStatus">{order.status}</p>
-                  <p style={{ fontSize: "0.85rem" }}>
-                    {formatDate(order.createdAt)}
-                  </p>
+                  <i style={styles.iconSearch}></i>
+                </button>
+
+                <div style={{position: 'relative', display: 'inline-block'}}>
+                  <button style={styles.iconButton} onClick={() => navigate("/cart")}>
+                    <i style={styles.iconCart}></i>
+                  </button>
+                  {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
                 </div>
-              ))}
+
+                <button
+                  style={styles.iconButton}
+                  onClick={() => navigate("/myprofile")}
+                >
+                  <i style={styles.iconAcc}></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <p style={styles.textQuoteHeader}>Claim Your 20% Discount Using The Code: "JKLASWER12345"</p>
+        </header>
+
+        <section style={styles.section}>
+          <div style={{width: '100%'}}>
+            <div style={styles.pageHeaderCont}>
+              <div>
+                <h1 style={styles.pageHeaderH1}>Track My Order</h1>
+                <p style={styles.pageSubHeader}>Real-time tracking for your current shipments</p>
+              </div>
             </div>
 
-            {/* Tracking Details */}
-            {selectedOrder && (
-              <div className="trackingSection">
-                <div className="orderInfo">
-                  <h2>Order #{selectedOrder._id?.slice(-6).toUpperCase()}</h2>
-                  <p>
-                    <strong>Status:</strong>{" "}
-                    <span
-                      style={{
-                        color:
-                          selectedOrder.status === "received"
-                            ? "#4caf50"
-                            : selectedOrder.status === "delivered"
-                            ? "#ff9800"
-                            : "#2196f3",
-                        fontWeight: "bold",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {selectedOrder.status.replace(/_/g, " ")}
-                    </span>
-                  </p>
-                  <p>
-                    <strong>Order Date:</strong> {formatDate(selectedOrder.createdAt)}
-                  </p>
-                  <p>
-                    <strong>Total:</strong> ₱{" "}
-                    {selectedOrder.total?.toLocaleString("en-PH")}
-                  </p>
-                  {selectedOrder.contactDetails && (
-                    <>
-                      <p>
-                        <strong>Recipient:</strong>{" "}
-                        {selectedOrder.contactDetails.firstName}{" "}
-                        {selectedOrder.contactDetails.lastName}
-                      </p>
-                      <p>
-                        <strong>Delivery Address:</strong>{" "}
-                        {selectedOrder.billingAddress?.add || "N/A"},{" "}
-                        {selectedOrder.billingAddress?.city || "N/A"},{" "}
-                        {selectedOrder.billingAddress?.region || "N/A"}
-                      </p>
-                      <p>
-                        <strong>Contact:</strong> {selectedOrder.contactDetails.phoneNumber}
-                      </p>
-                    </>
-                  )}
-                </div>
-
-                {/* Timeline */}
-                <div className="timeline">
-                  <h3>Delivery Timeline</h3>
-                  {timelineStages.map((stage) => (
+            {loading ? (
+              <p style={{ textAlign: "center", fontSize: "1.1rem", color: "#666" }}>
+                Loading orders...
+              </p>
+            ) : orders.filter(o => o.status !== "received").length > 0 ? (
+              <div style={styles.trackContainer}>
+                {/* Orders List */}
+                <div style={styles.ordersList}>
+                  <h3 style={styles.ordersListH3}>Active Orders</h3>
+                  {orders.filter(o => o.status !== "received").map((order) => (
                     <div
-                      key={stage.id}
-                      className={`timelineStep ${
-                        isStageDone(stage.status) ? "done" : "pending"
-                      }`}
+                      key={order._id}
+                      style={{
+                        ...styles.orderItem,
+                        ...(selectedOrder?._id === order._id ? styles.orderItemActive : {})
+                      }}
+                      onMouseEnter={(e) => {
+                        if (selectedOrder?._id !== order._id) {
+                          Object.assign(e.currentTarget.style, styles.orderItemHover);
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (selectedOrder?._id !== order._id) {
+                          e.currentTarget.style.borderColor = '#ddd';
+                          e.currentTarget.style.backgroundColor = 'white';
+                        }
+                      }}
+                      onClick={() => setSelectedOrder(order)}
                     >
-                      <div className="timelineCircle">
-                        {isStageDone(stage.status) ? "✓" : ""}
-                      </div>
-                      <div className="timelineContent">
-                        <h4>{stage.label}</h4>
-                        <p>
-                          {isStageDone(stage.status)
-                            ? "Completed"
-                            : "Pending"}
-                        </p>
-                        <div className={`timelineTimestamp ${isStageDone(stage.status) ? "" : "pending"}`}>
-                          {getStatusTimestamp(stage.status)
-                            ? formatDateTime(getStatusTimestamp(stage.status))
-                            : "Awaiting..."}
-                        </div>
-                      </div>
+                      <p style={{...styles.orderItemP, ...styles.orderItemId}}>#{order._id?.slice(-6).toUpperCase()}</p>
+                      <p style={{...styles.orderItemP, ...styles.orderItemStatus}}>{order.status}</p>
+                      <p style={{ fontSize: "0.85rem", margin: '5px 0' }}>
+                        {formatDate(order.createdAt)}
+                      </p>
                     </div>
                   ))}
                 </div>
 
-                {/* Order Received Button - After Out for Delivery */}
-                {selectedOrder.status === "delivered" && (
-                  <div className="orderActionContainer" style={{ marginTop: "30px" }}>
-                    <button
-                      className="orderReceivedBtn"
-                      onClick={handleOrderReceived}
-                      disabled={markingReceived}
-                    >
-                      {markingReceived ? "Processing..." : "✓ Mark as Received"}
-                    </button>
-                  </div>
-                )}
+                {/* Tracking Details */}
+                {selectedOrder && (
+                  <div style={styles.trackingSection}>
+                    <div style={styles.orderInfo}>
+                      <h2 style={styles.orderInfoH2}>Order #{selectedOrder._id?.slice(-6).toUpperCase()}</h2>
+                      <p style={styles.orderInfoP}>
+                        <strong>Status:</strong>{" "}
+                        <span
+                          style={{
+                            color:
+                              selectedOrder.status === "received"
+                                ? "#4caf50"
+                                : selectedOrder.status === "delivered"
+                                ? "#ff9800"
+                                : "#2196f3",
+                            fontWeight: "bold",
+                            textTransform: "capitalize",
+                          }}
+                        >
+                          {selectedOrder.status.replace(/_/g, " ")}
+                        </span>
+                      </p>
+                      <p style={styles.orderInfoP}>
+                        <strong>Order Date:</strong> {formatDate(selectedOrder.createdAt)}
+                      </p>
+                      <p style={styles.orderInfoP}>
+                        <strong>Total:</strong> ₱{" "}
+                        {selectedOrder.total?.toLocaleString("en-PH")}
+                      </p>
+                      {selectedOrder.contactDetails && (
+                        <>
+                          <p style={styles.orderInfoP}>
+                            <strong>Recipient:</strong>{" "}
+                            {selectedOrder.contactDetails.firstName}{" "}
+                            {selectedOrder.contactDetails.lastName}
+                          </p>
+                          <p style={styles.orderInfoP}>
+                            <strong>Delivery Address:</strong>{" "}
+                            {selectedOrder.billingAddress?.add || "N/A"},{" "}
+                            {selectedOrder.billingAddress?.city || "N/A"},{" "}
+                            {selectedOrder.billingAddress?.region || "N/A"}
+                          </p>
+                          <p style={styles.orderInfoP}>
+                            <strong>Contact:</strong> {selectedOrder.contactDetails.phoneNumber}
+                          </p>
+                        </>
+                      )}
+                    </div>
 
-                {/* Show received status badge when already received */}
-                {selectedOrder.status === "received" && (
-                  <div className="orderActionContainer" style={{ marginTop: "30px" }}>
-                    <span className="receivedStatus">✓ Order Received</span>
+                    {/* Timeline */}
+                    <div style={styles.timeline}>
+                      <h3 style={styles.timelineH3}>Delivery Timeline</h3>
+                      {timelineStages.map((stage, index) => {
+                        const isDone = isStageDone(stage.status);
+                        const timestamp = getStatusTimestamp(stage.status);
+                        
+                        return (
+                          <div
+                            key={stage.id}
+                            style={{
+                              ...styles.timelineStep,
+                              ...(!isDone && {
+                                opacity: 0.6
+                              })
+                            }}
+                          >
+                            <div 
+                              style={{
+                                ...styles.timelineCircle,
+                                borderColor: isDone ? '#4caf50' : '#ccc',
+                                color: isDone ? '#4caf50' : '#ccc',
+                              }}
+                            >
+                              {isDone ? "✓" : ""}
+                            </div>
+                            <div style={styles.timelineContent}>
+                              <h4 style={styles.timelineContentH4}>{stage.label}</h4>
+                              <p style={styles.timelineContentP}>
+                                {isDone ? "Completed" : "Pending"}
+                              </p>
+                              <div style={isDone ? styles.timelineTimestamp : styles.timelineTimestampPending}>
+                                {timestamp ? formatDateTime(timestamp) : "Awaiting..."}
+                              </div>
+                            </div>
+                            {/* Connecting line */}
+                            {index < timelineStages.length - 1 && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  left: '24px',
+                                  top: '60px',
+                                  width: '3px',
+                                  height: '60px',
+                                  backgroundColor: isDone ? '#4caf50' : '#ccc',
+                                }}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Order Received Button - After Delivered */}
+                    {selectedOrder.status === "delivered" && (
+                      <div style={styles.orderActionContainer}>
+                        <button
+                          style={styles.orderReceivedBtn}
+                          onClick={handleOrderReceived}
+                          disabled={markingReceived}
+                          onMouseEnter={(e) => {
+                            if (!markingReceived) {
+                              e.currentTarget.style.backgroundColor = '#45a049';
+                              e.currentTarget.style.transform = 'translateY(-2px)';
+                              e.currentTarget.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.3)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#4caf50';
+                            e.currentTarget.style.transform = 'none';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }}
+                        >
+                          {markingReceived ? "Processing..." : "✓ Mark as Received"}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Show received status badge when already received */}
+                    {selectedOrder.status === "received" && (
+                      <div style={styles.orderActionContainer}>
+                        <span style={styles.receivedStatus}>✓ Order Received</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
+            ) : (
+              <div style={styles.noOrder}>
+                <p style={styles.noOrderP}>No orders found. Start shopping!</p>
+                <button
+                  onClick={() => navigate("/shop")}
+                  style={styles.shopNowBtn}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'hsl(164, 25%, 12%)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = colors.primaryBg;
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  Shop Now
+                </button>
+              </div>
             )}
           </div>
-        ) : (
-          <div className="noOrder">
-            <p>No orders found. Start shopping!</p>
-            <button
-              onClick={() => navigate("/shop")}
-              className="shopNowBtn"
-            >
-              Shop Now
-            </button>
-          </div>
-        )}
-      </section>
+        </section>
 
-      <footer>
-        <p>© 2025 Eric's Garden. All Rights Reserved.</p>
-      </footer>
+        <footer style={styles.footer}>
+          <div>
+            <p style={{margin: 0}}>@ 2025 Plantasy. All Rights Reserved.</p>
+          </div>
+        </footer>
+      </div>
     </>
   );
 }

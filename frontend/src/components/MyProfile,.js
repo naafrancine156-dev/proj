@@ -17,61 +17,59 @@ export default function MyProfile() {
     const [searchOpen, setSearchOpen] = useState(false);
 
     useEffect(() => {
-    const fetchUserData = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) throw new Error("No token found. Please login again.");
+        const fetchUserData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                
+                if (!token) {
+                    throw new Error('No token found. Please login again.');
+                }
 
-            const response = await fetch("http://localhost:5000/api/auth/me", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-            });
+                const response = await fetch('http://localhost:5000/api/auth/me', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
 
-            if (!response.ok) throw new Error("Failed to fetch user data");
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
 
-            const result = await response.json();
-            console.log("🔍 Profile fetch result:", result);
-
-            // ✅ Backend returns user object directly, not wrapped in success
-            // No need to check result.success
-            
-            const hasAddress = result.region || result.city || result.postalCode || result.add;
-
-            setUserData({
-                firstName: result.firstName,
-                lastName: result.lastName,
-                email: result.email,
-                phoneNumber: result.phone || null,
-                role: result.role,
-                hasAddress: hasAddress,
-                address: hasAddress
-                    ? {
-                          region: result.region || null,
-                          city: result.city || null,
-                          postalCode: result.postalCode || null,
-                          add: result.add || null,
-                          country: result.country || null,
-                      }
-                    : null,
-            });
-        } catch (err) {
-            console.error("❌ Profile fetch error:", err);
-            setError(err.message);
-            if (err.message.includes("token")) {
-                setTimeout(() => {
-                    window.location.href = "/login";
-                }, 2000);
+                const result = await response.json();
+                console.log("🔍 Profile fetch result:", result);
+                
+                // ✅ Backend returns user object directly, not wrapped in success
+                setUserData({
+                    firstName: result.firstName,
+                    lastName: result.lastName,
+                    email: result.email,
+                    phoneNumber: result.phone || null,
+                    role: result.role,
+                    address: {
+                        region: result.region || '',
+                        city: result.city || '',
+                        postalCode: result.postalCode || '',
+                        add: result.add || '',
+                        country: result.country || ''
+                    }
+                });
+            } catch (err) {
+                console.error("❌ Profile fetch error:", err);
+                setError(err.message);
+                if (err.message.includes('token')) {
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                }
+            } finally {
+                setLoading(false);
             }
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
 
-    fetchUserData();
-}, []);
+        fetchUserData();
+    }, []);
 
     const handleLogoutConfirm = () => {
         localStorage.removeItem("token");
@@ -622,7 +620,7 @@ export default function MyProfile() {
                     <div className="mPnavHeaderCont">
                         <div className="mPlogoCont">
                             <p className="mPnavLogo"><img src={PlantLogo} alt="Logo"></img></p>
-                            <p className="mPnavLogoText">Eric's Garden</p>
+                            <p className="mPnavLogoText">Plantasy Garden</p>
                         </div>
                 
                         <div className="mPnavHeaderBttnCont">
@@ -674,9 +672,9 @@ export default function MyProfile() {
                     <div className="myProfileFormCont">
                         <aside className="mPsideBarMenuCont">
                             <nav className="mPsideBarBttn">
-                                <button className="mPprofile">Profile</button>
+                                <button className="mPprofile" disabled>Profile</button>
                                 <button className="mPediAccount" onClick={() => navigate("/editacc")}>Edit Account</button>
-                                <button className="mPcreateHistory" onClick={() => navigate("/history")}>Create History</button>
+                                <button className="mPcreateHistory" onClick={() => navigate("/history")}>Order History</button>
                                 <button className="mPtrackMyOrder" onClick={() => navigate("/track")}>Track My Order</button>
                                 <button 
                                     onClick={() => setShowLogoutModal(true)}
@@ -705,7 +703,7 @@ export default function MyProfile() {
                                 </div>
 
                                 <div className="mPsettingsCont">
-                                    <button className="mPsettings" onClick={() => navigate("/editacc")}>Settings</button>
+                                    <button className="mPsettings" onClick={() => navigate("/security")}>Settings</button>
                                 </div>
                             </div>
 
@@ -743,45 +741,29 @@ export default function MyProfile() {
                                 <label className="roleLabel">{userData.role}</label>
                             </div>
 
-                            {userData.hasAddress && userData.address && (
-                                <div className="addressCont">
-                                    <h3 className="addressHeader">Address</h3>
+                            <div className="addressCont">
+                                <h3 className="addressHeader">Address</h3>
 
-                                    {userData.address.add && (
-                                        <div style={{ marginBottom: "15px" }}>
-                                            <label className="address">Street Address</label>
-                                            <p className="mPaddressLabel">{userData.address.add}</p>
-                                        </div>
-                                    )}
+                                <div style={{ marginBottom: "15px" }}>
+                                    <label className="address">Street Address</label>
+                                    <p className="mPaddressLabel">{userData.address.add || '-'}</p>
+                                </div>
 
-                                    <div className="addressCont2">
-                                        <div className="mPcountryCont">
-                                            {userData.address.region && (
-                                                <>
-                                                    <label className="region">Region</label>
-                                                    <p className="mPregionLabel">{userData.address.region}</p>
-                                                </>
-                                            )}
+                                <div className="addressCont2">
+                                    <div className="mPcountryCont">
+                                        <label className="region">Region</label>
+                                        <p className="mPregionLabel">{userData.address.region || '-'}</p>
 
-                                            {userData.address.postalCode && (
-                                                <>
-                                                    <label className="postalCode">Postal Code</label>
-                                                    <p className="mPpostalCodeLabel">{userData.address.postalCode}</p>
-                                                </>
-                                            )}
-                                        </div>
+                                        <label className="postalCode" style={{ marginTop: '15px' }}>Postal Code</label>
+                                        <p className="mPpostalCodeLabel">{userData.address.postalCode || '-'}</p>
+                                    </div>
 
-                                        <div className="mPstateNcity">
-                                            {userData.address.city && (
-                                                <>
-                                                    <label className="city">City</label>
-                                                    <p className="mPcityLabel">{userData.address.city}</p>
-                                                </>
-                                            )}
-                                        </div>
+                                    <div className="mPstateNcity">
+                                        <label className="city">City</label>
+                                        <p className="mPcityLabel">{userData.address.city || '-'}</p>
                                     </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -789,7 +771,7 @@ export default function MyProfile() {
 
             <footer>
                 <div className="compyRight">
-                    <p>@ 2025 Eric's Garden. All Rights Reserved.</p>
+                    <p>@ 2025 Plantasy Garden. All Rights Reserved.</p>
                 </div>
             </footer>
 

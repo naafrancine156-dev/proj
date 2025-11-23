@@ -4,14 +4,28 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+const jwt = require("jsonwebtoken");
+
+// Security middlewares
+const helmet = require("helmet");
+const xssClean = require("xss-clean");
+const mongoSanitize = require("express-mongo-sanitize");
 
 const app = express();
 
-// ===== DEFINE VARIABLES FIRST =====
+// ===== DEFINE VARIABLES =====
 const MONGO_URI = config.MONGO_URI;
 const PORT = config.PORT;
 
-// ===== MIDDLEWARE =====
+console.log("🔍 Config loaded:", { MONGO_URI: !!MONGO_URI, JWT_SECRET: !!config.JWT_SECRET, PORT });
+
+// ===== MIDDLEWARE - ORDER MATTERS =====
+// 1. Security headers FIRST (but allow cross-origin for images)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// 2. CORS and body parsing
 app.use(cors({
   origin: "http://localhost:3000",
   credentials: true
@@ -19,12 +33,27 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ADD DEBUG HERE (after PORT is defined)
-console.log("🔍 Config loaded:", { MONGO_URI: !!MONGO_URI, JWT_SECRET: !!config.JWT_SECRET, PORT });
-console.log("🔍 NODE_ENV:", process.env.NODE_ENV);
+// 3. Data sanitization
+app.use(xssClean());
+app.use(mongoSanitize());
 
-// ===== SERVE STATIC FILES =====
+// 4. Static files - AFTER sanitization
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ===== JWT PROTECTION MIDDLEWARE =====
+const protect = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: 'No token provided' });
+
+  const token = authHeader.split(' ')[1]; // Bearer <token>
+  try {
+    const decoded = jwt.verify(token, config.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(403).json({ message: 'Invalid token' });
+  }
+};
 
 // ===== MONGODB CONNECTION =====
 mongoose.connect(MONGO_URI, {
@@ -32,7 +61,7 @@ mongoose.connect(MONGO_URI, {
   useUnifiedTopology: true,
 })
 .then(() => {
-  console.log("MongoDB Connected to Atlas");     
+  console.log("MongoDB Connected to Atlas");
   console.log("Database:", mongoose.connection.name);
   const createSampleAdmin = require("./utils/createSampleAdmin");
   createSampleAdmin();
@@ -46,25 +75,25 @@ mongoose.connect(MONGO_URI, {
 try {
   const authRoutes = require("./routes/authRoutes");
   console.log("✅ authRoutes loaded");
-  
+
   const productRoutes = require("./routes/productRoutes");
   console.log("✅ productRoutes loaded");
-  
+
   const userRoutes = require("./routes/userRoutes");
   console.log("✅ userRoutes loaded");
-  
+
   const cartRoutes = require("./routes/cartRoutes");
   console.log("✅ cartRoutes loaded");
-  
+
   const orderRoutes = require("./routes/orderRoutes");
   console.log("✅ orderRoutes loaded");
 
   // Register routes
-  app.use("/api/auth", authRoutes);
-  app.use("/api/products", productRoutes);
-  app.use("/api/user", userRoutes);
-  app.use("/api/cart", cartRoutes);
-  app.use("/api/orders", orderRoutes);
+  app.use("/api/auth", authRoutes);                  // Public
+  app.use("/api/products", productRoutes);           // Public
+  app.use("/api/user", protect, userRoutes);         // Protected
+  app.use("/api/cart", protect, cartRoutes);         // Protected
+  app.use("/api/orders", protect, orderRoutes);      // Protected
 
   console.log("✅ All routes registered");
 } catch (err) {
@@ -75,10 +104,6 @@ try {
 // ===== TEST ENDPOINTS =====
 app.get("/api/test", (req, res) => {
   res.json({ message: "Backend is working!" });
-});
-
-app.get("/api/user/test", (req, res) => {
-  res.json({ message: "User routes are working!" });
 });
 
 app.get("/api/health", (req, res) => {
@@ -112,6 +137,6 @@ app.use((err, req, res, next) => {
 // ===== START SERVER =====
 app.listen(PORT, () => {
   console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📁 Uploads directory: ${path.join(__dirname, "uploads")}`);  
+  console.log(`📁 Uploads directory: ${path.join(__dirname, "uploads")}`);
   console.log(`\n✅ Ready to accept requests!\n`);
-});
+})

@@ -8,20 +8,18 @@ import SearchSidebar from "./SearchSidebar";
 function HomePageUi() {
   const navigate = useNavigate();
 
-  // States
   const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cartCount, setCartCount] = useState(0);
   const [addedMessage, setAddedMessage] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false); // 🔍 New state for search
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     fetchCategories();
     fetchFeaturedProducts();
   }, []);
 
-  // Fetch categories
   const fetchCategories = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/products");
@@ -44,18 +42,17 @@ function HomePageUi() {
           });
         });
 
-        const categoriesArray = Array.from(categoryMap.values())
-          .sort((a, b) => b.productCount - a.productCount)
-          .slice(0, 3);
-
-        setCategories(categoriesArray);
+        setCategories(
+          Array.from(categoryMap.values())
+            .sort((a, b) => b.productCount - a.productCount)
+            .slice(0, 4)
+        );
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
   };
 
-  // Fetch featured products
   const fetchFeaturedProducts = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/products/featured");
@@ -64,37 +61,29 @@ function HomePageUi() {
       if (data.success) {
         setFeaturedProducts(data.products.slice(0, 6));
       } else {
-        const fallbackResponse = await fetch("http://localhost:5000/api/products");
-        const fallbackData = await fallbackResponse.json();
+        const fallback = await fetch("http://localhost:5000/api/products");
+        const fallbackData = await fallback.json();
         if (fallbackData.success) {
           setFeaturedProducts(fallbackData.products.slice(0, 6));
         }
       }
     } catch (error) {
-      console.error("Error fetching featured products:", error);
-      try {
-        const response = await fetch("http://localhost:5000/api/products");
-        const data = await response.json();
-        if (data.success) {
-          setFeaturedProducts(data.products.slice(0, 6));
-        }
-      } catch (fallbackError) {
-        console.error("Fallback fetch failed:", fallbackError);
+      const fallback = await fetch("http://localhost:5000/api/products");
+      const fallbackData = await fallback.json();
+      if (fallbackData.success) {
+        setFeaturedProducts(fallbackData.products.slice(0, 6));
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle add to cart
   const handleAddToCart = (productId) => {
     setCartCount((prev) => prev + 1);
     setAddedMessage("✅ Item added to cart!");
     setTimeout(() => setAddedMessage(""), 2500);
-    console.log("Add to cart:", productId);
   };
 
-  // Handle card click
   const handleCardClick = (productId) => {
     navigate(`/product/${productId}`);
   };
@@ -105,7 +94,6 @@ function HomePageUi() {
 
   return (
     <>
-      {/* 🔍 Search Sidebar Component */}
       <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <header>
@@ -115,7 +103,7 @@ function HomePageUi() {
               <p className="navLogo">
                 <img src={PlantLogo} alt="Logo" />
               </p>
-              <p className="navLogoText">Eric's Garden</p>
+              <p className="navLogoText">Plantasy</p>
             </div>
 
             <div className="navHeaderBttnCont">
@@ -126,15 +114,10 @@ function HomePageUi() {
             </div>
 
             <div className="navHeaderLogoBttonCont">
-              {/* 🔍 Search Button - Opens Sidebar */}
-              <button
-                className="iconBttn1"
-                onClick={() => setSearchOpen(true)}
-              >
+              <button className="iconBttn1" onClick={() => setSearchOpen(true)}>
                 <i className="navSearch"></i>
               </button>
 
-              {/* Cart Icon with Badge */}
               <div className="navCartWrapper">
                 <button className="iconBttn2" onClick={() => navigate("/cart")}>
                   <i className="navCard"></i>
@@ -142,10 +125,7 @@ function HomePageUi() {
                 {cartCount > 0 && <span className="cartBadge">{cartCount}</span>}
               </div>
 
-              <button
-                className="iconBttn3"
-                onClick={() => navigate("/myprofile")}
-              >
+              <button className="iconBttn3" onClick={() => navigate("/myprofile")}>
                 <i className="navAcc"></i>
               </button>
             </div>
@@ -157,45 +137,42 @@ function HomePageUi() {
 
           <div className="pageHeaderCont">
             <h1 className="pageHeader">Bring Nature into Your Sanctuary</h1>
-            <p className="pageSubHeader">
-              Curated Collection of Rare and Beautiful Plants to Mindful Living.
-            </p>
-            <button
-              className="exploreCollectionBttn"
-              onClick={() => navigate("/shop")}
-            >
+            <p className="pageSubHeader">Curated Collection of Rare and Beautiful Plants to Mindful Living.</p>
+
+            <button className="exploreCollectionBttn" onClick={() => navigate("/shop")}>
               SHOP ALL
             </button>
           </div>
         </div>
       </header>
 
+      {/* ---------- CATEGORIES (4 cards layout from second code) ---------- */}
       <section>
-        {/* Categories */}
         <div className="cont2">
           <div className="subHeaderCont">
             <h3 className="subHeaderText">Discover by Category</h3>
           </div>
 
-          <div className="imgCardCont">
+          <div className="imgCardCont categoryGrid">
             {loading ? (
               <p>Loading categories...</p>
             ) : categories.length > 0 ? (
               categories.map((category, index) => (
                 <div
                   key={index}
-                  className={`card${index + 1}`}
+                  className="categoryCard"
                   onClick={() => handleCategoryClick(category.name)}
-                  style={{ cursor: "pointer" }}
                 >
-                  <img
-                    alt={category.name}
-                    className={`card${index + 1}Img`}
-                    src={`http://localhost:5000${category.image}`}
-                    onError={(e) => (e.target.style.display = "none")}
-                  />
+                  <div className="categoryImgWrap">
+                    <img
+                      alt={category.name}
+                      src={`http://localhost:5000${category.image}`}
+                      onError={(e) => (e.target.style.display = "none")}
+                    />
+                  </div>
+
                   <h3 className="cardTitle">{category.name}</h3>
-                  <p className={`card${index + 1}Detail`}>
+                  <p>
                     {category.productCount}{" "}
                     {category.productCount === 1 ? "product" : "products"}
                   </p>
@@ -207,7 +184,8 @@ function HomePageUi() {
           </div>
         </div>
 
-        {/* Featured Products */}
+        {/* ---------- FEATURED PRODUCTS (Grid layout) ---------- */}
+        
         <div className="cont3">
           <div className="subHeader2Cont">
             <h3 className="subHeader2text">Featured Collection</h3>
@@ -216,134 +194,132 @@ function HomePageUi() {
           {loading ? (
             <p>Loading featured products...</p>
           ) : featuredProducts.length > 0 ? (
-            <>
-              <div className="imgCardCont2">
-                {featuredProducts.slice(0, 3).map((product, index) => (
-                  <div
-                    key={product._id}
-                    className="card"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleCardClick(product._id)}
-                  >
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: "30px",
+              padding: "20px"
+            }}>
+              {featuredProducts.map((product) => (
+                <div
+                  key={product._id}
+                  style={{
+                    cursor: "pointer",
+                    transition: "transform 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-8px)"}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+                  onClick={() => handleCardClick(product._id)}
+                >
+                  <div style={{
+                    width: "100%",
+                    height: "280px",
+                    overflow: "hidden",
+                    marginBottom: "15px",
+                    background: "#f5f5f5",
+                    borderRadius: "8px"
+                  }}>
                     <img
                       alt={product.name}
-                      className={`card${index + 1}Img`}
                       src={`http://localhost:5000${product.imageURLs[0]}`}
-                      onError={(e) => (e.target.style.display = "none")}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
                     />
-                    <div className="cardDetail">
-                      <div className="prodDetailCont">
-                        <h3 className="cardTitle">{product.name}</h3>
-                        <p className="card1Detail">
-                          {product.description || "Premium quality plant"}
-                        </p>
-                      </div>
-                      <div className="prodStatusCont">
-                        <label>POPULAR</label>
-                      </div>
-                    </div>
-                    <div className="priceAndBttnCont">
-                      <label
-                        className="priceLabel"
-                        style={{ color: "#222", fontWeight: "bold" }}
-                      >
-                        ₱{" "}
-                        {product.price.toLocaleString("en-PH", {
-                          minimumFractionDigits: 2,
-                        })}
-                      </label>
-                    </div>
                   </div>
-                ))}
-              </div>
 
-              {featuredProducts.length > 3 && (
-                <div className="imgCardCont3">
-                  {featuredProducts.slice(3, 6).map((product, index) => (
-                    <div
-                      key={product._id}
-                      className="card"
-                      style={{ cursor: "pointer" }}
-                      onClick={() => handleCardClick(product._id)}
-                    >
-                      <img
-                        alt={product.name}
-                        className={`card${index + 1}Img`}
-                        src={`http://localhost:5000${product.imageURLs[0]}`}
-                        onError={(e) => (e.target.style.display = "none")}
-                      />
-                      <div className="cardDetail">
-                        <div className="prodDetailCont">
-                          <h3 className="cardTitle">{product.name}</h3>
-                          <p className="card1Detail">
-                            {product.description || "Premium quality plant"}
-                          </p>
-                        </div>
-                        <div className="prodStatusCont">
-                          <label>POPULAR</label>
-                        </div>
-                      </div>
-                      <div className="priceAndBttnCont">
-                        <label
-                          className="priceLabel"
-                          style={{ color: "#222", fontWeight: "bold" }}
-                        >
-                          ₱{" "}
-                          {product.price.toLocaleString("en-PH", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </label>
-                      </div>
-                    </div>
-                  ))}
+                  <div style={{ padding: "0 10px" }}>
+                    <h3 style={{
+                      fontSize: "16px",
+                      fontWeight: "600",
+                      margin: "0 0 8px 0",
+                      color: "#333",
+                      lineHeight: "1.3"
+                    }}>
+                      {product.name}
+                    </h3>
+                    
+                    <p style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      margin: "0 0 12px 0",
+                      lineHeight: "1.4",
+                      minHeight: "40px"
+                    }}>
+                      {product.description || "Premium quality plant"}
+                    </p>
+
+                    <p style={{
+                      fontSize: "16px",
+                      fontWeight: "700",
+                      color: "#333",
+                      margin: "0"
+                    }}>
+                      ₱ {product.price.toLocaleString("en-PH", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}
+                    </p>
+                  </div>
                 </div>
-              )}
-            </>
+              ))}
+            </div>
           ) : (
             <p>No featured products available</p>
           )}
         </div>
       </section>
 
-      {/* Popup Message */}
+      {/* POPUP */}
       {addedMessage && <div className="addedMsg">{addedMessage}</div>}
 
+      {/* ---------- FOOTER FROM SECOND CODE ---------- */}
       <footer>
         <div className="footerCont">
           <div className="otherInfoCont">
+            
             <div className="infoCont1">
-              <h3 className="footerHeader">Eric's Garden</h3>
+              <h3 className="footerHeader">Plantasy Garden</h3>
               <p className="infoDetails">
                 Bringing the Beauty of Nature into Homes and Hearts.
               </p>
             </div>
+
             <div className="infoCont2">
               <h3 className="footerHeader">Shop</h3>
               <ul>
                 <li>Indoor Plants</li>
                 <li>Outdoor Plants</li>
                 <li>Succulents Plants</li>
-                <li>Rare Finds</li>
               </ul>
             </div>
+
             <div className="infoCont3">
               <h3 className="footerHeader">Support</h3>
               <ul>
-                <li><a href="plantsCare">Plant Care</a></li>
-                <li><a href="shippingInfo">Shipping Info</a></li>
-                <li><a href="returns">Returns</a></li>
-                <li><a href="faqs">FAQs</a></li>
+                <li><a href="AboutUs">About Us</a></li>
+                <li><a href="Track">Shipping Info</a></li>
+                <li><a href="Returns">Return</a></li>
+                <li><a href="FAQS">FAQs</a></li>
               </ul>
             </div>
+
             <div className="infoCont4">
               <h3 className="footerHeader">Stay Connected</h3>
               <p className="infoDetails">
                 Subscribe for plant care tips and exclusive offers
               </p>
+
+              <input type="email" className="footerInput" placeholder="Enter your email" />
+              <button className="footerSubscribe">Subscribe</button>
             </div>
+
           </div>
+
           <div className="compyRight">
-            <p>© 2025 Eric's Garden. All Rights Reserved.</p>
+            <p>© 2025 Plantasy. All Rights Reserved.</p>
           </div>
         </div>
       </footer>

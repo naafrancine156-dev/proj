@@ -71,6 +71,12 @@ export default function OrderManagement() {
     return (price * quantity).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' })
   }
 
+  // NEW: Calculate subtotal from items
+  const calculateSubtotal = (items) => {
+    if (!items || items.length === 0) return 0;
+    return items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  }
+
   // Sort orders based on sort option
   const getSortedOrders = () => {
     let sorted = [...orders];
@@ -200,7 +206,7 @@ export default function OrderManagement() {
     <div className="container">
       <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="logo">
-          <h1>Eric's Garden</h1>
+          <h1>Plantasy</h1>
           <p>Smart Plant Care & Shopping System</p>
         </div>
 
@@ -380,8 +386,13 @@ export default function OrderManagement() {
                 {selectedOrder.items && selectedOrder.items.map((item, idx) => (
                   <div key={idx} className="item-row">
                     <div className="item-name">
-                      <span className="avatar"></span>
-                      {item.name}
+                      {/* FIXED: Added product image */}
+                      <div className="avatar" style={{
+                        backgroundImage: item.image ? `url(http://localhost:5000${item.image})` : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}></div>
+                      <span>{item.name}</span>
                     </div>
                     <div className="item-details">
                       <span className="item-price">₱ {item.price.toLocaleString('en-PH')}</span>
@@ -412,7 +423,7 @@ export default function OrderManagement() {
                 <div className="detail-item">
                   <span className="detail-label">Delivery Address</span>
                   <span className="detail-value">
-                    {selectedOrder.billingAddress?.city}, {selectedOrder.billingAddress?.region}
+                    {selectedOrder.billingAddress?.add}, {selectedOrder.billingAddress?.city}, {selectedOrder.billingAddress?.region} {selectedOrder.billingAddress?.postalCode}
                   </span>
                 </div>
                 <div className="detail-item">
@@ -432,12 +443,20 @@ export default function OrderManagement() {
                   <span className="detail-label">Order Created</span>
                   <span className="detail-value">{formatDate(selectedOrder.createdAt)}</span>
                 </div>
+                {/* FIXED: Correct subtotal calculation */}
                 <div className="detail-item">
                   <span className="detail-label">Subtotal</span>
                   <span className="detail-value">
-                    ₱ {(selectedOrder.total - selectedOrder.shippingCost - selectedOrder.tax - selectedOrder.paymentFee).toLocaleString('en-PH')}
+                    ₱ {calculateSubtotal(selectedOrder.items).toLocaleString('en-PH')}
                   </span>
                 </div>
+                {/* FIXED: Show discount if applied */}
+                {selectedOrder.discount > 0 && (
+                  <div className="detail-item" style={{ color: '#10b981' }}>
+                    <span className="detail-label">Discount</span>
+                    <span className="detail-value">-₱ {selectedOrder.discount?.toLocaleString('en-PH')}</span>
+                  </div>
+                )}
                 <div className="detail-item">
                   <span className="detail-label">Shipping</span>
                   <span className="detail-value">₱ {selectedOrder.shippingCost?.toLocaleString('en-PH')}</span>
@@ -487,6 +506,7 @@ export default function OrderManagement() {
           position: fixed;
           z-index: 999;
         }
+          
 
         .sidebar-toggle {
           display: none;
@@ -507,7 +527,7 @@ export default function OrderManagement() {
         .logo {
           margin-bottom: 40px;
           text-align: center;
-          border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+          border-bottom: 2px solid #e0e0e0;
           padding-bottom: 20px;
         }
 
@@ -520,7 +540,7 @@ export default function OrderManagement() {
 
         .logo p {
           font-size: 11px;
-          color: rgba(245, 245, 240, 0.7);
+          color: #999;
         }
 
         .nav-menu {
@@ -546,12 +566,12 @@ export default function OrderManagement() {
         }
 
         .nav-item:hover {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: transparent;
           color: #fff;
         }
 
         .nav-item.active {
-          background-color: rgba(255, 255, 255, 0.15);
+          background-color: transparent;
           color: #fff;
           font-weight: 600;
         }
@@ -564,7 +584,7 @@ export default function OrderManagement() {
 
         .logout {
           margin-top: auto;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          border-top: 1px solid #e0e0e0;
           padding-top: 20px;
         }
 
@@ -733,17 +753,19 @@ export default function OrderManagement() {
         }
 
         .order-id-link {
-          background: none;
-          border: none;
+          background: transparent !important;
+          border: none !important;
           color: #1E3932;
           font-weight: 600;
           cursor: pointer;
           text-decoration: underline;
-          padding: 0;
+          padding: 0 !important;
+          box-shadow: none !important;
         }
 
         .order-id-link:hover {
           color: #155e4e;
+          background: transparent !important;
         }
 
         .status-badge {
@@ -947,6 +969,7 @@ export default function OrderManagement() {
           background-color: #e0e0e0;
           display: inline-block;
           flex-shrink: 0;
+          border: 1px solid #ddd;
         }
 
         .detail-item {

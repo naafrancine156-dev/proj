@@ -21,6 +21,8 @@ import MyProfile from "./components/MyProfile,";
 import EditAccount from "./components/EditAccount";
 import Customers from "./components/customers";
 import OrderHistory from "./components/OrderHistory";
+import SecuritySettings from "./components/SecuritySettings";
+import AboutUs from "./components/AboutUs";
 
 function App() {
   return (
@@ -49,6 +51,9 @@ function App() {
         <Route path="/orders" element={<Order />} />
         <Route path="/track" element={<Track />} />
         <Route path="/history" element={<OrderHistory />} />
+        <Route path="/security" element={<SecuritySettings />} />
+        <Route path="/aboutus" element={<AboutUs />} />
+
         
         {/* ===== CONTACT ROUTES (Public) ===== */}
         <Route path="/contactus" element={<ContactUs />} />

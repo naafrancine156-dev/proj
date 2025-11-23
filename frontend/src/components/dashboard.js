@@ -239,7 +239,7 @@ export default function Dashboard() {
     <div style={styles.container}>
       <aside style={styles.sidebar}>
         <div style={styles.logo}>
-          <h1>Eric's Garden</h1>
+          <h1>Plantasy</h1>
           <p>Smart Plant Care & Shopping System</p>
         </div>
 
@@ -275,7 +275,7 @@ export default function Dashboard() {
         <div style={styles.header}>
           <div style={styles.greeting}>
             <h2>Hello, {adminData ? adminData.firstName : "Admin"}!</h2>
-            <p>Welcome to Eric's Garden Dashboard</p>
+            <p>Welcome to Plantasy Dashboard</p>
           </div>
           <div style={styles.profile}>
             <div style={styles.profileIcon}>{adminData ? adminData.firstName[0] : "A"}</div>

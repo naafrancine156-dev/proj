@@ -317,7 +317,7 @@ export default function ProductsPage() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo">
-          <h1>Eric's Garden</h1>
+          <h1>Plantasy</h1>
           <p>Smart Plant Care & Shopping System</p>
         </div>
 

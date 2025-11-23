@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 export default function UsersPage() {
   const [activeItem, setActiveItem] = useState("Users");
@@ -14,6 +16,8 @@ export default function UsersPage() {
   const [filterRole, setFilterRole] = useState("all");
   const [sortBy, setSortBy] = useState("default");
   const itemsPerPage = 10;
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     fetchUsers();
@@ -236,32 +240,44 @@ export default function UsersPage() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo">
-          <h1>Eric's Garden</h1>
+          <h1>Plantasy</h1>
           <p>Smart Plant Care & Shopping System</p>
         </div>
 
         <nav className="nav-menu">
           <button 
             className={`nav-item ${activeItem === "Dashboard" ? "active" : ""}`} 
-            onClick={() => handleNavigation("Dashboard")}
+            onClick={() => {
+              setActiveItem("Dashboard");
+              navigate("/dashboard");
+            }}
           >
             <span className="nav-icon">⊞</span> Dashboard
           </button>
           <button 
             className={`nav-item ${activeItem === "Products" ? "active" : ""}`} 
-            onClick={() => handleNavigation("Products")}
+            onClick={() => {
+              setActiveItem("Products");
+              navigate("/product");
+            }}
           >
             <span className="nav-icon">⊞</span> Products
           </button>
           <button 
             className={`nav-item ${activeItem === "Order" ? "active" : ""}`} 
-            onClick={() => handleNavigation("Order")}
+            onClick={() => {
+              setActiveItem("Order");
+              navigate("/orders");
+            }}
           >
             <span className="nav-icon">⊞</span> Order Management
           </button>
           <button 
             className={`nav-item ${activeItem === "Users" ? "active" : ""}`} 
-            onClick={() => handleNavigation("Users")}
+            onClick={() => {
+              setActiveItem("Customers");
+              navigate("/customers");
+            }}
           >
             <span className="nav-icon">⊞</span> User Management
           </button>

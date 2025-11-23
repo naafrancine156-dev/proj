@@ -1,15 +1,19 @@
-// Update your OrderHistory component to fetch data from backend and show status
-
 import { useState, useEffect } from "react";
-//import "./TrackMyOrder.css";
 import SearchIcon from "./assets/whitesearch.png";
 import CartIcon from "./assets/whitecart.png";
 import AccIcon from "./assets/whiteaccount.png";
 import PlantLogo from "./assets/plantlogo.png";
+import { useNavigate } from "react-router-dom";
+import SearchSidebar from "./SearchSidebar";
+import LogoutModal from "./LogoutModal";
 
-function OrderHistory(){
+function OrderHistory() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cartCount, setCartCount] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     fetchOrderHistory();
@@ -37,6 +41,16 @@ function OrderHistory(){
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRemoveOrder = (orderId) => {
+    const updatedOrders = orders.filter(order => order._id !== orderId);
+    setOrders(updatedOrders);
+  };
+
+  const handleLogoutConfirm = () => {
+    setShowLogoutModal(false);
+    navigate("/");
   };
 
   const getStatusBadge = (status) => {
@@ -77,516 +91,384 @@ function OrderHistory(){
     );
   };
 
-  // Replace the hardcoded order cards with this dynamic rendering:
+  const colors = {
+    primaryBg: 'hsl(164, 31%, 17%)',
+    secondaryBg: 'hsl(47, 47%, 93%)',
+    primaryTxt: 'hsl(0, 0%, 100%)',
+    secondaryTxt: 'hsl(0, 1%, 25%)',
+    darkTxt: 'hsla(0, 0%, 10%, 1.00)',
+  };
+
+  const styles = {
+    pageWrapper: {
+      background: 'hsl(0, 0%, 100%)',
+      width: '100%',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      fontFamily: "'Times New Roman', Times, serif",
+      boxSizing: 'border-box',
+      margin: 0,
+      padding: 0,
+    },
+    navHeaderCont: {
+      backgroundColor: colors.primaryBg,
+      display: 'flex',
+      flexWrap: 'nowrap',
+      alignItems: 'center',
+      borderBottom: '1px solid #eee',
+      justifyContent: 'space-between',
+      gap: '20px',
+      width: '100%',
+      padding: '10px 15px',
+      boxSizing: 'border-box',
+      overflow: 'scroll',
+    },
+    logoCont: {
+      color: colors.primaryTxt,
+      display: 'flex',
+      alignItems: 'center',
+      marginLeft: '10px',
+    },
+    logoImg: {
+      backgroundColor: '#ffff',
+      borderRadius: '50%',
+      width: '50px',
+      height: '50px',
+      marginRight: '10px',
+    },
+    navLogoText: {
+      color: colors.primaryTxt,
+      fontSize: '1.5rem',
+      fontWeight: 'bold',
+      margin: 0,
+    },
+    navHeaderBttnCont: {
+      display: 'flex',
+      flexWrap: 'nowrap',
+      justifyContent: 'center',
+      gap: '15px',
+    },
+    navButton: {
+      background: 'none',
+      color: colors.primaryTxt,
+      border: 'none',
+      fontSize: '1rem',
+      padding: '8px 12px',
+      cursor: 'pointer',
+      fontFamily: 'inherit',
+    },
+    iconButtonCont: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '20px',
+    },
+    iconButton: {
+      width: '33px',
+      height: '33px',
+      background: 'transparent',
+      borderRadius: '50%',
+      border: 'none',
+      padding: 0,
+      cursor: 'pointer',
+      position: 'relative',
+    },
+    iconSearch: {
+      backgroundImage: `url(${SearchIcon})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      width: '28px',
+      height: '28px',
+      display: 'inline-block',
+    },
+    iconCart: {
+      backgroundImage: `url(${CartIcon})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      width: '28px',
+      height: '28px',
+      display: 'inline-block',
+    },
+    iconAcc: {
+      backgroundImage: `url(${AccIcon})`,
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: 'cover',
+      width: '28px',
+      height: '28px',
+      display: 'inline-block',
+    },
+    cartBadge: {
+      position: 'absolute',
+      top: '-5px',
+      right: '-5px',
+      backgroundColor: 'red',
+      color: 'white',
+      borderRadius: '50%',
+      padding: '2px 6px',
+      fontSize: '10px',
+      fontWeight: 'bold'
+    },
+    textQuoteHeader: {
+      backgroundColor: 'hwb(0 100% 0%)',
+      textAlign: 'center',
+      fontSize: '0.9rem',
+      letterSpacing: '1px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      padding: '5px 0',
+      margin: 0,
+    },
+    section: {
+      backgroundColor: colors.secondaryBg,
+      padding: '40px 80px',
+      flex: 1,
+      boxSizing: 'border-box',
+    },
+    pageHeaderCont: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '30px',
+      paddingBottom: '15px',
+      borderBottom: `1px solid ${colors.primaryBg}`,
+    },
+    pageHeaderH1: {
+      fontSize: '2.5rem',
+      margin: 0,
+    },
+    pageSubHeader: {
+      fontSize: '1rem',
+      color: 'hsl(0, 0%, 30%)',
+      margin: 0,
+    },
+    orderHistFormCont: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      gap: '10px',
+      paddingTop: '20px',
+      width: '100%',
+      minWidth: '100px',
+    },
+    sidebarMenu: {},
+    sidebarNav: {
+      background: '#ffffff',
+      color: colors.primaryTxt,
+      border: '1px solid black',
+      borderRadius: '10px',
+      padding: '20px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '5px',
+    },
+    sidebarButton: {
+      background: 'transparent',
+      borderBottom: '1px solid black',
+      padding: '10px 15px',
+      textAlign: 'left',
+      color: colors.secondaryTxt,
+      cursor: 'pointer',
+      marginBottom: '0',
+      fontFamily: 'inherit',
+      fontSize: '1rem',
+      width: '100%',
+      borderRadius: '5px',
+      boxShadow: 'none',
+      outline: 'none',
+    },
+    orderHistForm: {
+      display: 'flex',
+      flexDirection: 'column',
+      background: '#ffffff',
+      border: '1px solid black',
+      borderRadius: '10px',
+      padding: '25px',
+      gap: '20px',
+      boxSizing: 'border-box',
+      flex: '0.6',
+    },
+    orderCard: {
+      border: '1px solid black',
+      borderRadius: '10px',
+      padding: '20px 30px',
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      backgroundColor: '#fff',
+    },
+    orderCardDet: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: '5px',
+    },
+    orderIdentity: {
+      margin: 0,
+      fontSize: '1.17em',
+      fontWeight: 'bold',
+    },
+    orderLabel: {
+      fontSize: '1rem',
+      color: '#333',
+    },
+    orderQnttyLabel2: {
+      fontWeight: 'bold',
+    },
+    orderNameLabel: {
+      fontWeight: 'normal',
+      fontStyle: 'italic',
+    },
+    orderTotalPriceLabel: {
+      marginTop: '5px',
+    },
+    orderPriceLabel: {
+      fontWeight: 'bold',
+      fontStyle: 'normal',
+    },
+    removeBttn: {
+      padding: '3px 6px',
+      borderRadius: '5px',
+      fontWeight: 'bold',
+      fontSize: '0.75rem',
+      background: 'transparent',
+      color: colors.darkTxt,
+      cursor: 'pointer',
+      fontFamily: 'inherit',
+      border: '1px solid black',
+      boxShadow: 'none',
+      outline: 'none',
+    },
+    removeBttnHover: {
+      backgroundColor: colors.primaryBg,
+      color: colors.primaryTxt,
+    },
+    statusBadgeCont: {
+      marginTop: '10px',
+    },
+    footer: {
+      backgroundColor: colors.primaryBg,
+      color: colors.primaryTxt,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      padding: '15px 0',
+      marginTop: 'auto',
+    }
+  };
+
   return (
-    <>
-      <style>{`
-            
-                :root{
-                    --primarybgcolor: --hsl(164, 31%, 17%); /* minty green something */
-                    --secondarybgcolor: --hsl(47, 47%, 93%); /* beige */
-                    --optionalbgcolor: --hsl(0, 0%, 100%); /* white lang */
-                    --primarytxtcolor: --hsl(0, 0%, 100%); /* white lang */
-                    --secondarytxtcolor: --hsl(0, 1%, 25%); /* gray lang */
-                    --primarybttncolor: --hsl(164, 31%, 17%); /* minty green something */
-                    --secondarybttncolor: --hsl(0, 0%, 6%); /* black lang */
-                }
+    <div style={styles.pageWrapper}>
+      <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-                *{
-                    box-sizing: border-box;
-                    margin: 0;
-                    padding: 0;
-                    font-family: 'Times New Roman', Times, serif;
-                }
+      <header style={{ boxSizing: 'border-box', margin: 0, padding: 0 }}>
+        <div style={{ width: '100%' }}>
+          <div style={styles.navHeaderCont}>
+            <div style={styles.logoCont}>
+              <p style={{ margin: 0 }}><img src={PlantLogo} alt="Logo" style={styles.logoImg}></img></p>
+              <p style={styles.navLogoText}>Eric's Garden</p>
+            </div>
 
-                body{
-                    background: hsl(0, 0%, 100%);
-                    width: 100%;
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                    opacity: 0;
-                    animation: fadeAnimation 1.5s ease-in 1 forwards;
-                }
+            <div style={styles.navHeaderBttnCont}>
+              <button style={styles.navButton} onClick={() => navigate("/homepage")}>Home</button>
+              <button style={styles.navButton} onClick={() => navigate("/shop")}>Shop</button>
+              <button style={styles.navButton} onClick={() => navigate("/track")}>Track Order</button>
+              <button style={styles.navButton} onClick={() => navigate("/contactus")}>Contact Us</button>
+            </div>
 
-                /* eat bulaga animation */
-                @keyframes fadeAnimation{
-                    0%{
-                        opacity: 0;
-                    }100%{
-                        opacity: 1;
-                    }
-                }
+            <div style={styles.iconButtonCont}>
+              <button
+                style={styles.iconButton}
+                onClick={() => setSearchOpen(true)}
+              >
+                <i style={styles.iconSearch}></i>
+              </button>
 
-                .navHeaderCont{
-                    background-color: hsl(164, 31%, 17%);
-                    display: flex;
-                    flex-wrap: nowrap;
-                    align-items: center;
-                    border-bottom: 1px solid #eee;
-                    justify-content: space-between;
-                    gap: 20px;
-                    width: 100%;
-                    padding: 10px 15px;
-                }
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                <button style={styles.iconButton} onClick={() => navigate("/cart")}>
+                  <i style={styles.iconCart}></i>
+                </button>
+                {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
+              </div>
 
-                .logoCont{
-                    color: hsl(0, 0%, 100%);
-                    display: flex;
-                    align-items: center;
-                }
+              <button
+                style={styles.iconButton}
+                onClick={() => navigate("/myprofile")}
+              >
+                <i style={styles.iconAcc}></i>
+              </button>
+            </div>
+          </div>
+        </div>
 
-                .logoCont img{
-                    background-color: #ffff;
-                    border-radius: 50%;
-                    width: 50px;
-                    height: 50px;
-                    margin-right: 10px;
-                }
+        <p style={styles.textQuoteHeader}>Claim Your 20% Discount Using The Code: "JKLASWER12345"</p>
+      </header>
 
-                .navLogoText{
-                    color: hsl(0, 0%, 100%);
-                    font-size: 1.5rem;
-                    font-weight: bold;
-                }
-
-                .navHeaderBttnCont{
-                    display: flex;
-                    flex-wrap: wrap;
-                    justify-content: center;
-                    gap: 15px;
-                }
-
-                .navHeaderBttnCont button{
-                    background: none;
-                    color: hsl(0, 0%, 100%);
-                    border: none;
-                    font-size: 1rem;
-                    padding: 8px 12px;
-                }
-
-                .navHeaderBttnCont button:hover{
-                    transform: scale(1.05);
-                    transition: all 0.2s ease-in-out;
-                    border-bottom: 1px solid hsl(0, 1%, 44%);
-                    box-shadow: 0 5px 5px hsl(0, 0%, 52%);
-                    cursor: pointer;
-                }
-
-                .navHeaderLogoBttonCont{
-                    display: flex;
-                    align-items: center;
-                    gap: 20px;
-                }
-
-                .navHeaderLogoBttonCont button{
-                    width: 33px;
-                    height: 33px;
-                    background: transparent;
-                    border-radius: 50%;
-                    border: none;
-                }
-
-                .navSearch{
-                    background-image: url(${SearchIcon});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 28px;
-                    height: 28px;
-                    display: inline-block;
-                }
-
-                .navCard{
-                    background-image: url(${CartIcon});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 28px;
-                    height: 28px;
-                    display: inline-block;
-                }
-
-                .navAcc{
-                    background-image: url(${AccIcon});
-                    background-position: center;
-                    background-repeat: no-repeat;
-                    background-size: cover;
-                    width: 28px;
-                    height: 28px;
-                    display: inline-block;
-                }
-
-                .navHeaderLogoBttonCont i:hover{
-                    transform: scale(1.06);
-                    transition: all 0.2s ease-in;
-                    box-shadow: 0 0 20px hsl(165, 33%, 2%);
-                    cursor: pointer;
-                }
-
-                .textQuoteHeader{
-                    background-color: hwb(0 100% 0%);
-                    text-align: center;
-                    font-size: 0.9rem;
-                    letter-spacing: 1px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    animation: scrolling 20s linear infinite;
-                }
-
-                /* wala lang trip ko lang tong animation na marquee */
-                @keyframes scrolling {
-                    0% { transform: translateX(100%); }
-                    100% { transform: translateX(-100%); }
-                }
-
-                section{
-                    background-color: hsl(47, 47%, 93%);
-                    padding: 40px 80px;
-                }
-
-                .pageHeaderCont{
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 30px;
-                    padding-bottom: 15px;
-                    border-bottom: 1px solid hsl(164, 31%, 17%);
-                }
-
-                .pageHeaderCont h1{
-                    font-size: 2.5rem;
-                }
-
-                .pageHeaderCont p {
-                    font-size: 1rem;
-                    color: hsl(0, 0%, 30%);
-                }
-
-                /* typing animation */
-                @keyframes typingAnim {
-                    from { 
-                        width: 0 
-                    }
-                    to { 
-                        width: 100% 
-                    }
-                }
-
-                @keyframes blinkingAnim {
-                    from, to {
-                        border-color: transparent;
-                    }
-                    50% {
-                        border-color: hsl(164, 31%, 17%);
-                    }
-                }
-
-                .orderHistFormCont{
-                    display: flex;
-                    align-items: start;
-                    justify-content: center;
-                    gap: 10px;
-                    padding-top: 20px;
-                    width: 100%;
-                    min-width: 100px;
-                }
-
-                .sideBarBttn {
-                    background: #ffffff;
-                    color: var(--primarytxtcolor);
-                    border: 1px solid black;
-                    border-radius: 10px;
-                    padding: 20px;
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .profile, .ediAccount, .createHistory, .trackMyOrder, .security {
-                    background: transparent;
-                    border: none;
-                    padding: 10px 40px 10px 10px;
-                }
-
-                nav button {
-                    margin-bottom: 5px;
-                    text-align: left;
-                }
-
-                nav button:hover {
-                    transform: scale(1.05);
-                    transition: all 0.2s ease-in;
-                    box-shadow: 0 0 5px hsl(0, 1%, 28%);
-                    cursor: pointer;
-                }
-
-                .orderHIstForm{
-                    display: flex;
-                    flex-direction: column;
-                    background: #ffffff;
-                    border: 1px solid black;
-                    border-radius: 10px;
-                    padding: 25px;
-                    display: flex;
-                    gap: 20px;
-                    width: 60%;
-                }
-
-                .orderHistCard1, .orderHistCard2, .orderHistCard3{
-                    border: 1px solid black;
-                    border-radius: 10px;
-                    padding: 20px 30px 20px 30px;
-                    display: flex;
-                    align-items: start;
-                    justify-content: space-between;
-                }
-
-                .orderHistCardDet{
-                    display: flex;
-                    flex-direction: column;
-                    align-items: start;
-                    justify-content: space-between;
-                    gap: 5px;
-                }
-
-                .orderHistCardDet button{
-                    margin-top: 10px;
-                    padding: 5px 5px 5px 5px;
-                    border-radius: 5px;
-                    font-weight: bold;
-                    background: transparent;
-                }
-
-                .removeBttn{
-                    padding: 5px 5px 5px 5px;
-                    border-radius: 5px;
-                    font-weight: bold;
-                    background: transparent;
-                }
-
-                .orderHistCardDet button:hover, .removeBttn:hover{
-                    cursor: pointer;
-                    transition: background-color 0.2s, color 0.2s;
-                    background-color: hsl(164, 31%, 17%);
-                    color: hsl(0, 0%, 100%);
-                }
-
-                .orderTotalPriceLabel i{
-                    font-weight: bold;
-                }
-
-                .orderQnttyLabel2{
-                    font-weight: bold;
-                }
-
-                .orderQnttyLabel2 i{
-                    font-weight: normal;
-                }
-
-                footer{
-                    background-color: hsl(164, 31%, 17%);
-                    color: hsl(0, 0%, 100%);
-                    font-weight: bold;
-                    text-align: center;
-                    padding: 15px 0;
-                }
-
-                @media (max-width: 1024px) {
-                    .navHeaderBttnCont {
-                        flex-wrap: wrap;
-                        gap: 10px;
-                    }
-
-                    .pageHeader {
-                        font-size: 2rem;
-                    }
-
-                    section {
-                        padding: 30px 40px;
-                    }
-
-                    .navHeaderBttnCont {
-                        gap: 10px;
-                    }
-
-                    .navHeaderBttnCont button {
-                        padding: 6px 10px;
-                        font-size: 0.9rem;
-                    }
-
-                    .orderHIstForm{
-                        width: 65%;
-                    }
-                }
-
-                @media (max-width: 768px) {
-                    .navHeaderCont {
-                        flex-direction: column;
-                        align-items: center;
-                        text-align: center;
-                    }
-
-                    .navHeaderBttnCont button {
-                        font-size: 0.9rem;
-                    }
-
-                    .pageHeader {
-                        font-size: 1.8rem;
-                    }
-
-                    .footerHeader {
-                        text-align: center;
-                    }
-
-                    .orderHistFormCont{
-                        flex-direction: column;
-                        align-items: center;
-                        gap: 30px;
-                    }
-
-                    .sideBarMenuCont {
-                        width: 100%; 
-                    }
-
-                    .sideBarBttn {
-                        flex-direction: row; 
-                        flex-wrap: wrap;
-                        justify-content: space-around;
-                        gap: 5px; 
-                        padding: 15px 10px;
-                        min-width: initial; 
-                    }
-
-                    .sideBarBttn button {
-                        flex: 1 1 auto; 
-                        text-align: center;
-                        padding: 8px 10px;
-                        margin-bottom: 5px;
-                    }
-
-                    .orderHIstForm{
-                        flex-direction: column; 
-                        width: 100%;
-                        padding: 20px;
-                    }
-
-                    section {
-                        
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .navHeaderCont {
-                        padding: 10px;
-                    }
-
-                    .logoCont img {
-                        width: 40px;
-                        height: 40px;
-                    }
-
-                    .navLogoText {
-                        font-size: 1.2rem;
-                    }
-
-                    .pageHeader {
-                        font-size: 1.5rem;
-                    }
-
-                    .pageSubHeader {
-                        font-size: 0.9rem;
-                    }
-                }
-            
-            `}</style>
-
-      <section>
-        <div className="orderHistCont">
-          <div className="pageHeaderCont">
-            <div className="headerCont">
-              <h1 className="pageHeader">Order History</h1>
-              <p className="pageSubHeader">View your recent orders</p>
+      <section style={styles.section}>
+        <div style={{ width: '100%' }}>
+          <div style={styles.pageHeaderCont}>
+            <div>
+              <h1 style={styles.pageHeaderH1}>Order History</h1>
+              <p style={styles.pageSubHeader}>View your recent orders</p>
             </div>
           </div>
 
           {loading ? (
-            <p>Loading your orders...</p>
+            <p style={{ textAlign: 'center', fontSize: '1.1rem', color: '#666' }}>Loading your orders...</p>
           ) : orders.length > 0 ? (
-            <div className="orderHistFormCont">
-              <aside className="sideBarMenuCont">
-                <nav className="sideBarBttn">
-                  <button className="profile">Profile</button>
-                  <button className="ediAccount">Edit Account</button>
-                  <button className="createHistory">Order History</button>
-                  <button className="trackMyOrder">Track My Order</button>
-                  <button className="security">Security</button>
+            <div style={styles.orderHistFormCont}>
+              <aside style={styles.sidebarMenu}>
+                <nav style={styles.sidebarNav}>
+                  <button style={styles.sidebarButton} onClick={() => navigate("/Myprofile")}>Profile</button>
+                  <button style={styles.sidebarButton} onClick={() => navigate("/EditAcc")}>Edit Account</button>
+                  <button style={{ ...styles.sidebarButton, opacity: 0.5 }} disabled>Order History</button>
+                  <button style={styles.sidebarButton} onClick={() => navigate("/Track")}>Track My Order</button>
+                  <button
+                    onClick={() => setShowLogoutModal(true)}
+                    style={styles.sidebarButton}
+                  >
+                    🚪 Logout
+                  </button>
                 </nav>
               </aside>
 
-              <div className="orderHIstForm">
+              <div style={styles.orderHistForm}>
                 {orders.map((order) => (
-                  <div
-                    key={order._id}
-                    className="orderHistCard"
-                    style={{
-                      border: "1px solid black",
-                      borderRadius: "10px",
-                      padding: "20px 30px",
-                      display: "flex",
-                      alignItems: "start",
-                      justifyContent: "space-between",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <div className="orderHistCardDet">
-                      <h3 className="orderIdentity">
-                        Order no. {order._id?.slice(-6).toUpperCase()}
-                      </h3>
-                      <label className="orderLabel">
+                  <div key={order._id} style={styles.orderCard}>
+                    <div style={styles.orderCardDet}>
+                      <h3 style={styles.orderIdentity}>Order no. {order._id?.slice(-6).toUpperCase()}</h3>
+                      <label style={styles.orderLabel}>
                         Placed on {new Date(order.createdAt).toLocaleDateString("en-PH", {
                           year: "numeric",
                           month: "long",
                           day: "numeric",
                         })}
                       </label>
-                      <label className="orderQnttyLabel2">
+                      <label style={styles.orderQnttyLabel2}>
                         {order.items?.length || 0} Items
                         {order.items?.[0]?.name && (
-                          <i className="orderNameLabel"> - {order.items[0].name}</i>
+                          <i style={styles.orderNameLabel}> - {order.items[0].name}</i>
                         )}
                       </label>
-                      <label className="orderTotalPriceLabel">
-                        Total: <i className="orderPriceLabel">₱ {order.total?.toLocaleString("en-PH")}</i>
+                      <label style={styles.orderTotalPriceLabel}>
+                        Total: <i style={styles.orderPriceLabel}>₱ {order.total?.toLocaleString("en-PH")}</i>
                       </label>
-                      <div style={{ marginTop: "10px" }}>
+                      <div style={styles.statusBadgeCont}>
                         {getStatusBadge(order.status)}
                       </div>
-                      <button
-                        className="viewDetailsBttn"
-                        style={{
-                          marginTop: "10px",
-                          padding: "5px 15px",
-                          borderRadius: "5px",
-                          fontWeight: "bold",
-                          background: "transparent",
-                          cursor: "pointer",
-                          border: "1px solid #333",
-                        }}
-                        onClick={() => window.location.href = "/track"}
-                      >
-                        View Details
-                      </button>
                     </div>
                     <div>
                       <button
-                        className="removeBttn"
-                        style={{
-                          padding: "5px 5px",
-                          borderRadius: "5px",
-                          fontWeight: "bold",
-                          background: "transparent",
-                          cursor: "pointer",
-                          border: "1px solid #ccc",
+                        style={styles.removeBttn}
+                        onClick={() => handleRemoveOrder(order._id)}
+                        onMouseEnter={(e) => {
+                          Object.assign(e.currentTarget.style, styles.removeBttnHover);
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = colors.darkTxt;
                         }}
                       >
                         Remove
@@ -597,17 +479,24 @@ function OrderHistory(){
               </div>
             </div>
           ) : (
-            <p>No orders found.</p>
+            <div style={{ textAlign: 'center', padding: '20px' }}>No orders found.</div>
           )}
         </div>
       </section>
-            <footer>
-                <div className="compyRight">
-                    <p>@ 2025 Eric's Garden. All Rights Reserved.</p>
-                </div>
-            </footer>
-        </>
-    );
+
+      <footer style={styles.footer}>
+        <div>
+          <p style={{ margin: 0 }}>@ 2025 Eric's Garden. All Rights Reserved.</p>
+        </div>
+      </footer>
+
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogoutConfirm}
+      />
+    </div>
+  );
 }
 
 export default OrderHistory;

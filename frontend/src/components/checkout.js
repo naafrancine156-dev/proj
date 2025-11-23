@@ -1,6 +1,6 @@
 import { useCart } from "./CartContext";
 import { useUser } from "./UserContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import SearchIcon from "./assets/whitesearch.png";
 import CartIcon from "./assets/whitecart.png";
@@ -11,6 +11,10 @@ function Checkout() {
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
   const { user, loading } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // NEW: Get selected items from Cart page
+  const [cartToCheckout, setCartToCheckout] = useState([]);
 
   // Contact Details
   const [firstName, setFirstName] = useState("");
@@ -48,6 +52,17 @@ function Checkout() {
   const [voucherCode, setVoucherCode] = useState("");
   const [appliedVoucher, setAppliedVoucher] = useState(null);
   const [voucherError, setVoucherError] = useState("");
+
+  // NEW: Set cart items from location state
+  useEffect(() => {
+    if (location.state?.selectedItems) {
+      console.log("✅ Using selected items from cart:", location.state.selectedItems);
+      setCartToCheckout(location.state.selectedItems);
+    } else {
+      console.log("⚠️ No selected items, using full cart");
+      setCartToCheckout(cart);
+    }
+  }, [location.state, cart]);
 
   // Auto-fill form when user data loads
   useEffect(() => {
@@ -128,8 +143,9 @@ function Checkout() {
     }
   };
 
+  // CHANGED: Use cartToCheckout instead of cart
   const shippingCost = deliveryOption === "door-to-door" ? 450 : 150;
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = cartToCheckout.reduce((sum, item) => sum + item.price * item.quantity, 0);
   
   // Apply voucher discount
   let discount = 0;
@@ -147,8 +163,7 @@ function Checkout() {
   // Free shipping if subtotal (after discount) is over ₱1,000
   const finalShippingCost = subtotalAfterDiscount >= 1000 ? 0 : shippingCost;
   
-  const paymentFee = paymentMethod === "cash" ? 50 : 0;
-  const estimatedTotal = subtotalAfterDiscount + finalShippingCost + estimatedTax + paymentFee;
+  const estimatedTotal = subtotalAfterDiscount + finalShippingCost + estimatedTax;
 
   const handleAddCard = async (e) => {
     e.preventDefault();
@@ -314,9 +329,10 @@ function Checkout() {
       }
     }
 
+    // CHANGED: Use cartToCheckout instead of cart
     const orderData = {
       userId: userId,
-      items: cart.map(item => ({
+      items: cartToCheckout.map(item => ({
         productId: item.id,
         name: item.name,
         price: item.price,
@@ -348,7 +364,6 @@ function Checkout() {
       deliveryOption,
       paymentMethod,
       shippingCost: finalShippingCost,
-      paymentFee,
       tax: estimatedTax,
       discount: discount,
       voucherCode: appliedVoucher ? voucherCode : null,
@@ -858,7 +873,7 @@ function Checkout() {
           padding-top: 15px;
         }
 
-        .subtotalLabelCont, .shippingLabelCont, .feeLabelCont, .taxLabelCont, .etCont {
+        .subtotalLabelCont, .shippingLabelCont, .taxLabelCont, .etCont {
           display: flex;
           justify-content: space-between;
           align-items: center;
@@ -899,7 +914,7 @@ function Checkout() {
           <div className="navHeaderCont">
             <div className="logoCont">
               <p className="navLogo"><img src={PlantLogo} alt="Logo" /></p>
-              <p className="navLogoText">Eric's Garden</p>
+              <p className="navLogoText">Plantasy</p>
             </div>
 
             <div className="navHeaderBttnCont">
@@ -1126,7 +1141,7 @@ function Checkout() {
                   />
                   <div>
                     <div>Cash on Delivery</div>
-                    <div className="paymentOptionDetails">Shipping Fee: ₱ 50</div>
+                    <div className="paymentOptionDetails">No fee</div>
                   </div>
                 </label>
                 <label className="paymentOption">
@@ -1254,13 +1269,13 @@ function Checkout() {
               </button>
             </form>
 
-            {/* Cart Summary */}
+            {/* Cart Summary - CHANGED: Use cartToCheckout */}
             <aside className="checkoutProdFormCont">
-              {cart.length === 0 ? (
+              {cartToCheckout.length === 0 ? (
                 <p>Your cart is empty.</p>
               ) : (
                 <>
-                  {cart.map((item) => (
+                  {cartToCheckout.map((item) => (
                     <div className="checkoutProdCard" key={item.id}>
                       <img src={`http://localhost:5000${item.image}`} alt={item.name} className="prodImg1" />
                       <div className="prodDetailCont">
@@ -1312,7 +1327,7 @@ function Checkout() {
                     )}
                   </div>
 
-                  {cart.length > 0 && (
+                  {cartToCheckout.length > 0 && (
                     <div className="checkoutDetCont">
                       <div className="subtotalLabelCont">
                         <label>Subtotal</label>
@@ -1347,12 +1362,6 @@ function Checkout() {
                         <label>Estimated Tax</label>
                         <label>₱ {estimatedTax.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
                       </div>
-                      {paymentMethod === "cash" && (
-                        <div className="feeLabelCont">
-                          <label>Payment Fee</label>
-                          <label>₱ {paymentFee.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
-                        </div>
-                      )}
                       <div className="etCont">
                         <h3>Estimated Total</h3>
                         <label>₱ {estimatedTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</label>
@@ -1368,7 +1377,7 @@ function Checkout() {
 
       <footer>
         <div className="compyRight">
-          <p>@ 2025 Eric's Garden. All Rights Reserved.</p>
+          <p>@ 2025 Plantasy. All Rights Reserved.</p>
         </div>
       </footer>
     </>
