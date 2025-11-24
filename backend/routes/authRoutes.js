@@ -400,4 +400,104 @@ router.post("/logout", (req, res) => {
   });
 });
 
+// ADD ONLY THESE TWO ROUTES TO YOUR authRoutes.js FILE
+
+// ===== CHANGE PASSWORD =====
+router.post("/change-password", auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Current and new password are required" 
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ 
+        success: false,
+        message: "New password must be at least 6 characters" 
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: "User not found" 
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        success: false,
+        message: "Current password is incorrect" 
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ 
+      success: true,
+      message: "Password changed successfully" 
+    });
+
+  } catch (error) {
+    console.error("Change Password Error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to change password" 
+    });
+  }
+});
+
+// ===== DELETE ACCOUNT =====
+router.delete("/delete-account", auth, async (req, res) => {
+  try {
+    const { password } = req.body;
+    const userId = req.user.id;
+
+    if (!password) {
+      return res.status(400).json({ 
+        success: false,
+        message: "Password is required to delete account" 
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ 
+        success: false,
+        message: "User not found" 
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ 
+        success: false,
+        message: "Incorrect password" 
+      });
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({ 
+      success: true,
+      message: "Account deleted successfully" 
+    });
+
+  } catch (error) {
+    console.error("Delete Account Error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Failed to delete account" 
+    });
+  }
+});
 module.exports = router;

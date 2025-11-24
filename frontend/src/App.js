@@ -23,6 +23,7 @@ import Customers from "./components/customers";
 import OrderHistory from "./components/OrderHistory";
 import SecuritySettings from "./components/SecuritySettings";
 import AboutUs from "./components/AboutUs";
+import FAQS from "./components/FAQS";
 
 function App() {
   return (
@@ -53,6 +54,8 @@ function App() {
         <Route path="/history" element={<OrderHistory />} />
         <Route path="/security" element={<SecuritySettings />} />
         <Route path="/aboutus" element={<AboutUs />} />
+        <Route path="/faqs" element={<FAQS />} />
+
 
         
         {/* ===== CONTACT ROUTES (Public) ===== */}

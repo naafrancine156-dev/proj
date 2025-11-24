@@ -92,6 +92,75 @@ function HomePageUi() {
     navigate(`/category?category=${encodeURIComponent(categoryName)}`);
   };
 
+  const [showReturnPopup, setShowReturnPopup] = useState(false);
+  
+    // NEW FUNCTION TO TOGGLE POPUP
+    const toggleReturnPopup = () => {
+      setShowReturnPopup((prev) => !prev);
+    };
+
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = () => {
+      if (!email || !email.includes('@')) {
+          alert("Please enter a valid email address.");
+          return;
+      }
+      // Replace this alert with an API call
+      alert(`Subscribing with email: ${email}`);
+      setEmail('');
+  };
+
+  const colors = {
+      primaryGreen: 'hsl(164, 31%, 17%)', 
+      secondaryBg: 'hsl(47, 47%, 93%)', 
+      white: '#ffffff',
+      darkText: '#222222',
+      lightText: '#666666',
+      lightText2: '#b0afafff',
+      accentRed: 'red',
+  };
+
+  const styles = {
+      listItems: {
+        listStyle: 'none',
+      },
+      listSupport: {
+        color: colors.lightText2,
+      },
+      subscribeInput: {
+          padding: '10px',
+          borderRadius: '5px',
+          border: 'none',
+          fontSize: '1rem',
+          width: '100%',
+          boxSizing: 'border-box',
+          fontFamily: 'inherit',
+      },
+      subscribeInputCont: {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          marginTop: '15px',
+      },
+      subscribeButton: {
+          backgroundColor: colors.white,
+          color: colors.primaryGreen,
+          border: 'none',
+          padding: '10px',
+          borderRadius: '5px',
+          fontSize: '1rem',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          transition: 'opacity 0.2s',
+          fontFamily: 'inherit',
+      },
+      subscribeButtonhover: {
+          backgroundColor: colors.primaryGreen,
+          color: colors.white,
+      }
+  };
+
   return (
     <>
       <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
@@ -146,7 +215,6 @@ function HomePageUi() {
         </div>
       </header>
 
-      {/* ---------- CATEGORIES (4 cards layout from second code) ---------- */}
       <section>
         <div className="cont2">
           <div className="subHeaderCont">
@@ -272,10 +340,8 @@ function HomePageUi() {
         </div>
       </section>
 
-      {/* POPUP */}
       {addedMessage && <div className="addedMsg">{addedMessage}</div>}
 
-      {/* ---------- FOOTER FROM SECOND CODE ---------- */}
       <footer>
         <div className="footerCont">
           <div className="otherInfoCont">
@@ -290,19 +356,30 @@ function HomePageUi() {
             <div className="infoCont2">
               <h3 className="footerHeader">Shop</h3>
               <ul>
-                <li>Indoor Plants</li>
-                <li>Outdoor Plants</li>
-                <li>Succulents Plants</li>
+                <li style={styles.listItems}>Indoor Plants</li>
+                <li style={styles.listItems}>Outdoor Plants</li>
+                <li style={styles.listItems}>Succulents Plants</li>
               </ul>
             </div>
 
             <div className="infoCont3">
               <h3 className="footerHeader">Support</h3>
-              <ul>
-                <li><a href="AboutUs">About Us</a></li>
-                <li><a href="Track">Shipping Info</a></li>
-                <li><a href="Returns">Return</a></li>
-                <li><a href="FAQS">FAQs</a></li>
+              <ul style={styles.listItems}>
+                <li><a href="AboutUs" style={styles.listSupport}>About Us</a></li>
+                <li><a href="Track" style={styles.listSupport}>Shipping Info</a></li>
+                <li>
+                  <a
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleReturnPopup(); 
+                    }}
+                    style={styles.listSupport}
+                  >
+                    Return
+                  </a>
+                </li>
+                <li><a href="FAQS" style={styles.listSupport}>FAQs</a></li>
               </ul>
             </div>
 
@@ -311,11 +388,22 @@ function HomePageUi() {
               <p className="infoDetails">
                 Subscribe for plant care tips and exclusive offers
               </p>
-
-              <input type="email" className="footerInput" placeholder="Enter your email" />
-              <button className="footerSubscribe">Subscribe</button>
+              <div style={styles.subscribeInputCont}>
+                  <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      style={styles.subscribeInput}
+                  />
+                  <button
+                      onClick={handleSubscribe}
+                      style={styles.subscribeButton}
+                  >
+                      Subscribe
+                  </button>
+              </div>
             </div>
-
           </div>
 
           <div className="compyRight">
@@ -323,6 +411,121 @@ function HomePageUi() {
           </div>
         </div>
       </footer>
+
+      {showReturnPopup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          padding: '20px',
+          overflowY: 'auto'
+        }}>
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '10px',
+            padding: '30px',
+            width: '90%',
+            maxWidth: '800px', // Adjusted for wider content
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            position: 'relative',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)'
+          }}>
+            <button 
+              onClick={toggleReturnPopup} 
+              style={{
+                position: 'sticky', // Make close button sticky at top
+                top: '0',
+                right: '0',
+                marginLeft: 'auto',
+                display: 'block',
+                backgroundColor: 'transparent',
+                border: 'none',
+                fontSize: '1.8em', // Slightly larger for visibility
+                cursor: 'pointer',
+                color: '#333',
+                padding: '5px 10px'
+              }}
+            >
+              &times;
+            </button>
+
+            <h3 style={{
+              color: '#333',
+              marginBottom: '20px',
+              fontSize: '2em',
+              textAlign: 'center',
+              fontWeight: 'bold'
+            }}>
+              Return & Refund
+            </h3>
+            
+            <div style={{
+              color: '#555',
+              fontSize: '1em',
+              lineHeight: '1.8'
+            }}>
+              <p style={{ marginBottom: '20px' }}>
+                At our webshop, we strive to ensure your complete satisfaction with every purchase. Considering that plants are living entities, our return and exchange policy is designed to address specific situations. Please review the following guidelines regarding returns and exchanges:
+              </p>
+
+              <h4 style={{ marginBottom: '10px', fontSize: '1.2em', color: '#333' }}>
+                1. Dead Upon Arrival or Within 2 Weeks
+              </h4>
+              <ul style={{ listStyleType: 'disc', marginLeft: '25px', marginBottom: '20px' }}>
+                <li style={{ marginBottom: '10px' }}>
+                  Exchange is permitted if a plant is found dead upon arrival or within a span of 2 weeks from the date of purchase.
+                </li>
+                <li>
+                  To facilitate approval, clients must submit the plant's location upon its arrival in their home.
+                </li>
+              </ul>
+              
+              <h4 style={{ marginBottom: '10px', fontSize: '1.2em', color: '#333' }}>
+                2. Minor Damages and Natural Variations
+              </h4>
+              <ul style={{ listStyleType: 'disc', marginLeft: '25px', marginBottom: '20px' }}>
+                <li style={{ marginBottom: '10px' }}>
+                  Minor damages that are typical to plants, especially considering their growth in nurseries, are considered normal.
+                </li>
+                <li>
+                  Factors such as weather conditions can impact a plant's leaves, and these natural variations are not eligible for return or exchange.
+                </li>
+              </ul>
+
+              <h4 style={{ marginBottom: '10px', fontSize: '1.2em', color: '#333' }}>
+                3. Restrictions on Client-Repotted Plants
+              </h4>
+              <ul style={{ listStyleType: 'disc', marginLeft: '25px', marginBottom: '20px' }}>
+                <li style={{ marginBottom: '10px' }}>
+                  We only accept returns or exchanges for plants that have been repotted by our team.
+                </li>
+                <li>
+                  Plants repotted by clients are not eligible for exchange under our policy.
+                </li>
+              </ul>
+
+              <h4 style={{ marginBottom: '10px', fontSize: '1.2em', color: '#333' }}>
+                4. Handmade Pottery
+              </h4>
+              <p style={{ marginBottom: '20px' }}>
+                Please note that some of our pots are handmade, and minor flaws may occur due to the artisanal crafting process. These minor imperfections do not qualify for returns or exchanges. We ensure that only high-quality items leave our facility, and any significant damage will be handled in accordance with our shipping policy.
+              </p>
+
+              <p style={{ marginTop: '30px', textAlign: 'center', fontSize: '0.85em', color: '#888' }}>
+                  Last Updated: November 23, 2025
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

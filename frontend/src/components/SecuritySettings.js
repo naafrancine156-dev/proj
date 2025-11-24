@@ -2,84 +2,232 @@ import SearchIcon from "./assets/whitesearch.png";
 import CartIcon from "./assets/whitecart.png";
 import AccIcon from "./assets/whiteaccount.png";
 import PlantLogo from "./assets/plantlogo.png";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import SearchSidebar from "./SearchSidebar";
 import LogoutModal from "./LogoutModal";
+import axios from 'axios';
 
 function SecuritySettings(){
     const navigate = useNavigate();
+    const API_URL = 'http://localhost:5000/api';
 
     const [cartCount, setCartCount] = useState(0);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false); 
-    const [is2FAEnabled, setIs2FAEnabled] = useState(false); 
+    const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     
-    // State to manage active sessions
     const [activeSessions, setActiveSessions] = useState([
         { id: "Chrome-Win-1", browser: "Chrome on Windows", lastActive: "Today at 11:45am", status: 'active' },
         { id: "Safari-iOS-2", browser: "Safari on iPhone", lastActive: "Last Week at 1:00pm", status: 'active' },
         { id: "Edge-Mac-3", browser: "Edge on macOS", lastActive: "10 mins ago", status: 'active' },
     ]);
 
+    // Window resize listener
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const handleLogoutConfirm = () => {
         setShowLogoutModal(false);
         navigate("/");
     };
-    
-    // ------------------------------------------------------------------
-    // ACTION HANDLER FUNCTIONS
-    // ------------------------------------------------------------------
 
-    const handleChangePassword = () => {
-        alert("Redirecting to the Change Password form...");
-        console.log("Change Password button clicked. User should be sent to a dedicated form.");
+    const handleChangePassword = async () => {
+        const currentPassword = prompt("Enter your current password:");
+        if (!currentPassword) {
+            alert("Password change cancelled.");
+            return;
+        }
+
+        const newPassword = prompt("Enter your new password:");
+        if (!newPassword || newPassword.length < 6) {
+            alert("New password must be at least 6 characters long.");
+            return;
+        }
+
+        const confirmPassword = prompt("Confirm your new password:");
+        if (newPassword !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("Session expired. Please login again.");
+                navigate("/login");
+                return;
+            }
+
+            const response = await axios.post(`${API_URL}/auth/change-password`, {
+                currentPassword,
+                newPassword
+            }, { 
+                headers: { 'Authorization': `Bearer ${token}` },
+                withCredentials: true 
+            });
+
+            alert("Password changed successfully!");
+            console.log("Password change successful:", response.data);
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || "Failed to change password. Please try again.";
+            alert(`Password Change Failed: ${errorMessage}`);
+            console.error("Password Change Error:", error.response?.data || error.message);
+        }
     };
 
-    const handleToggle2FA = () => {
-        if (is2FAEnabled) {
-            const confirmDisable = window.confirm("Are you sure you want to disable Two-Factor Authentication?");
-            if (confirmDisable) {
+    const handleToggle2FA = async () => {
+        const endpoint = is2FAEnabled ? '/auth/disable-2fa' : '/auth/enable-2fa';
+
+        try {
+            if (is2FAEnabled) {
+                const confirmDisable = window.confirm("Are you sure you want to disable Two-Factor Authentication?");
+                if (!confirmDisable) return;
+                
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert("Session expired. Please login again.");
+                    navigate("/login");
+                    return;
+                }
+
+                await axios.post(`${API_URL}${endpoint}`, {}, { 
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    withCredentials: true 
+                });
+
                 setIs2FAEnabled(false);
                 alert("Two-Factor Authentication has been disabled.");
                 console.log("2FA Disabled.");
+            } else {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert("Session expired. Please login again.");
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await axios.post(`${API_URL}${endpoint}`, {}, { 
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    withCredentials: true 
+                });
+                
+                alert("Starting the Two-Factor Authentication setup process. Check your email/app.");
+                setIs2FAEnabled(true);
+                console.log("2FA Enabled.");
             }
-        } else {
-            alert("Starting the Two-Factor Authentication setup process...");
-            setIs2FAEnabled(true);
-            console.log("2FA Enabled.");
+        } catch (error) {
+            console.error("2FA Error:", error.response?.data || error.message);
+            alert(`Failed to ${is2FAEnabled ? 'disable' : 'enable'} 2FA. See console for details.`);
         }
     };
     
-    const handleDeleteAccount = () => {
-        const confirmation = window.confirm("WARNING: Are you absolutely sure you want to permanently delete your account? This action cannot be undone.");
-        if (confirmation) {
-            alert("Account deletion initiated. You will be logged out.");
-            console.log("Account Deletion requested.");
+    const handleDeleteAccount = async () => {
+        const confirmation = window.confirm("⚠️ WARNING: Are you absolutely sure you want to permanently delete your account? This action cannot be undone.");
+        
+        if (!confirmation) {
+            console.log("Account deletion cancelled by user.");
+            return;
+        }
+
+        const confirmPassword = prompt("Enter your password to confirm account deletion:");
+        if (!confirmPassword) {
+            alert("Account deletion cancelled.");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("Session expired. Please login again.");
+                navigate("/login");
+                return;
+            }
+
+            const response = await axios.delete(`${API_URL}/auth/delete-account`, { 
+                headers: { 'Authorization': `Bearer ${token}` },
+                data: { password: confirmPassword },
+                withCredentials: true
+            });
+
+            alert("Account deleted successfully. You have been logged out.");
+            console.log("Account Deletion successful:", response.data);
+            
+            localStorage.removeItem('token');
+            navigate("/"); 
+            
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || "Failed to delete account. Please try again.";
+            alert(`Account Deletion Failed: ${errorMessage}`);
+            console.error("Account Deletion Error:", error.response?.data || error.message);
         }
     };
 
-    const handleSessionAction = (sessionId, action) => {
+    const handleSessionAction = async (sessionId, action) => {
         if (action === "Browse") {
-            alert(`Opening new tab for session: ${sessionId}`);
+            alert(`Viewing session details for: ${sessionId}`);
             console.log(`Action: ${action}, Session ID: ${sessionId}`);
         } else if (action === "Logout") {
             const confirmed = window.confirm(`Are you sure you want to log out of session ${sessionId}?`);
-            if (confirmed) {
+            if (!confirmed) return;
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert("Session expired. Please login again.");
+                    navigate("/login");
+                    return;
+                }
+
+                await axios.post(`${API_URL}/auth/logout-session`, { sessionId }, { 
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    withCredentials: true 
+                });
+                
                 setActiveSessions(prevSessions => 
                     prevSessions.filter(session => session.id !== sessionId)
                 );
+                
                 alert(`Successfully logged out of session: ${sessionId}`);
                 console.log(`Successfully logged out of session: ${sessionId}`);
+            } catch (error) {
+                console.error("Logout Session Error:", error.response?.data || error.message);
+                alert("Failed to log out of session. Please try again.");
             }
         }
     };
 
-    // ------------------------------------------------------------------
-    // END OF ACTION HANDLER FUNCTIONS
-    // ------------------------------------------------------------------
+    const handleLogoutSessionConfirm = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setShowLogoutModal(false);
+                navigate("/");
+                return;
+            }
 
-    // ----- Definition of commonly used styles to keep JSX cleaner -----
+            await axios.post(`${API_URL}/auth/logout`, {}, { 
+                headers: { 'Authorization': `Bearer ${token}` },
+                withCredentials: true 
+            });
+            
+            localStorage.removeItem('token');
+            setShowLogoutModal(false);
+            navigate("/");
+            alert("You have been successfully logged out.");
+        } catch (error) {
+            console.error("Logout Error:", error.response?.data || error.message);
+            localStorage.removeItem('token');
+            setShowLogoutModal(false);
+            navigate("/");
+            alert("Logout successful (or session cleared).");
+        }
+    };
+
     const colors = {
         primaryBg: 'hsl(164, 31%, 17%)', 
         secondaryBg: 'hsl(47, 47%, 93%)',
@@ -104,13 +252,13 @@ function SecuritySettings(){
         navHeaderCont: {
             backgroundColor: colors.primaryBg,
             display: 'flex',
-            flexWrap: 'nowrap',
+            flexWrap: windowWidth <= 768 ? 'wrap' : 'nowrap',
             alignItems: 'center',
             borderBottom: '1px solid #eee',
             justifyContent: 'space-between',
-            gap: '20px',
+            gap: windowWidth <= 768 ? '10px' : '20px',
             width: '100%',
-            padding: '10px 15px',
+            padding: windowWidth <= 768 ? '10px' : '10px 15px',
             boxSizing: 'border-box',
             overflow: 'scroll',
         },
@@ -118,23 +266,23 @@ function SecuritySettings(){
             color: colors.primaryTxt,
             display: 'flex',
             alignItems: 'center',
-            marginLeft: '10px',
+            marginLeft: windowWidth <= 768 ? '5px' : '10px',
         },
         logoImg: {
             backgroundColor: '#ffff',
             borderRadius: '50%',
-            width: '50px',
-            height: '50px',
+            width: windowWidth <= 768 ? '40px' : '50px',
+            height: windowWidth <= 768 ? '40px' : '50px',
             marginRight: '10px',
         },
         navLogoText: {
             color: colors.primaryTxt,
-            fontSize: '1.5rem',
+            fontSize: windowWidth <= 768 ? '1.2rem' : '1.5rem',
             fontWeight: 'bold',
             margin: 0,
         },
         navHeaderBttnCont: {
-            display: 'flex',
+            display: windowWidth <= 768 ? 'none' : 'flex',
             flexWrap: 'nowrap',
             justifyContent: 'center',
             gap: '15px',
@@ -151,11 +299,11 @@ function SecuritySettings(){
         iconButtonCont: {
             display: 'flex',
             alignItems: 'center',
-            gap: '20px',
+            gap: windowWidth <= 768 ? '15px' : '20px',
         },
         iconButton: {
-            width: '33px',
-            height: '33px',
+            width: windowWidth <= 768 ? '30px' : '33px',
+            height: windowWidth <= 768 ? '30px' : '33px',
             background: 'transparent',
             borderRadius: '50%',
             border: 'none',
@@ -168,8 +316,8 @@ function SecuritySettings(){
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-            width: '28px',
-            height: '28px',
+            width: windowWidth <= 768 ? '24px' : '28px',
+            height: windowWidth <= 768 ? '24px' : '28px',
             display: 'inline-block',
         },
         iconCart: {
@@ -177,8 +325,8 @@ function SecuritySettings(){
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-            width: '28px',
-            height: '28px',
+            width: windowWidth <= 768 ? '24px' : '28px',
+            height: windowWidth <= 768 ? '24px' : '28px',
             display: 'inline-block',
         },
         iconAcc: {
@@ -186,8 +334,8 @@ function SecuritySettings(){
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-            width: '28px',
-            height: '28px',
+            width: windowWidth <= 768 ? '24px' : '28px',
+            height: windowWidth <= 768 ? '24px' : '28px',
             display: 'inline-block',
         },
         cartBadge: {
@@ -204,7 +352,7 @@ function SecuritySettings(){
         textQuoteHeader: {
             backgroundColor: 'hwb(0 100% 0%)',
             textAlign: 'center',
-            fontSize: '0.9rem',
+            fontSize: windowWidth <= 768 ? '0.75rem' : '0.9rem',
             letterSpacing: '1px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -213,7 +361,7 @@ function SecuritySettings(){
         },
         section: {
             backgroundColor: colors.secondaryBg,
-            padding: '40px 80px',
+            padding: windowWidth <= 768 ? '20px 15px' : windowWidth <= 1024 ? '30px 40px' : '40px 80px',
             flex: 1,
             boxSizing: 'border-box',
             minHeight: 'calc(100vh - 200px)',
@@ -227,11 +375,11 @@ function SecuritySettings(){
             borderBottom: `1px solid ${colors.primaryBg}`,
         },
         pageHeaderH1: {
-            fontSize: '2.5rem',
+            fontSize: windowWidth <= 768 ? '2rem' : '2.5rem',
             margin: 0,
         },
         pageSubHeader: {
-            fontSize: '1rem',
+            fontSize: windowWidth <= 768 ? '0.9rem' : '1rem',
             color: 'hsl(0, 0%, 30%)',
             margin: 0,
         },
@@ -240,84 +388,84 @@ function SecuritySettings(){
             border: `1px solid ${colors.primaryBg}`,
             borderRadius: '5px', 
             color: colors.primaryBg,
-            fontSize: '1rem',
+            fontSize: windowWidth <= 768 ? '0.95rem' : '1rem',
             fontWeight: 'bold',
             cursor: 'pointer',
-            padding: '10px 15px', 
+            padding: windowWidth <= 768 ? '12px' : '10px 15px', 
             fontFamily: 'inherit',
             marginTop: '23px',
             textAlign: 'center',
             boxShadow: 'none',
             outline: 'none',
             width: '100%',
-            // Removed marginTop: '20px' to rely on formColumn gap
         },
         securityFormCont: {
             display: 'flex',
+            flexDirection: windowWidth <= 768 ? 'column' : 'row',
             alignItems: 'flex-start',
             justifyContent: 'center',
-            gap: '10px',
+            gap: windowWidth <= 768 ? '20px' : '10px',
             paddingTop: '20px',
             width: '100%',
             minWidth: '100px',
         },
-        sidebarMenu: {
-            //width: '20%',
-        },
-        // FIXED: Added gap for spacing between buttons
         sidebarNav: {
             background: '#ffffff',
             border: '1px solid black',
             borderRadius: '10px',
             padding: '20px',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '5px', // Added gap for spacing
+            flexDirection: windowWidth <= 768 ? 'row' : 'column',
+            gap: '5px',
         },
-        // FIXED: Standardized padding and added border radius for consistency
         sidebarButton: {
             background: 'transparent',
             borderBottom: '1px solid black',
-            padding: '10px 15px', // Standardized padding
+            padding: '10px 15px',
             textAlign: 'left',
             color: colors.secondaryTxt,
             cursor: 'pointer',
-            marginBottom: '0', // Removed manual margin
+            marginBottom: '0',
             fontFamily: 'inherit',
             fontSize: '1rem',
-            width: '100%', // Explicit width
+            width: '100%',
             borderRadius: '5px',
-            boxShadow: 'none', // Removes any default box-shadow
+            boxShadow: 'none',
             outline: 'none',
+            borderTop: 'none',
+            borderLeft: 'none',
+            borderRight: '1px solid black',
+            borderBottom: '1px solid black',
         },
         securityForm: {
             background: '#ffffff',
             border: '1px solid black',
             borderRadius: '10px',
-            padding: '25px',
+            padding: windowWidth <= 768 ? '20px' : '25px',
             display: 'flex',
-            gap: '30px',
-            //width: '50%',
-            flex: '0.6',
+            flexDirection: windowWidth <= 768 ? 'column' : 'row',
+            gap: windowWidth <= 768 ? '20px' : '30px',
+            flex: windowWidth <= 768 ? '1' : '0.6',
+            width: windowWidth <= 768 ? '100%' : 'auto',
         },
         formColumn: {
             display: 'flex',
             flexDirection: 'column',
             gap: '20px',
-            width: '50%',
+            width: windowWidth <= 768 ? '100%' : '50%',
         },
         contentCont: {
             display: 'flex',
             flexDirection: 'column',
         },
         contentHeader: {
-            fontSize: '1.4rem',
+            fontSize: windowWidth <= 768 ? '1.2rem' : '1.4rem',
             fontWeight: 'bold',
             color: colors.tertiaryTxt,
             marginBottom: '5px',
         },
         contentLabel: {
-            fontSize: '0.9rem',
+            fontSize: windowWidth <= 768 ? '0.85rem' : '0.9rem',
             color: colors.secondaryTxt,
             marginBottom: '15px',
         },
@@ -325,10 +473,10 @@ function SecuritySettings(){
             background: 'transparent',
             border: `1px solid ${colors.primaryBg}`,
             color: colors.primaryBg,
-            padding: '10px 15px',
+            padding: windowWidth <= 768 ? '12px' : '10px 15px',
             borderRadius: '5px',
             fontWeight: 'bold',
-            fontSize: '1rem',
+            fontSize: windowWidth <= 768 ? '0.95rem' : '1rem',
             cursor: 'pointer',
             fontFamily: 'inherit',
             boxShadow: 'none',
@@ -339,12 +487,12 @@ function SecuritySettings(){
             background: colors.primaryBg, 
             border: `1px solid ${colors.primaryBg}`,
             color: colors.primaryTxt,
-            padding: '10px 15px',
+            padding: windowWidth <= 768 ? '12px' : '10px 15px',
             borderRadius: '5px',
             fontWeight: 'bold',
             cursor: 'pointer',
             fontFamily: 'inherit',
-            fontSize: '1rem',
+            fontSize: windowWidth <= 768 ? '0.95rem' : '1rem',
             boxShadow: 'none',
             outline: 'none',
             width: '100%',
@@ -353,30 +501,28 @@ function SecuritySettings(){
             background: 'transparent',
             border: `1px solid ${colors.primaryBg}`,
             color: colors.primaryBg,
-            padding: '10px 15px',
+            padding: windowWidth <= 768 ? '12px' : '10px 15px',
             borderRadius: '5px',
             fontWeight: 'bold',
             cursor: 'pointer',
             fontFamily: 'inherit',
-            fontSize: '1rem',
+            fontSize: windowWidth <= 768 ? '0.95rem' : '1rem',
             boxShadow: 'none',
             outline: 'none',
             width: '100%',
         },
         hoverToFill: {
             backgroundColor: colors.primaryBg,
-            color: colors.primaryTxt, // White
+            color: colors.primaryTxt,
             borderColor: colors.primaryBg, 
         },
-        // Standard hover for filled buttons (primaryActionButton)
         hoverToDarken: {
-            backgroundColor: 'hsl(164, 31%, 10%)', // Darker green
+            backgroundColor: 'hsl(164, 31%, 10%)',
             color: colors.primaryTxt, 
         },
-        // Hover for the red bordered logout button
         hoverRedToFill: {
             backgroundColor: 'red',
-            color: colors.primaryTxt, // White
+            color: colors.primaryTxt,
             borderColor: 'red',
         },
          footer: {
@@ -386,22 +532,10 @@ function SecuritySettings(){
             textAlign: 'center',
             padding: '15px 0',
             marginTop: 'auto',
+            fontSize: windowWidth <= 768 ? '0.85rem' : '1rem',
         }
     }
 
-    // Helper for applying and resetting sidebar button hover styles
-    const applySidebarHover = (e, hoverStyle) => {
-        Object.assign(e.currentTarget.style, hoverStyle);
-    };
-
-    const resetSidebarHover = (e, originalStyle) => {
-         // Reset only the changed properties while preserving the existing borderBottom
-        e.currentTarget.style.backgroundColor = originalStyle.background;
-        e.currentTarget.style.color = originalStyle.color;
-        // The original style has borderBottom, so we don't need to manually reset border color, only background/text
-    };
-
-    // Helper for applying and resetting main button hover styles
     const applyButtonHover = (e, hoverStyle) => {
         Object.assign(e.currentTarget.style, hoverStyle);
     };
@@ -454,7 +588,7 @@ function SecuritySettings(){
                     <nav style={{ margin: "0", fontSize: "14px", color: colors.secondaryTxt, padding: "10px 0" }}>
                         <span>Home</span>
                         <span> / </span>
-                        <span style={{ fontWeight: "bold" }}>My Profile</span>
+                        <span style={{ fontWeight: "bold" }}>Security Settings</span>
                     </nav>
                 </div>
             </header>
@@ -477,7 +611,7 @@ function SecuritySettings(){
                                 <button style={styles.sidebarButton} onClick={() => navigate("/Track")}>Track My Order</button>
                                 <button 
                                     onClick={() => setShowLogoutModal(true)}
-                                    style={styles.sidebarButton} // Removed manual margin
+                                    style={styles.sidebarButton}
                                 >
                                     🚪 Logout
                                 </button>
@@ -486,7 +620,6 @@ function SecuritySettings(){
 
                         <div style={styles.securityForm}>
                             <div style={styles.formColumn}>
-                                {/* Password Section */}
                                 <div style={styles.contentCont}>
                                     <h3 style={styles.contentHeader}>Password</h3>
                                     <label style={styles.contentLabel}>Change your password regularly</label>
@@ -505,17 +638,16 @@ function SecuritySettings(){
                                     <label style={styles.contentLabel}>Manage your active session</label>
                                 </div>
 
-                                {/* Dynamic Session List */}
                                 {activeSessions.map((session) => (
                                     <div key={session.id} style={styles.contentCont}>
                                         <h3 style={styles.contentHeader}>{session.browser}</h3>
                                         <label style={styles.contentLabel}>Last Active: {session.lastActive}</label>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                        <div style={{ display: 'flex', gap: '10px', flexDirection: windowWidth <= 480 ? 'column' : 'row' }}>
                                             <button 
                                                 style={styles.securityButton}
                                                 onClick={() => handleSessionAction(session.id, "Browse")}
                                                 onMouseEnter={(e) => applyButtonHover(e, styles.hoverToFill)}
-                                        onMouseLeave={(e) => resetButtonHover(e, styles.securityButton)}
+                                                onMouseLeave={(e) => resetButtonHover(e, styles.securityButton)}
                                             >
                                                 Browse
                                             </button>
@@ -524,7 +656,6 @@ function SecuritySettings(){
                                                 onClick={() => handleSessionAction(session.id, "Logout")}
                                                 onMouseEnter={(e) => applyButtonHover(e, styles.hoverRedToFill)}
                                                 onMouseLeave={(e) => {
-                                                    // Resetting to the base red/bordered style
                                                     e.currentTarget.style.backgroundColor = 'transparent';
                                                     e.currentTarget.style.color = 'red';
                                                     e.currentTarget.style.borderColor = 'red';
@@ -545,7 +676,6 @@ function SecuritySettings(){
                             </div>
 
                             <div style={styles.formColumn}>
-                                {/* Two-factor Authentication Section */}
                                 <div style={styles.contentCont}>
                                     <h3 style={styles.contentHeader}>Two-factor Authentication</h3>
                                     <label style={styles.contentLabel}>
@@ -565,7 +695,6 @@ function SecuritySettings(){
                                     </button>
                                 </div>
 
-                                {/* Manage Account Section */}
                                 <div style={styles.contentCont}>
                                     <h3 style={styles.contentHeader}>Manage Account</h3>
                                     <label style={styles.contentLabel}>Permanently Delete Your Account</label>
@@ -579,12 +708,11 @@ function SecuritySettings(){
                                     </button>
                                 </div>
                                 
-                                {/* BACK BUTTON PLACED BELOW DELETE ACCOUNT */}
                                 <button 
                                     style={styles.backButton}
                                     onClick={() => navigate("/Myprofile")}
                                     onMouseEnter={(e) => applyButtonHover(e, styles.hoverToFill)}
-                                        onMouseLeave={(e) => resetButtonHover(e, styles.securityButton)}
+                                    onMouseLeave={(e) => resetButtonHover(e, styles.securityButton)}
                                 >
                                     Back to Profile
                                 </button>
@@ -596,14 +724,14 @@ function SecuritySettings(){
 
            <footer style={styles.footer}>
                 <div>
-                    <p style={{margin: 0}}>@ 2025 Plantasy. All Rights Reserved.</p>
+                    <p style={{margin: 0}}>@ 2025 Plantasy Garden. All Rights Reserved.</p>
                 </div>
             </footer>
 
             <LogoutModal
                 isOpen={showLogoutModal}
                 onClose={() => setShowLogoutModal(false)}
-                onConfirm={handleLogoutConfirm}
+                onConfirm={handleLogoutSessionConfirm}
             />
         </div>
     );

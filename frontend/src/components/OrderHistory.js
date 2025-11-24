@@ -421,10 +421,10 @@ function OrderHistory() {
             <div style={styles.orderHistFormCont}>
               <aside style={styles.sidebarMenu}>
                 <nav style={styles.sidebarNav}>
-                  <button style={styles.sidebarButton} onClick={() => navigate("/Myprofile")}>Profile</button>
-                  <button style={styles.sidebarButton} onClick={() => navigate("/EditAcc")}>Edit Account</button>
+                  <button style={styles.sidebarButton} onClick={() => navigate("/myprofile")}>Profile</button>
+                  <button style={styles.sidebarButton} onClick={() => navigate("/editAcc")}>Edit Account</button>
                   <button style={{ ...styles.sidebarButton, opacity: 0.5 }} disabled>Order History</button>
-                  <button style={styles.sidebarButton} onClick={() => navigate("/Track")}>Track My Order</button>
+                  <button style={styles.sidebarButton} onClick={() => navigate("/track")}>Track My Order</button>
                   <button
                     onClick={() => setShowLogoutModal(true)}
                     style={styles.sidebarButton}

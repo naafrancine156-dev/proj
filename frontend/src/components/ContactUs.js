@@ -10,12 +10,20 @@ import { useEffect, useState } from "react";
 export default function ContactUs(){
     const navigate = useNavigate();
     const [cartCount, setCartCount] = useState(0);
-    const [searchOpen, setSearchOpen] = useState(false); // 🔍 New state for search
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     // 📬 State for form inputs
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+
+    // Window resize listener for responsive design
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // --- Form Handlers ---
 
@@ -52,7 +60,7 @@ export default function ContactUs(){
 
     // Handles form submission
     const handleSubmit = (e) => {
-        e.preventDefault(); // Prevents the default form submission (page reload)
+        e.preventDefault();
 
         // Basic validation
         if (!name || !email || !message) {
@@ -72,16 +80,15 @@ export default function ContactUs(){
 
     // --- Inline Styles (Converted from CSS) ---
     const colors = {
-        primaryBg: 'hsl(164, 31%, 17%)', // minty green something
-        secondaryBg: 'hsl(47, 47%, 93%)', // beige
-        optionalBg: 'hsl(0, 0%, 100%)', // white lang
-        primaryTxt: 'hsl(0, 0%, 100%)', // white lang
-        secondaryTxt: 'hsl(0, 1%, 25%)', // gray lang
-        secondaryBttn: 'hsl(0, 0%, 6%)', // black lang
+        primaryBg: 'hsl(164, 31%, 17%)',
+        secondaryBg: 'hsl(47, 47%, 93%)',
+        optionalBg: 'hsl(0, 0%, 100%)',
+        primaryTxt: 'hsl(0, 0%, 100%)',
+        secondaryTxt: 'hsl(0, 1%, 25%)',
+        secondaryBttn: 'hsl(0, 0%, 6%)',
     };
 
     const styles = {
-        // Body (cannot apply to body in React, applied to top div)
         pageWrapper: {
             background: colors.optionalBg,
             width: '100%',
@@ -92,53 +99,47 @@ export default function ContactUs(){
             boxSizing: 'border-box',
         },
 
-        // .contUsNavHeaderCont
         navHeaderCont: {
             backgroundColor: colors.primaryBg,
             display: 'flex',
-            flexWrap: 'nowrap',
+            flexWrap: windowWidth <= 768 ? 'wrap' : 'nowrap',
             alignItems: 'center',
             borderBottom: '1px solid #eee',
             justifyContent: 'space-between',
-            gap: '20px',
+            gap: windowWidth <= 768 ? '10px' : '20px',
             width: '100%',
-            padding: '10px 15px',
+            padding: windowWidth <= 768 ? '10px' : '10px 15px',
             overflow: 'scroll',
         },
 
-        // .contUsLogoCont
         logoCont: {
             color: colors.primaryTxt,
             display: 'flex',
             alignItems: 'center',
-            marginLeft: '10px',
+            marginLeft: windowWidth <= 768 ? '5px' : '10px',
         },
         
-        // .contUsLogoCont img
         logoImg: {
             backgroundColor: '#ffff',
             borderRadius: '50%',
-            width: '50px',
-            height: '50px',
+            width: windowWidth <= 768 ? '40px' : '50px',
+            height: windowWidth <= 768 ? '40px' : '50px',
             marginRight: '10px',
         },
         
-        // .contUsNavLogoText
         navLogoText: {
             color: colors.primaryTxt,
-            fontSize: '1.5rem',
+            fontSize: windowWidth <= 768 ? '1.2rem' : '1.5rem',
             fontWeight: 'bold',
         },
 
-        // .contUsNavHeaderBttnCont
         navHeaderBttnCont: {
-            display: 'flex',
+            display: windowWidth <= 768 ? 'none' : 'flex',
             flexWrap: 'nowrap',
             justifyContent: 'center',
             gap: '15px',
         },
 
-        // .contUsNavHeaderBttnCont button (Base Style)
         navButton: {
             background: 'none',
             color: colors.primaryTxt,
@@ -146,53 +147,45 @@ export default function ContactUs(){
             fontSize: '1rem',
             padding: '8px 12px',
             cursor: 'pointer',
-            // --- SHADOW/OUTLINE REMOVAL ---
             boxShadow: 'none',
             outline: 'none',
             transition: 'all 0.2s ease-in-out',
         },
 
-        // .contUsNavHeaderBttnCont button:hover (Hover Style)
         navButtonHover: {
             transform: 'scale(1.05)',
-            borderBottom: '1px solid ' + colors.primaryTxt, // Changed border color to white for visibility
+            borderBottom: '1px solid ' + colors.primaryTxt,
         },
         
-        // .contUsNavHeaderLogoBttonCont
         iconButtonWrapper: {
             display: 'flex',
             alignItems: 'center',
-            gap: '20px',
+            gap: windowWidth <= 768 ? '15px' : '20px',
         },
 
-        // .contUsNavHeaderLogoBttonCont button
         iconButton: {
-            width: '35px',
-            height: '35px',
+            width: windowWidth <= 768 ? '30px' : '35px',
+            height: windowWidth <= 768 ? '30px' : '35px',
             background: 'none',
             borderRadius: '50%',
             border: 'none',
             cursor: 'pointer',
             position: 'relative',
-            // --- SHADOW/OUTLINE REMOVAL ---
             boxShadow: 'none',
             outline: 'none',
             transition: 'transform 0.2s ease-in',
         },
 
-        // .contUsnavHeaderLogoBttonCont i:hover
         iconHover: {
             transform: 'scale(1.06)',
-            // Original box-shadow removed here to fix black shadow on hover
         },
 
-        // .contUsNavSearch, .contUsNavCard, .contUsNavAcc
         iconBase: {
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-            width: '28px',
-            height: '28px',
+            width: windowWidth <= 768 ? '24px' : '28px',
+            height: windowWidth <= 768 ? '24px' : '28px',
             display: 'inline-block',
         },
         iconSearch: {
@@ -205,7 +198,6 @@ export default function ContactUs(){
             backgroundImage: `url(${AccIcon})`,
         },
 
-        // .cartBadge (similar to MyProfile.js)
         cartBadge: {
              position: 'absolute',
              top: '-5px',
@@ -218,11 +210,10 @@ export default function ContactUs(){
              fontWeight: 'bold'
         },
 
-        // .textQuoteHeader
         textQuoteHeader: {
             backgroundColor: 'hwb(0 100% 0%)',
             textAlign: 'center',
-            fontSize: '0.9rem',
+            fontSize: windowWidth <= 768 ? '0.75rem' : '0.9rem',
             letterSpacing: '1px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
@@ -230,13 +221,11 @@ export default function ContactUs(){
             padding: '5px 0',
         },
         
-        // section
         section: {
             backgroundColor: colors.secondaryBg,
-            padding: '40px 80px',
+            padding: windowWidth <= 768 ? '20px 15px' : windowWidth <= 1024 ? '30px 40px' : '40px 80px',
         },
 
-        // .contUsPageHeaderCont
         pageHeaderCont: {
             display: 'flex',
             justifyContent: 'space-between',
@@ -246,18 +235,15 @@ export default function ContactUs(){
             borderBottom: `1px solid ${colors.primaryBg}`,
         },
 
-        // .contUsPageHeaderCont h1
         pageHeaderH1: {
-            fontSize: '2.5rem',
+            fontSize: windowWidth <= 768 ? '2rem' : '2.5rem',
         },
 
-        // .contUsPageHeaderCont p 
         pageSubHeader: {
-            fontSize: '1rem',
+            fontSize: windowWidth <= 768 ? '0.9rem' : '1rem',
             color: 'hsl(0, 0%, 30%)',
         },
 
-        // .contUsFormCont
         formContWrapper: {
             display: 'flex',
             flexDirection: 'column',
@@ -270,34 +256,32 @@ export default function ContactUs(){
             minWidth: '100px',
         },
 
-        // .contUsForm
         form: {
             display: 'flex',
             flexDirection: 'column',
             background: colors.optionalBg,
             border: '1px solid black',
             borderRadius: '10px',
-            padding: '25px',
+            padding: windowWidth <= 768 ? '20px' : '25px',
             marginBottom: '10px',
             gap: '20px',
             maxWidth: '600px',
-            width: '55%',
+            width: windowWidth <= 768 ? '95%' : windowWidth <= 1024 ? '70%' : '55%',
         },
         
-        // .mssgUsHeader
         messageHeader: {
             margin: 0,
+            fontSize: windowWidth <= 768 ? '1.3rem' : '1.5rem',
         },
 
-        // .textFieldCont
         textFieldCont: {
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: windowWidth <= 768 ? 'column' : 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
+            gap: windowWidth <= 768 ? '15px' : '0',
         },
 
-        // .wholeNameCont, .emailCont, .txtAreaFieldCont
         inputContainer: {
             display: 'flex',
             flexDirection: 'column',
@@ -305,19 +289,18 @@ export default function ContactUs(){
             gap: '5px',
         },
         wholeNameCont: {
-            width: '45%', // Explicit width to maintain layout
+            width: windowWidth <= 768 ? '100%' : '45%',
         },
         emailCont: {
-            width: '45%', // Explicit width to maintain layout
+            width: windowWidth <= 768 ? '100%' : '45%',
         },
         txtAreaFieldCont: {
             width: '100%',
         },
 
-        // .wholeNameCont input, .emailCont input
         inputField: {
             padding: '5px',
-            fontSize: '1.2rem',
+            fontSize: windowWidth <= 768 ? '1rem' : '1.2rem',
             border: '1px solid black',
             borderRadius: '10px',
             background: 'transparent',
@@ -325,10 +308,9 @@ export default function ContactUs(){
             boxSizing: 'border-box',
         },
 
-        // .txtAreaFieldCont textarea
         textAreaField: {
             padding: '10px 10px 50px 10px',
-            fontSize: '1.2rem',
+            fontSize: windowWidth <= 768 ? '1rem' : '1.2rem',
             border: '1px solid black',
             borderRadius: '10px',
             background: 'transparent',
@@ -337,19 +319,17 @@ export default function ContactUs(){
             resize: 'vertical',
         },
 
-        // .msgFormBttns
         formButtonsCont: {
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'flex-end',
             alignItems: 'center',
-            gap: '20px',
+            gap: windowWidth <= 768 ? '10px' : '20px',
         },
 
-        // .clear, .delete, .submit (Base Style)
         formButton: {
-            padding: '10px 5px',
-            fontSize: '1rem',
+            padding: windowWidth <= 768 ? '8px 5px' : '10px 5px',
+            fontSize: windowWidth <= 768 ? '0.9rem' : '1rem',
             color: colors.secondaryBttn,
             background: 'transparent',
             border: '1px solid black',
@@ -358,25 +338,23 @@ export default function ContactUs(){
             textAlign: 'center',
             cursor: 'pointer',
             fontFamily: 'inherit',
-            // --- SHADOW/OUTLINE REMOVAL ---
             boxShadow: 'none',
             outline: 'none',
             transition: 'background-color 0.2s, color 0.2s',
         },
 
-        // .clear:hover, .delete:hover, .submit:hover (Hover Style)
         formButtonHover: {
             backgroundColor: colors.primaryBg,
             color: colors.primaryTxt,
         },
 
-        // footer
         footer: {
             backgroundColor: colors.primaryBg,
             color: colors.primaryTxt,
             fontWeight: 'bold',
             textAlign: 'center',
             padding: '15px 0',
+            fontSize: windowWidth <= 768 ? '0.85rem' : '1rem',
         }
     };
 
@@ -389,11 +367,10 @@ export default function ContactUs(){
                     <div style={styles.navHeaderCont}>
                         <div style={styles.logoCont}>
                             <p style={{margin: 0}}><img src={PlantLogo} alt="Logo" style={styles.logoImg}></img></p>
-                            <p style={styles.navLogoText}>Plantasy</p>
+                            <p style={styles.navLogoText}>Plantasy Garden</p>
                         </div>
                 
                         <div style={styles.navHeaderBttnCont}>
-                            {/* Nav Button 1 */}
                             <button 
                                 style={styles.navButton} 
                                 onClick={() => navigate("/homepage")}
@@ -405,7 +382,6 @@ export default function ContactUs(){
                             >
                                 Home
                             </button>
-                            {/* Nav Button 2 */}
                             <button 
                                 style={styles.navButton} 
                                 onClick={() => navigate("/shop")}
@@ -417,7 +393,6 @@ export default function ContactUs(){
                             >
                                 Shop
                             </button>
-                            {/* Nav Button 3 */}
                             <button 
                                 style={styles.navButton} 
                                 onClick={() => navigate("/track")}
@@ -429,7 +404,6 @@ export default function ContactUs(){
                             >
                                 Track Order
                             </button>
-                            {/* Nav Button 4 */}
                             <button 
                                 style={styles.navButton} 
                                 onClick={() => navigate("/contactus")}
@@ -444,7 +418,6 @@ export default function ContactUs(){
                         </div>
 
                         <div style={styles.iconButtonWrapper}>
-                            {/* 🔍 Search Button - Opens Sidebar */}
                             <button
                                 style={styles.iconButton}
                                 onClick={() => setSearchOpen(true)}
@@ -454,7 +427,6 @@ export default function ContactUs(){
                                 <i style={{...styles.iconBase, ...styles.iconSearch}}></i>
                             </button>
 
-                            {/* Cart Icon with Badge */}
                             <div style={{position: 'relative', display: 'inline-block'}}>
                                 <button 
                                     style={styles.iconButton} 
@@ -467,7 +439,6 @@ export default function ContactUs(){
                                 {cartCount > 0 && <span style={styles.cartBadge}>{cartCount}</span>}
                             </div>
 
-                            {/* Account Button */}
                             <button
                                 style={styles.iconButton}
                                 onClick={() => navigate("/myprofile")}
@@ -501,7 +472,7 @@ export default function ContactUs(){
                     </div>
 
                     <div style={styles.formContWrapper}>
-                        <form style={styles.form} onSubmit={handleSubmit}> 
+                        <div style={styles.form}> 
                             <h2 style={styles.messageHeader}>Contact Us using the form below</h2>
 
                             <div style={styles.textFieldCont}>
@@ -549,7 +520,6 @@ export default function ContactUs(){
                             </div>
 
                             <div style={styles.formButtonsCont}>
-                                {/* Clear Button */}
                                 <button 
                                     type="button" 
                                     style={styles.formButton} 
@@ -562,7 +532,6 @@ export default function ContactUs(){
                                 >
                                     Clear
                                 </button> 
-                                {/* Delete Button */}
                                 <button 
                                     type="button" 
                                     style={styles.formButton} 
@@ -575,10 +544,10 @@ export default function ContactUs(){
                                 >
                                     Delete
                                 </button> 
-                                {/* Submit Button */}
                                 <button 
-                                    type="submit" 
+                                    type="button" 
                                     style={styles.formButton}
+                                    onClick={handleSubmit}
                                     onMouseEnter={(e) => Object.assign(e.currentTarget.style, styles.formButtonHover)}
                                     onMouseLeave={(e) => {
                                         e.currentTarget.style.backgroundColor = 'transparent';
@@ -588,7 +557,7 @@ export default function ContactUs(){
                                     Submit
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </section>

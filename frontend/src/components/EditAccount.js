@@ -12,7 +12,8 @@ export default function EditAccount(){
 
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [cartCount, setCartCount] = useState(0);
-    const [searchOpen, setSearchOpen] = useState(false); 
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     const [formData, setFormData] = useState({
         firstName: '',
@@ -28,6 +29,13 @@ export default function EditAccount(){
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+
+    // Window resize listener
+    useEffect(() => {
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Fetch current user data
     useEffect(() => {
@@ -153,7 +161,6 @@ export default function EditAccount(){
             const result = await response.json();
             setSuccess('Profile updated successfully!');
             
-            // Optionally redirect back to profile after success
             setTimeout(() => {
                 navigate('/myprofile');
             }, 1500);
@@ -168,7 +175,6 @@ export default function EditAccount(){
         return <div style={{padding: '50px', textAlign: 'center', fontFamily: "'Times New Roman', Times, serif"}}>Loading...</div>;
     }
 
-    // ----- Definition of commonly used styles to keep JSX cleaner -----
     const colors = {
         primaryBg: 'hsl(164, 31%, 17%)',
         secondaryBg: 'hsl(47, 47%, 93%)',
@@ -179,7 +185,6 @@ export default function EditAccount(){
     };
 
     const styles = {
-        // Imitating body and global reset styles
         pageWrapper: {
             background: 'hsl(0, 0%, 100%)',
             width: '100%',
@@ -190,18 +195,17 @@ export default function EditAccount(){
             boxSizing: 'border-box',
             margin: 0,
             padding: 0,
-             // Animation removed as keyframes cannot be inlined strictly
         },
         navHeaderCont: {
             backgroundColor: colors.primaryBg,
             display: 'flex',
-            flexWrap: 'nowrap',
+            flexWrap: windowWidth <= 768 ? 'wrap' : 'nowrap',
             alignItems: 'center',
             borderBottom: '1px solid #eee',
             justifyContent: 'space-between',
-            gap: '20px',
+            gap: windowWidth <= 768 ? '10px' : '20px',
             width: '100%',
-            padding: '10px 15px',
+            padding: windowWidth <= 768 ? '10px' : '10px 15px',
             boxSizing: 'border-box',
             overflow: 'scroll',
         },
@@ -209,23 +213,23 @@ export default function EditAccount(){
             color: colors.primaryTxt,
             display: 'flex',
             alignItems: 'center',
-            marginLeft: '10px',
+            marginLeft: windowWidth <= 768 ? '5px' : '10px',
         },
         logoImg: {
             backgroundColor: '#ffff',
             borderRadius: '50%',
-            width: '50px',
-            height: '50px',
+            width: windowWidth <= 768 ? '40px' : '50px',
+            height: windowWidth <= 768 ? '40px' : '50px',
             marginRight: '10px',
         },
         navLogoText: {
             color: colors.primaryTxt,
-            fontSize: '1.5rem',
+            fontSize: windowWidth <= 768 ? '1.2rem' : '1.5rem',
             fontWeight: 'bold',
             margin: 0,
         },
         navHeaderBttnCont: {
-            display: 'flex',
+            display: windowWidth <= 768 ? 'none' : 'flex',
             flexWrap: 'nowrap',
             justifyContent: 'center',
             gap: '15px',
@@ -238,30 +242,29 @@ export default function EditAccount(){
             padding: '8px 12px',
             cursor: 'pointer',
             fontFamily: 'inherit',
-            // Hover effects removed as they cannot be inlined without JS
         },
         iconButtonCont: {
             display: 'flex',
             alignItems: 'center',
-            gap: '20px',
+            gap: windowWidth <= 768 ? '15px' : '20px',
         },
         iconButton: {
-            width: '33px',
-            height: '33px',
+            width: windowWidth <= 768 ? '30px' : '33px',
+            height: windowWidth <= 768 ? '30px' : '33px',
             background: 'transparent',
             borderRadius: '50%',
             border: 'none',
             padding: 0,
             cursor: 'pointer',
-            position: 'relative', // for badge
+            position: 'relative',
         },
         iconSearch: {
             backgroundImage: `url(${SearchIcon})`,
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-            width: '28px',
-            height: '28px',
+            width: windowWidth <= 768 ? '24px' : '28px',
+            height: windowWidth <= 768 ? '24px' : '28px',
             display: 'inline-block',
         },
         iconCart: {
@@ -269,8 +272,8 @@ export default function EditAccount(){
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-            width: '28px',
-            height: '28px',
+            width: windowWidth <= 768 ? '24px' : '28px',
+            height: windowWidth <= 768 ? '24px' : '28px',
             display: 'inline-block',
         },
         iconAcc: {
@@ -278,8 +281,8 @@ export default function EditAccount(){
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: 'cover',
-            width: '28px',
-            height: '28px',
+            width: windowWidth <= 768 ? '24px' : '28px',
+            height: windowWidth <= 768 ? '24px' : '28px',
             display: 'inline-block',
         },
         cartBadge: {
@@ -293,21 +296,19 @@ export default function EditAccount(){
              fontSize: '10px',
              fontWeight: 'bold'
         },
-        // Marquee effect is complex inline. Using basic overflow hidden for now.
         textQuoteHeader: {
             backgroundColor: 'hwb(0 100% 0%)',
             textAlign: 'center',
-            fontSize: '0.9rem',
+            fontSize: windowWidth <= 768 ? '0.75rem' : '0.9rem',
             letterSpacing: '1px',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             padding: '5px 0',
             margin: 0,
-             // Animation removed as keyframes cannot be inlined
         },
         section: {
             backgroundColor: colors.secondaryBg,
-            padding: '40px 80px',
+            padding: windowWidth <= 768 ? '20px 15px' : windowWidth <= 1024 ? '30px 40px' : '40px 80px',
             flex: 1,
             boxSizing: 'border-box',
         },
@@ -320,19 +321,20 @@ export default function EditAccount(){
             borderBottom: `1px solid ${colors.primaryBg}`,
         },
         pageHeaderH1: {
-            fontSize: '2.5rem',
+            fontSize: windowWidth <= 768 ? '2rem' : '2.5rem',
             margin: 0,
         },
         pageSubHeader: {
-            fontSize: '1rem',
+            fontSize: windowWidth <= 768 ? '0.9rem' : '1rem',
             color: 'hsl(0, 0%, 30%)',
             margin: 0,
         },
         editAccFormCont: {
             display: 'flex',
+            flexDirection: windowWidth <= 768 ? 'column' : 'row',
             alignItems: 'flex-start',
             justifyContent: 'center',
-            gap: '10px',
+            gap: windowWidth <= 768 ? '20px' : '10px',
             paddingTop: '20px',
             width: '100%',
             minWidth: '100px',
@@ -344,23 +346,27 @@ export default function EditAccount(){
             borderRadius: '10px',
             padding: '20px',
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: windowWidth <= 768 ? 'row' : 'column',
             gap: '10px',
         },
         sidebarButton: {
             background: 'transparent',
             borderBottom: '1px solid black',
-            padding: '10px 15px', // Standardized padding
+            padding: '10px 15px',
             textAlign: 'left',
             color: colors.secondaryTxt,
             cursor: 'pointer',
-            marginBottom: '0', // Removed manual margin
+            marginBottom: '0',
             fontFamily: 'inherit',
             fontSize: '1rem',
-            width: '100%', // Explicit width
+            width: '100%',
             borderRadius: '5px',
-            boxShadow: 'none', // Removes any default box-shadow
+            boxShadow: 'none',
             outline: 'none',
+            borderTop: 'none',
+            borderLeft: 'none',
+            borderRight: '1px solid black',
+            borderBottom: '1px solid black',
         },
         formContainer: {
             display: 'flex',
@@ -368,15 +374,15 @@ export default function EditAccount(){
             background: 'hsl(0, 0%, 100%)',
             border: '1px solid black',
             borderRadius: '10px',
-            padding: '25px',
+            padding: windowWidth <= 768 ? '20px' : '25px',
             gap: '20px',
-            //width: '30%',
             boxSizing: 'border-box',
-            flex: '0.6',
+            flex: windowWidth <= 768 ? '1' : '0.6',
+            width: windowWidth <= 768 ? '100%' : 'auto',
         },
         formRow: {
             display: 'flex',
-            flexDirection: 'row',
+            flexDirection: windowWidth <= 768 ? 'column' : 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
             gap: '10px',
@@ -385,22 +391,22 @@ export default function EditAccount(){
             display: 'flex',
             flexDirection: 'column',
             gap: '10px',
-            flex: 1,
+            width: windowWidth <= 768 ? '100%' : '100%',
         },
         label: {
             fontWeight: 'bold',
             color: colors.secondaryTxt,
+            fontSize: windowWidth <= 768 ? '0.95rem' : '1rem',
         },
         input: {
-            padding: '8px',
-            fontSize: '1rem',
+            padding: windowWidth <= 768 ? '10px' : '8px',
+            fontSize: windowWidth <= 768 ? '1rem' : '1rem',
             background: 'transparent',
             border: '1px solid #ccc',
             borderRadius: '5px',
             width: '100%',
             boxSizing: 'border-box',
             fontFamily: 'inherit',
-            // Focus styles like outline/box-shadow cannot be done strictly inline easily
         },
         fieldHelper: {
             fontSize: '0.85rem',
@@ -413,8 +419,8 @@ export default function EditAccount(){
             background: 'transparent',
             color: colors.darkTxt,
             borderRadius: '5px',
-            fontSize: '1.1rem',
-            padding: '10px',
+            fontSize: windowWidth <= 768 ? '1rem' : '1.1rem',
+            padding: windowWidth <= 768 ? '12px' : '10px',
             fontWeight: 'bold',
             marginTop: '10px',
             cursor: saving ? 'not-allowed' : 'pointer',
@@ -434,6 +440,7 @@ export default function EditAccount(){
             border: '1px solid #c3e6cb',
             borderRadius: '5px',
             marginBottom: '15px',
+            fontSize: windowWidth <= 768 ? '0.9rem' : '1rem',
         },
         errorMessage: {
             padding: '10px',
@@ -442,6 +449,7 @@ export default function EditAccount(){
             border: '1px solid #f5c6cb',
             borderRadius: '5px',
             marginBottom: '15px',
+            fontSize: windowWidth <= 768 ? '0.9rem' : '1rem',
         },
         footer: {
             backgroundColor: colors.primaryBg,
@@ -449,16 +457,13 @@ export default function EditAccount(){
             fontWeight: 'bold',
             textAlign: 'center',
             padding: '15px 0',
-            marginTop: 'auto', // ensures footer stays at bottom if content is short
+            marginTop: 'auto',
+            fontSize: windowWidth <= 768 ? '0.85rem' : '1rem',
         }
     };
 
-
     return(
-        // Wrapping the whole content to imitate body styles
         <div style={styles.pageWrapper}>
-            
-            {/* SearchSidebar component handles its own styling mostly, kept as is */}
             <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
             
             <header style={{boxSizing: 'border-box', margin: 0, padding: 0}}>
@@ -472,12 +477,11 @@ export default function EditAccount(){
                         <div style={styles.navHeaderBttnCont}>
                             <button style={styles.navButton} onClick={() => navigate("/HomePage")}>Home</button>
                             <button style={styles.navButton} onClick={() => navigate("/Shop")}>Shop</button>
-                            <button style={styles.navButton} onClick={() => navigate("/Track")}>Track Order</button>
+                            <button style={styles.navButton} onClick={() => navigate("/track")}>Track Order</button>
                             <button style={styles.navButton} onClick={() => navigate("/ContactUs")}>Contact Us</button>
                         </div>
                 
                         <div style={styles.iconButtonCont}>
-                            {/* 🔍 Search Button */}
                             <button
                                 style={styles.iconButton}
                                 onClick={() => setSearchOpen(true)}
@@ -485,7 +489,6 @@ export default function EditAccount(){
                                 <i style={styles.iconSearch}></i>
                             </button>
 
-                            {/* Cart Icon with Badge */}
                             <div style={{position: 'relative', display: 'inline-block'}}>
                                 <button style={styles.iconButton} onClick={() => navigate("/cart")}>
                                     <i style={styles.iconCart}></i>
@@ -503,7 +506,6 @@ export default function EditAccount(){
                     </div>
                 </div>
                 
-                {/* Note: Marquee animation removed as keyframes cannot be inlined */}
                 <p style={styles.textQuoteHeader}>Claim Your 20% Discount Using The Code: "JKLASWER12345"</p>
 
                 <div style={{ padding: "0 10px", backgroundColor: colors.secondaryBg, boxSizing: 'border-box' }}>
@@ -524,14 +526,13 @@ export default function EditAccount(){
                         </div>
                     </div>
 
-                    {/* Note: Media queries removed. This container will not stack vertically on mobile. */}
                     <div style={styles.editAccFormCont}>
                         <aside>
                             <nav style={styles.sidebarNav}>
-                                <button style={styles.sidebarButton} onClick={() => navigate("/Myprofile")}>Profile</button>
+                                <button style={styles.sidebarButton} onClick={() => navigate("/myprofile")}>Profile</button>
                                 <button style={styles.sidebarButton} disabled>Edit Account</button>
-                                <button style={styles.sidebarButton} onClick={() => navigate("/OrderHist")}>Order History</button>
-                                <button style={styles.sidebarButton} onClick={() => navigate("/Track")}>Track My Order</button>
+                                <button style={styles.sidebarButton} onClick={() => navigate("/history")}>Order History</button>
+                                <button style={styles.sidebarButton} onClick={() => navigate("/track")}>Track My Order</button>
                                 <button 
                                     onClick={() => setShowLogoutModal(true)}
                                     style={styles.sidebarButton}
@@ -541,12 +542,10 @@ export default function EditAccount(){
                             </nav>
                         </aside>
 
-                        {/* Note: Media queries removed. Width is fixed to 40% as per original desktop CSS. */}
                         <form style={styles.formContainer} onSubmit={handleSaveChanges}>
                             {error && <div style={styles.errorMessage}>{error}</div>}
                             {success && <div style={styles.successMessage}>{success}</div>}
 
-                            {/* Note: Media queries removed. Rows will not stack on mobile. */}
                             <div style={styles.formRow}>
                                 <div style={styles.inputGroup}>
                                     <label htmlFor="firstName" style={styles.label}>First Name (Optional)</label>
@@ -663,7 +662,6 @@ export default function EditAccount(){
                                 </div>
                             </div>
 
-                            {/* HOVER EFFECT APPLIED HERE */}
                             <button 
                                 type="submit" 
                                 style={styles.saveButton} 
@@ -675,8 +673,7 @@ export default function EditAccount(){
                                 }}
                                 onMouseLeave={(e) => {
                                     if (!saving) {
-                                        // Reset to original primaryBg color
-                                        e.currentTarget.style.backgroundColor = colors.primaryTxt;
+                                        e.currentTarget.style.backgroundColor = 'transparent';
                                         e.currentTarget.style.color = colors.darkTxt;
                                     }
                                 }}
@@ -694,7 +691,6 @@ export default function EditAccount(){
                 </div>
             </footer>
 
-            {/* Logout Modal */}
             <LogoutModal
                 isOpen={showLogoutModal}
                 onClose={() => setShowLogoutModal(false)}

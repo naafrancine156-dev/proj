@@ -568,20 +568,20 @@ footer {
         <div className="navHeaderCont">
           <div className="logoCont">
             <img src={PlantLogo} alt="Logo" />
-            <p className="navLogoText">Eric's Garden</p>
+            <p className="navLogoText">Plantasy</p>
           </div>
 
           <div className="navHeaderBttnCont">
-            <button>Home</button>
-            <button>Shop</button>
-            <button>About</button>
-            <button>Contact</button>
+            <button onClick={() => navigate("/homepage")}>Home</button>
+            <button onClick={() => navigate("/shop")}>Shop</button>
+            <button onClick={() => navigate("/aboutus")}>About</button>
+            <button onClick={() => navigate("/contactus")}>Contact</button>
           </div>
 
           <div className="navHeaderLogoBttonCont">
             <button><i className="navSearch"></i></button>
             <button><i className="navCard"></i></button>
-            <button><i className="navAcc"></i></button>
+            <button><i className="navAcc" onClick={() => navigate("/myprofile")}></i></button>
           </div>
         </div>
 
@@ -707,7 +707,7 @@ footer {
       </section>
 
       <footer>
-        <p>© 2025 Eric's Garden. All Rights Reserved.</p>
+        <p>© 2025 Plantasy. All Rights Reserved.</p>
       </footer>
     </>
   );

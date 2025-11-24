@@ -13,7 +13,7 @@ function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [selectedPot, setSelectedPot] = useState("Nursery");
+  const [selectedPot, setSelectedPot] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [expandedSections, setExpandedSections] = useState({
@@ -21,6 +21,7 @@ function ProductDetails() {
     shipping: false,
     disclaimer: false,
   });
+  const [showNotif, setShowNotif] = useState(false);
   const { addToCart, cart } = useCart();
 
   useEffect(() => {
@@ -51,6 +52,8 @@ function ProductDetails() {
       potStyle: selectedPot,
     });
     setQuantity(1);
+    setShowNotif(true);
+    setTimeout(() => setShowNotif(false), 3000);
   };
 
   const toggleSection = (section) => {
@@ -59,6 +62,8 @@ function ProductDetails() {
       [section]: !prev[section],
     }));
   };
+
+
 
   if (loading)
     return (
@@ -418,6 +423,57 @@ function ProductDetails() {
           color: hsl(0, 0%, 100%);
         }
 
+        .pdpotSizeContainer {
+          margin-top: 15px;
+          animation: slideDown 0.3s ease-in-out;
+        }
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            max-height: 0;
+          }
+          to {
+            opacity: 1;
+            max-height: 200px;
+          }
+        }
+
+        .pdsizeLabel {
+          font-size: 0.9rem;
+          font-weight: bold;
+          color: hsl(0, 1%, 25%);
+          margin-bottom: 10px;
+        }
+
+        .pdsizeOptionsContainer {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+        }
+
+        .pdsizeOption {
+          border: 2px solid hsl(0, 0%, 80%);
+          border-radius: 8px;
+          padding: 10px;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+          background: hsl(0, 0%, 100%);
+          font-size: 0.9rem;
+        }
+
+        .pdsizeOption:hover {
+          border-color: hsl(164, 31%, 17%);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .pdsizeOption.active {
+          border-color: hsl(164, 31%, 17%);
+          background-color: hsl(164, 31%, 17%);
+          color: hsl(0, 0%, 100%);
+        }
+
         .pdquantitySection {
           display: flex;
           align-items: center;
@@ -531,6 +587,43 @@ function ProductDetails() {
           color: hsl(0, 0%, 100%);
         }
 
+        .pdnotification {
+          position: fixed;
+          top: 100px;
+          right: 20px;
+          background-color: #4caf50;
+          color: white;
+          padding: 20px 30px;
+          border-radius: 8px;
+          font-size: 1.1rem;
+          font-weight: bold;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+          animation: slideInNotif 0.4s ease-out forwards, slideOutNotif 0.4s ease-in 2.6s forwards;
+          z-index: 9999;
+        }
+
+        @keyframes slideInNotif {
+          from {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideOutNotif {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+        }
+
         footer {
           background-color: hsl(164, 31%, 17%);
           color: hsl(0, 0%, 100%);
@@ -636,6 +729,12 @@ function ProductDetails() {
 
       <SearchSidebar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
+      {showNotif && (
+        <div className="pdnotification">
+          ✓ Added to cart successfully!
+        </div>
+      )}
+
       <header>
         <div className="pdheaderCont">
           <div className="pdnavHeaderCont">
@@ -721,7 +820,9 @@ function ProductDetails() {
 
             {/* Pot Style Selection */}
             <div className="pdpotStyleSection">
-              <div className="pdpotStyleLabel">Pot Style: {selectedPot}</div>
+              <div className="pdpotStyleLabel">
+                Pot Style: {selectedPot || "None"}
+              </div>
               <div className="pdpotOptionsContainer">
                 {(product.potSizes && product.potSizes.length > 0
                   ? product.potSizes
