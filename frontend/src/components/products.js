@@ -307,7 +307,7 @@ export default function ProductsPage() {
 
   const handleAdminLogout = () => {
     localStorage.removeItem("token");  // delete token
-    navigate("/admin/login");          // redirect to admin login page
+    navigate("/login");          // redirect to admin login page
   };
 
 
